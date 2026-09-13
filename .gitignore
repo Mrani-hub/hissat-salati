@@ -1,0 +1,9 @@
+# Dossiers produits par la compilation : jamais dans le dépôt
+build/
+app/build/
+.gradle/
+.idea/
+*.iml
+local.properties
+.DS_Store
+Thumbs.db
