@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write   # nécessaire pour publier dans Releases
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,12 +31,43 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Construire l'APK
-        run: gradle assembleDebug --no-daemon
+      - name: Récupérer la clé de signature (secrets GitHub)
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Secrets KEYSTORE_B64 et KEYSTORE_PASSWORD manquants (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/hissat-salati.jks"
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/hissat-salati.jks" >> "$GITHUB_ENV"
 
-      - name: Publier l'APK
+      - name: Construire l'APK signé
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          gradle assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk hissat-salati.apk
+
+      - name: Lire le numéro de version
+        id: ver
+        run: |
+          CODE=$(grep -oP 'versionCode\s+\K\d+' app/build.gradle)
+          NAME=$(grep -oP 'versionName\s+"\K[^"]+' app/build.gradle)
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Publier l'APK (artefact du run)
         uses: actions/upload-artifact@v4
         with:
           name: hissat-salati-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: hissat-salati.apk
           if-no-files-found: error
+
+      - name: Publier dans Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.name }}-${{ steps.ver.outputs.code }}
+          name: حصة صلاتي ${{ steps.ver.outputs.name }} (build ${{ steps.ver.outputs.code }})
+          files: hissat-salati.apk

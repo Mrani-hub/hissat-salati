@@ -7,3 +7,7 @@ app/build/
 local.properties
 .DS_Store
 Thumbs.db
+
+# Clés de signature : jamais dans le dépôt
+*.jks
+*.keystore

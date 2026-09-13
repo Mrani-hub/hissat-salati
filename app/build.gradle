@@ -12,9 +12,25 @@ android {
         versionName "1.0"
     }
 
+    // Signature : la clé vient des variables d'environnement (secrets GitHub),
+    // jamais du code. Sans ces variables, on retombe sur la clé de débogage locale.
+    signingConfigs {
+        release {
+            def ksPath = System.getenv("KEYSTORE_PATH")
+            def ksPass = System.getenv("KEYSTORE_PASSWORD")
+            if (ksPath && ksPass) {
+                storeFile file(ksPath)
+                storePassword ksPass
+                keyAlias "hissat"
+                keyPassword ksPass
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig System.getenv("KEYSTORE_PATH") ? signingConfigs.release : signingConfigs.debug
         }
     }
 
