@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, u));
                 } catch (Exception e) {
-                    toast("Aucune application pour ouvrir ce lien");
+                    toast(getString(R.string.no_app_for_link));
                 }
                 return true;
             }
@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 i.setType("image/*");
                 try {
-                    startActivityForResult(Intent.createChooser(i, "Choisir une image"), PICK_FILE);
+                    startActivityForResult(Intent.createChooser(i, getString(R.string.choose_image)), PICK_FILE);
                 } catch (Exception e) {
                     filePath = null;
                     return false;
@@ -128,9 +128,9 @@ public class MainActivity extends Activity {
                 send.putExtra(Intent.EXTRA_STREAM, uri);
                 if (title != null && !title.isEmpty()) send.putExtra(Intent.EXTRA_SUBJECT, title);
                 send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(Intent.createChooser(send, "Partager"));
+                startActivity(Intent.createChooser(send, getString(R.string.share)));
             } catch (Exception e) {
-                toast("Partage impossible : " + e.getMessage());
+                toast(getString(R.string.share_failed, e.getMessage()));
             }
         }
     }

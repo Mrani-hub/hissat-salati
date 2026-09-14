@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">حصة صلاتي</string>
+    <string name="no_app_for_link">لا يوجد تطبيق لفتح هذا الرابط</string>
+    <string name="choose_image">اختيار صورة</string>
+    <string name="share">مشاركة</string>
+    <string name="share_failed">تعذّرت المشاركة: %1$s</string>
 </resources>

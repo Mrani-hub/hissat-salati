@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -34,7 +34,7 @@ h3{margin:0 0 8px;font-size:1rem;font-weight:600}
 
 header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 2px 14px}
 .appname{font-family:var(--arab);direction:rtl;font-size:1.05rem;color:var(--gold);line-height:1.3;letter-spacing:.01em}
-.src-tag{font-family:var(--sans);font-size:.66rem;border-radius:99px;padding:2px 8px;vertical-align:2px;margin-right:6px;border:1px solid currentColor}
+.src-tag{font-family:var(--sans);font-size:.66rem;border-radius:99px;padding:2px 8px;vertical-align:2px;margin-inline-end:6px;border:1px solid currentColor}
 .src-tag.off{color:#2C6B4F}
 .src-tag.calc{color:var(--azure)}
 .cityrow{display:flex;align-items:center;gap:4px}
@@ -65,7 +65,7 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .hero .date b{font-weight:500}
 .hero .main{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-top:18px}
 .hero .col-l{min-width:0}
-.hero .col-r{min-width:0;text-align:right;font-variant-numeric:tabular-nums}
+.hero .col-r{min-width:0;text-align:end;font-variant-numeric:tabular-nums}
 .hero .lead{font-size:.82rem;opacity:.8}
 .hero .name{font-family:var(--arab);font-size:clamp(2rem,11vw,2.9rem);line-height:1.15;font-weight:700;direction:rtl;white-space:nowrap}
 .hero .fr{font-size:1rem;font-weight:500;opacity:.92;margin-top:2px}
@@ -75,6 +75,8 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .call .ar{display:block;font-family:var(--arab);direction:rtl;font-size:1.28rem;line-height:1.7}
 .call .frx{display:block;font-size:.74rem;opacity:.82;margin-top:3px}
 .hero .flag{display:inline-block;margin-top:14px;font-size:.74rem;background:rgba(255,255,255,.16);border-radius:99px;padding:3px 10px}
+.rawhint{margin-top:14px;font-family:var(--arab);font-size:1.05rem;line-height:1.6;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:8px 14px}
+.rawhint b{color:#FDE9B5;font-weight:700}
 .cd{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.22)}
 .cd-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .cd-lab{font-size:.78rem;opacity:.8}
@@ -86,13 +88,13 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .rail{margin-top:18px;background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
 .slot{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:12px 16px;position:relative}
 .slot + .slot{border-top:1px solid #F0EADC}
-.slot::before{content:"";position:absolute;left:16.5px;top:0;bottom:0;width:2px;background:#F0EADC}
+.slot::before{content:"";position:absolute;inset-inline-start:16.5px;top:0;bottom:0;width:2px;background:#F0EADC}
 .slot:first-child::before{top:50%}
 .slot:last-child::before{bottom:50%}
 .dot{justify-self:center;width:11px;height:11px;border-radius:50%;border:2px solid var(--rule);background:var(--panel);z-index:1}
 .slot.done .dot{background:var(--rule);border-color:var(--rule)}
 .slot.done .ar,.slot.done .time{color:#9AA6AF}
-.slot.now{background:linear-gradient(90deg,var(--gold-pale),transparent 70%)}
+.slot.now{background:linear-gradient(270deg,var(--gold-pale),transparent 70%)}
 .slot.now .dot{border-color:var(--gold);background:var(--gold);box-shadow:0 0 0 5px rgba(185,139,46,.16)}
 .slot.next .dot{border-color:var(--azure)}
 .ar{font-family:var(--arab);font-size:1.45rem;line-height:1.15;direction:rtl}
@@ -107,6 +109,24 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 
 .note{font-size:.76rem;color:var(--ink-soft);margin:14px 2px 0;line-height:1.5}
 
+/* السنن الرواتب */
+.rawcard{margin-top:18px;background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.rawhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 10px}
+.rawhead h4{margin:0;font-family:var(--arab);font-size:1.3rem;font-weight:700;color:var(--azure)}
+.rawhead .sub{font-family:var(--arab);font-size:.95rem;color:var(--ink-soft);margin-top:2px}
+.rawnum{font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap}
+.rawbar{height:6px;background:#EDE6D7;margin:0 16px 6px;border-radius:99px;overflow:hidden}
+.rawbar span{display:block;height:100%;background:var(--gold);width:0;transition:width .25s}
+.raw{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid #F0EADC;cursor:pointer;font-family:var(--arab);font-size:1.2rem;line-height:1.3}
+.raw input{width:22px;height:22px;margin:0;accent-color:var(--gold);flex:none;cursor:pointer}
+.raw .lbl{flex:1}
+.raw .rk{font-family:var(--sans);font-size:.78rem;color:var(--ink-soft);background:#F8F4EA;border-radius:99px;padding:2px 9px}
+.raw.on{background:var(--gold-pale)}
+.raw.on .lbl{color:#8A671C}
+.raw.on .rk{background:var(--gold);color:#fff}
+.rawfoot{font-family:var(--arab);font-size:1.05rem;line-height:1.9;color:var(--ink-soft);padding:12px 16px 14px;border-top:1px solid #F0EADC}
+.rawfoot .h{color:var(--ink)}
+
 /* tableaux */
 .card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
 .card + .card{margin-top:14px}
@@ -115,10 +135,10 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font
 thead th{background:#F6F1E6;font-weight:600;font-size:.7rem;color:var(--ink-soft);padding:8px 3px;border-bottom:1px solid var(--rule)}
 thead th .a{display:block;font-family:var(--arab);font-size:1rem;color:var(--ink);line-height:1.2}
 tbody td{padding:7px 3px;text-align:center;border-bottom:1px solid #F3EEE3}
-tbody td:first-child{text-align:left;padding-left:12px;white-space:nowrap;color:var(--ink-soft);font-size:.75rem}
+tbody td:first-child{text-align:start;padding-inline-start:12px;white-space:nowrap;color:var(--ink-soft);font-size:.75rem}
 tbody tr.fri{background:var(--azure-pale)}
 tbody tr.today{background:var(--gold-pale);font-weight:600}
-tbody tr.today td:first-child{box-shadow:inset 3px 0 0 var(--gold);color:var(--ink)}
+tbody tr.today td:first-child{box-shadow:inset -3px 0 0 var(--gold);color:var(--ink)}
 .dayname{font-family:var(--arab);font-size:.95rem;color:var(--ink)}
 
 /* suivi */
@@ -130,7 +150,7 @@ tbody tr.today td:first-child{box-shadow:inset 3px 0 0 var(--gold);color:var(--i
 .cell:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
 tbody tr.future .cell{opacity:.45}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--ink-soft);margin:12px 2px 0;align-items:center}
-.legend i{display:inline-block;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--rule);vertical-align:-3px;margin-right:5px;position:relative}
+.legend i{display:inline-block;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--rule);vertical-align:-3px;margin-inline-end:5px;position:relative}
 .legend i.t{background:var(--azure-pale);border-color:var(--azure)}
 .legend i.m{background:var(--gold);border-color:var(--gold)}
 .legend i.mt{background:var(--gold);border-color:var(--gold)}
@@ -155,6 +175,7 @@ tbody tr.future .cell{opacity:.45}
 .cnt{font:inherit;font-size:.9rem;font-weight:600;font-variant-numeric:tabular-nums;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:99px;padding:7px 16px;cursor:pointer;min-width:86px}
 .cnt.full{background:var(--gold);border-color:var(--gold);color:#fff}
 .cnt:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+.cnt,.rawnum,.time,.cd-num,.stat .n{direction:ltr;unicode-bidi:isolate}
 .dtools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 
 /* chargement */
@@ -193,7 +214,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
     <div>
       <div class="appname">حصة صلاتي <span class="src-tag" id="srcTag"></span></div>
       <div class="cityrow">
-        <select class="city" id="citySel" aria-label="ville"></select>
+        <select class="city" id="citySel" aria-label="المدينة"></select>
         <span class="caret hidden" id="cityCaret">⌄</span>
       </div>
       <div class="month-line" id="range">—</div>
@@ -215,7 +236,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="date" id="heroDate">—</div>
       <div class="main">
         <div class="col-l">
-          <div class="lead" id="heroLead">Prochaine prière</div>
+          <div class="lead" id="heroLead">الصلاة القادمة</div>
           <div class="fr" id="heroFr">—</div>
           <div class="left" id="heroLeft">—</div>
         </div>
@@ -226,18 +247,28 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       </div>
       <div class="cd">
         <div class="cd-row">
-          <span class="cd-lab" id="cdLab">Temps restant</span>
+          <span class="cd-lab" id="cdLab">الوقت المتبقي</span>
           <span class="cd-num" id="cdNum">--:--:--</span>
         </div>
         <div class="hbar"><span id="cdBar"></span></div>
       </div>
       <div class="call hidden" id="heroCall">
         <span class="ar">حَيَّ عَلَى الصَّلَاةِ — أَدْرِكِ الْجَمَاعَةَ فِي الْمَسْجِدِ</span>
-        <span class="frx">La prière en groupe vaut vingt-sept degrés de plus que celle accomplie seul.</span>
+        <span class="frx" style="font-family:var(--arab);font-size:.95rem">صلاة الجماعة تفضل صلاة الفذ بسبع وعشرين درجة</span>
       </div>
       <span class="flag hidden" id="heroFlag"></span>
+      <div class="rawhint hidden" id="heroRaw"></div>
     </div>
     <div class="rail" id="rail"></div>
+    <div class="rawcard" id="rawcard">
+      <div class="rawhead">
+        <div><h4>السنن الرواتب</h4><div class="sub">اثنتا عشرة ركعة في اليوم والليلة</div></div>
+        <div class="rawnum" id="rawNum">0 / 12</div>
+      </div>
+      <div class="rawbar"><span id="rawBar"></span></div>
+      <div id="rawList"></div>
+      <div class="rawfoot"><span class="h">«مَنْ صَلَّى اثْنَتَيْ عَشْرَةَ رَكْعَةً فِي يَوْمٍ وَلَيْلَةٍ بُنِيَ لَهُ بِهِنَّ بَيْتٌ فِي الْجَنَّةِ»</span> — رواه مسلم</div>
+    </div>
     <p class="note" id="dayNote"></p>
   </section>
 
@@ -246,19 +277,19 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
     <div class="card">
       <table>
         <thead><tr>
-          <th>Jour</th>
-          <th><span class="a">الصبح</span>Fajr</th><th><span class="a">الشروق</span>Lever</th>
-          <th><span class="a">الظهر</span>Dohr</th><th><span class="a">العصر</span>Asr</th>
-          <th><span class="a">المغرب</span>Maghreb</th><th><span class="a">العشاء</span>Icha</th>
+          <th>اليوم</th>
+          <th><span class="a">الصبح</span></th><th><span class="a">الشروق</span></th>
+          <th><span class="a">الظهر</span></th><th><span class="a">العصر</span></th>
+          <th><span class="a">المغرب</span></th><th><span class="a">العشاء</span></th>
         </tr></thead>
         <tbody id="mbody"></tbody>
       </table>
     </div>
     <div class="row">
-      <button class="act" id="btnShareImg">Partager en image</button>
-      <button class="act ghost" id="btnShareFile">Partager le fichier</button>
+      <button class="act" id="btnShareImg">مشاركة كصورة</button>
+      <button class="act ghost" id="btnShareFile">مشاركة الملف</button>
     </div>
-    <p class="note" id="shareNote">Vendredis en bleu, jour courant en doré. L'image et le fichier reprennent le mois et la ville affichés ci-dessus.</p>
+    <p class="note" id="shareNote">أيام الجمعة بالأزرق، واليوم الحالي بالذهبي. تشمل الصورة والملف الشهر والمدينة المعروضين أعلاه.</p>
   </section>
 
   <!-- ===== suivi ===== -->
@@ -269,27 +300,27 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
     <div class="card">
       <table>
         <thead><tr>
-          <th>Jour</th>
-          <th><span class="a">الصبح</span>Fajr</th><th><span class="a">الظهر</span>Dohr</th>
-          <th><span class="a">العصر</span>Asr</th><th><span class="a">المغرب</span>Maghreb</th>
-          <th><span class="a">العشاء</span>Icha</th>
+          <th>اليوم</th>
+          <th><span class="a">الصبح</span></th><th><span class="a">الظهر</span></th>
+          <th><span class="a">العصر</span></th><th><span class="a">المغرب</span></th>
+          <th><span class="a">العشاء</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
     <div class="legend">
-      <span><i></i>non renseigné</span>
+      <span><i></i>غير مسجّل</span>
       <span><i class="t"></i>في الوقت</span>
       <span><i class="m"></i>في المسجد</span>
       <span><i class="mt"></i>المسجد + في الوقت</span>
     </div>
-    <p class="note">Touchez une case pour passer d'un état au suivant. Le suivi reste enregistré même quand vous chargez un nouveau mois.</p>
+    <p class="note">المس خانة للانتقال من حالة إلى التي تليها. تبقى المتابعة محفوظة حتى عند تحميل شهر جديد.</p>
   </section>
 
   <!-- ===== أذكار الصلاة ===== -->
   <section id="v-dhikr" role="tabpanel" aria-labelledby="t-dhikr" class="hidden">
     <div class="dtools">
-      <p class="note" style="margin:0">Touchez le compteur pour égrener ; il revient à zéro une fois complet.</p>
+      <p class="note" style="margin:0">المس العدّاد للتسبيح؛ يعود إلى الصفر عند اكتماله.</p>
       <button class="act ghost" id="btnDzero">إعادة التصفير</button>
     </div>
     <div id="dhikr"></div>
@@ -299,67 +330,67 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
   <section id="v-load" role="tabpanel" aria-labelledby="t-load" class="hidden">
 
     <div class="card pad">
-      <h3>المدينة — choisir la ville</h3>
+      <h3>المدينة</h3>
       <select id="ville"></select>
       <div class="row">
-        <button class="act" id="btnGen">Horaires de cette ville</button>
-        <button class="act ghost" id="btnFav">Ajouter aux favoris</button>
+        <button class="act" id="btnGen">مواقيت هذه المدينة</button>
+        <button class="act ghost" id="btnFav">إضافة إلى المفضلة</button>
       </div>
       <div class="favs" id="favList"></div>
-      <p class="note" style="margin-top:10px">Les villes favorites apparaissent dans la liste en haut de l'écran d'accueil : un appui suffit pour basculer de l'une à l'autre. Chaque ville garde ses propres horaires, calculés ou officiels.</p>
+      <p class="note" style="margin-top:10px">تظهر المدن المفضلة في القائمة أعلى الشاشة الرئيسية: لمسة واحدة تكفي للتنقل بينها. تحتفظ كل مدينة بمواقيتها الخاصة، محسوبة أو رسمية.</p>
     </div>
 
     <div class="card pad">
-      <h3>Tableau officiel de habous.gov.ma</h3>
-      <p class="note" style="margin:0 0 10px">Le site numérote ses villes. Trouvez le numéro de la vôtre une seule fois, mémorisez le lien, et chaque mois il suffira de deux gestes.</p>
-      <label class="f" for="vid">Numéro de ville à essayer</label>
+      <h3>الجدول الرسمي لموقع habous.gov.ma</h3>
+      <p class="note" style="margin:0 0 10px">يرقّم الموقع مدنه. ابحث عن رقم مدينتك مرة واحدة، واحفظ الرابط، وكل شهر تكفي خطوتان.</p>
+      <label class="f" for="vid">رقم المدينة للتجربة</label>
       <div class="row" style="margin-top:0;flex-wrap:nowrap;align-items:center">
-        <button class="act ghost" id="vidDown" aria-label="numéro précédent">−</button>
+        <button class="act ghost" id="vidDown" aria-label="الرقم السابق">−</button>
         <input type="number" id="vid" min="1" max="250" value="1" style="width:88px;text-align:center">
-        <button class="act ghost" id="vidUp" aria-label="numéro suivant">+</button>
-        <button class="act ghost" id="btnTry">Ouvrir</button>
+        <button class="act ghost" id="vidUp" aria-label="الرقم التالي">+</button>
+        <button class="act ghost" id="btnTry">فتح</button>
       </div>
-      <div class="row"><button class="act ghost" id="btnKeep">Mémoriser ce lien pour la ville choisie</button></div>
-      <label class="f" for="hlink">Lien mémorisé</label>
-      <input type="text" id="hlink" spellcheck="false" placeholder="https://www.habous.gov.ma/prieres/horaire_hijri.php?ville=…">
+      <div class="row"><button class="act ghost" id="btnKeep">حفظ هذا الرابط للمدينة المختارة</button></div>
+      <label class="f" for="hlink">الرابط المحفوظ</label>
+      <input type="text" id="hlink" dir="ltr" spellcheck="false" placeholder="https://www.habous.gov.ma/prieres/horaire_hijri.php?ville=…">
       <div class="row">
-        <button class="act" id="btnOpen">Ouvrir le tableau du mois</button>
-        <button class="act ghost" id="btnFetch">Charger directement</button>
+        <button class="act" id="btnOpen">فتح جدول الشهر</button>
+        <button class="act ghost" id="btnFetch">تحميل مباشر</button>
       </div>
-      <label class="f" for="paste">Tableau copié depuis la page (sélectionner, copier, coller ici)</label>
-      <textarea id="paste" placeholder="Collez ici les lignes du tableau mensuel…"></textarea>
-      <label class="f" for="startd">Premier jour du tableau (si les dates n'y figurent pas)</label>
+      <label class="f" for="paste">الجدول المنسوخ من الصفحة (حدّد، انسخ، ثم ألصق هنا)</label>
+      <textarea id="paste" placeholder="ألصق هنا سطور الجدول الشهري…"></textarea>
+      <label class="f" for="startd">أول يوم في الجدول (إن لم تكن التواريخ مذكورة فيه)</label>
       <input type="date" id="startd">
-      <div class="row"><button class="act" id="btnPaste">Lire le texte collé</button></div>
+      <div class="row"><button class="act" id="btnPaste">قراءة النص الملصق</button></div>
     </div>
 
     <div class="card pad">
-      <h3>Depuis une image du calendrier</h3>
+      <h3>من صورة التقويم</h3>
       <div class="drop" id="drop" tabindex="0" role="button">
-        <p>Déposez ou choisissez la photo du tableau mensuel (JPG, PNG).</p>
+        <p>أسقط أو اختر صورة الجدول الشهري (JPG، PNG).</p>
       </div>
       <input type="file" id="file" accept="image/*" class="hidden">
-      <div class="preview" id="preview"><img id="prevImg" alt="Calendrier importé"></div>
-      <div class="row"><button class="act" id="btnRead" disabled>Lire l'image</button></div>
+      <div class="preview" id="preview"><img id="prevImg" alt="التقويم المستورد"></div>
+      <div class="row"><button class="act" id="btnRead" disabled>قراءة الصورة</button></div>
     </div>
 
     <div class="row">
-      <button class="act ghost" id="btnExport">Exporter horaires et suivi</button>
-      <button class="act ghost" id="btnReset">Mois par défaut</button>
+      <button class="act ghost" id="btnExport">تصدير المواقيت والمتابعة</button>
+      <button class="act ghost" id="btnReset">الشهر الافتراضي</button>
     </div>
     <div class="status" id="status"></div>
 
     <div id="editor" class="hidden" style="margin-top:14px">
-      <p class="note" style="margin-top:0">Vérifiez les valeurs, corrigez ce qui est faux, puis enregistrez.</p>
+      <p class="note" style="margin-top:0">تحقق من القيم، وصحّح ما كان خطأ، ثم احفظ.</p>
       <div class="card">
         <table>
-          <thead><tr><th>Jour</th><th>Fajr</th><th>Lever</th><th>Dohr</th><th>Asr</th><th>Maghreb</th><th>Icha</th></tr></thead>
+          <thead><tr><th>اليوم</th><th>الصبح</th><th>الشروق</th><th>الظهر</th><th>العصر</th><th>المغرب</th><th>العشاء</th></tr></thead>
           <tbody id="ebody"></tbody>
         </table>
       </div>
       <div class="row">
-        <button class="act" id="btnSave">Enregistrer ce mois</button>
-        <button class="act ghost" id="btnCancel">Annuler</button>
+        <button class="act" id="btnSave">حفظ هذا الشهر</button>
+        <button class="act ghost" id="btnCancel">إلغاء</button>
       </div>
     </div>
   </section>
@@ -371,7 +402,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
    ===================================================================== */
 const DEFAULT_MONTH = {
   city:"الرباط ـ سلا والنواحي", hijriMonth:"ربيع الثاني", hijriYear:1448, source:"officiel",
-  note:"Retour à GMT à partir du dimanche 20 septembre 2026.",
+  note:"العودة إلى توقيت غرينتش ابتداءً من يوم الأحد 20 شتنبر 2026.",
   days:[
     ["2026-09-13",1,"05:39","07:06","13:28","16:55","19:41","20:56"],
     ["2026-09-14",2,"05:40","07:07","13:28","16:54","19:39","20:55"],
@@ -407,14 +438,23 @@ const DEFAULT_MONTH = {
 };
 
 const PRAYERS=[
-  {k:"fajr",ar:"الصُّبح",fr:"Fajr",sub:"Aube",track:true},
-  {k:"shuruq",ar:"الشُّروق",fr:"Chourouq",sub:"Lever du soleil — fin du temps de Fajr",track:false},
-  {k:"dhuhr",ar:"الظُّهر",fr:"Dohr",sub:"Midi",track:true},
-  {k:"asr",ar:"العَصر",fr:"Asr",sub:"Après-midi",track:true},
-  {k:"maghrib",ar:"المَغرب",fr:"Maghreb",sub:"Coucher du soleil",track:true},
-  {k:"isha",ar:"العِشاء",fr:"Icha",sub:"Nuit",track:true}
+  {k:"fajr",ar:"الصُّبح",fr:"الفجر الصادق",sub:"من طلوع الفجر الصادق إلى الشروق",track:true},
+  {k:"shuruq",ar:"الشُّروق",fr:"طلوع الشمس",sub:"طلوع الشمس — نهاية وقت الصبح",track:false},
+  {k:"dhuhr",ar:"الظُّهر",fr:"الزوال",sub:"بعد زوال الشمس",track:true},
+  {k:"asr",ar:"العَصر",fr:"العصر",sub:"حين يصير ظل الشيء مثله",track:true},
+  {k:"maghrib",ar:"المَغرب",fr:"الغروب",sub:"بعد غروب الشمس",track:true},
+  {k:"isha",ar:"العِشاء",fr:"العشاء",sub:"بعد مغيب الشفق الأحمر",track:true}
 ];
 const TRACKED=PRAYERS.filter(p=>p.track).map(p=>p.k);
+/* السنن الرواتب المؤكدة : اثنتا عشرة ركعة (حديث أم حبيبة رضي الله عنها) */
+const RAWATIB=[
+  {k:"fajr_b",   p:"fajr",   pos:"b", n:2, ar:"ركعتان",     when:"قبل الصبح"},
+  {k:"dhuhr_b",  p:"dhuhr",  pos:"b", n:4, ar:"أربع ركعات", when:"قبل الظهر"},
+  {k:"dhuhr_a",  p:"dhuhr",  pos:"a", n:2, ar:"ركعتان",     when:"بعد الظهر"},
+  {k:"maghrib_a",p:"maghrib",pos:"a", n:2, ar:"ركعتان",     when:"بعد المغرب"},
+  {k:"isha_a",   p:"isha",   pos:"a", n:2, ar:"ركعتان",     when:"بعد العشاء"}
+];
+const RAW_TOTAL=RAWATIB.reduce((s,r)=>s+r.n,0);   // 12
 const WINDOW=30;   // minutes pendant lesquelles la prière est annoncée « en cours »
 const AR_DAYS=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const SKY={
@@ -477,7 +517,7 @@ const Store=(()=>{
     }
   };
 })();
-const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1";
+const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1";
 
 /* =====================================================================
    3. Utilitaires
@@ -485,17 +525,17 @@ const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,"0");
 const isoOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const FR_DATE=new Intl.DateTimeFormat("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-const FR_SHORT=new Intl.DateTimeFormat("fr-FR",{day:"2-digit",month:"2-digit"});
-const FR_MONTH=new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"long"});
+const FR_DATE=new Intl.DateTimeFormat("ar-MA-u-nu-latn",{day:"numeric",month:"long",year:"numeric"});
+const FR_SHORT={format:d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}`};   // 13/09, lisible dans les deux sens
+const FR_MONTH=new Intl.DateTimeFormat("ar-MA-u-nu-latn",{day:"numeric",month:"long"});
 function parseISO(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);}
 function at(iso,hhmm){const d=parseISO(iso);const[h,mi]=hhmm.split(":").map(Number);d.setHours(h,mi,0,0);return d;}
 function arDay(iso){return AR_DAYS[parseISO(iso).getDay()];}
 function human(ms){
   const t=Math.max(0,Math.round(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;
-  if(h>0)return `dans ${h} h ${pad(m)} min`;
-  if(m>0)return `dans ${m} min ${pad(s)} s`;
-  return `dans ${s} s`;
+  if(h>0)return `بعد ${h} س ${pad(m)} د`;
+  if(m>0)return `بعد ${m} د ${pad(s)} ث`;
+  return `بعد ${s} ث`;
 }
 function hms(ms){
   const t=Math.max(0,Math.round(ms/1000));
@@ -513,6 +553,7 @@ let MONTH=normalizeMonth(JSON.parse(JSON.stringify(DEFAULT_MONTH)));
 let MONTHS={};   // un mois mémorisé par ville
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
+let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
 let pending=null, fileB64=null, fileType=null, railKey="";
 
 /* =====================================================================
@@ -533,6 +574,16 @@ function cycle(e){                       // rien → في الوقت → الم�
 }
 function cellClass(e){ return e.m&&e.t?"mt":e.m?"m":e.t?"t":""; }
 
+/* الرواتب : خانة لكل راتبة في اليوم */
+function rawEntry(iso){ return RAW[iso]||{}; }
+function setRaw(iso,k,on){
+  if(!RAW[iso])RAW[iso]={};
+  if(on)RAW[iso][k]=true;
+  else{ delete RAW[iso][k]; if(!Object.keys(RAW[iso]).length) delete RAW[iso]; }
+  Store.set(K_RAW,RAW);
+}
+function rawCount(iso){ const e=rawEntry(iso); return RAWATIB.reduce((s,r)=>s+(e[r.k]?r.n:0),0); }
+
 /* =====================================================================
    5. Rendu
    ===================================================================== */
@@ -545,7 +596,7 @@ function renderHeader(){
   $("#cityCaret").classList.toggle("hidden",list.length<2);
   $("#hmonth").textContent=`${MONTH.hijriMonth||""} ${MONTH.hijriYear||""}`.trim();
   const tag=$("#srcTag"), calc=MONTH.source==="calcul";
-  tag.textContent=calc?"calculé":"table officielle";
+  tag.textContent=calc?"محسوب":"الجدول الرسمي";
   tag.className="src-tag "+(calc?"calc":"off");
   const a=MONTH.days[0].greg,b=MONTH.days[MONTH.days.length-1].greg;
   $("#range").textContent=`${FR_MONTH.format(parseISO(a))} – ${FR_MONTH.format(parseISO(b))} ${parseISO(b).getFullYear()}`;
@@ -580,25 +631,25 @@ function renderDay(force){
   const running=!T.out&&cur&&cur.track&&since<WINDOW*60000;
 
   if(running){
-    $("#heroLead").textContent="Prière en cours";
+    $("#heroLead").textContent="الصلاة الحالية";
     $("#heroFr").textContent=cur.fr;
-    $("#heroLeft").textContent=`adhan à ${cur.time}`;
+    $("#heroLeft").textContent=`الأذان على الساعة ${cur.time}`;
     $("#heroName").textContent=cur.ar;
     $("#heroAt").textContent=cur.time;
-    $("#cdLab").textContent="Depuis l'adhan";
+    $("#cdLab").textContent="منذ الأذان";
     $("#cdNum").textContent=hms(since);
     $("#cdBar").style.width=Math.min(100,since/(WINDOW*60000)*100).toFixed(1)+"%";
     $("#heroCall").classList.remove("hidden");
     $("#hero").style.background=SKY[cur.k]||SKY.night;
   }else{
-    $("#heroLead").textContent="Prochaine prière";
-    $("#heroFr").textContent=T.next.tomorrow?`${T.next.fr} de demain`:T.next.fr;
-    $("#heroLeft").textContent=cur?`après ${cur.fr}`:"";
+    $("#heroLead").textContent="الصلاة القادمة";
+    $("#heroFr").textContent=T.next.tomorrow?`${T.next.fr} — غدًا`:T.next.fr;
+    $("#heroLeft").textContent=cur?`بعد ${cur.ar}`:"";
     $("#heroName").textContent=T.next.ar;
     $("#heroAt").textContent=T.next.time;
     const prevWhen=cur?cur.when:new Date(at(T.today.greg,T.today.isha).getTime()-864e5);
     const total=T.next.when-prevWhen, gone=now-prevWhen;
-    $("#cdLab").textContent=`Reste avant ${T.next.fr}`;
+    $("#cdLab").textContent=`المتبقي قبل ${T.next.ar}`;
     $("#cdNum").textContent=T.out?"—:—:—":hms(T.next.when-now);
     $("#cdBar").style.width=T.out?"0%":Math.max(0,Math.min(100,gone/total*100)).toFixed(1)+"%";
     $("#heroCall").classList.add("hidden");
@@ -606,13 +657,27 @@ function renderDay(force){
   }
 
   const flag=$("#heroFlag");
-  if(T.out){flag.textContent="La date du jour n'est pas dans le mois chargé";flag.classList.remove("hidden");}
+  if(T.out){flag.textContent="تاريخ اليوم ليس ضمن الشهر المحمّل";flag.classList.remove("hidden");}
   else flag.classList.add("hidden");
+
+  /* تذكير بالراتبة : البعدية للصلاة الحالية إن لم تُصلَّ بعد، وإلا القبلية للصلاة القادمة */
+  const rawHint=$("#heroRaw");
+  let hint="";
+  if(!T.out){
+    const todayRaw=rawEntry(T.today.greg);
+    const after=cur?RAWATIB.find(r=>r.p===cur.k&&r.pos==="a"):null;
+    const before=RAWATIB.find(r=>r.p===T.next.k&&r.pos==="b");
+    if(after&&!todayRaw[after.k]) hint=`تذكير بالراتبة: <b>${after.ar} ${after.when}</b>`;
+    else if(before&&!(T.next.tomorrow?false:todayRaw[before.k])) hint=`تذكير بالراتبة: <b>${before.ar} ${before.when}</b>`;
+  }
+  rawHint.innerHTML=hint;
+  rawHint.classList.toggle("hidden",!hint);
 
   const key=`${T.today.greg}|${T.currentIdx}|${T.out?1:0}|${running?1:0}`;
   if(!force&&key===railKey)return;
   railKey=key;
   const iso=T.today.greg;
+  renderRawatib(iso);
   $("#rail").innerHTML=T.list.map((p,i)=>{
     let cls=T.out?"":i<T.currentIdx?"done":i===T.currentIdx?"now":i===T.nextIdx?"next":"";
     const e=entry(iso,p.k);
@@ -622,7 +687,7 @@ function renderDay(force){
       </div>`:"";
     return `<div class="slot ${cls}">
       <span class="dot"></span>
-      <div><div class="ar">${p.ar}</div><div class="sub">${p.fr} — ${p.sub}</div></div>
+      <div><div class="ar">${p.ar}</div><div class="sub">${p.sub}</div></div>
       <div class="time">${p.time}</div>
       ${chips}
     </div>`;
@@ -638,6 +703,27 @@ $("#rail").addEventListener("click",ev=>{
   e[f]=!e[f];
   setEntry(iso,k,e);
   b.setAttribute("aria-pressed",String(e[f]));
+  renderTrack();
+});
+
+function renderRawatib(iso){
+  iso=iso||timeline(new Date()).today.greg;
+  const e=rawEntry(iso), n=rawCount(iso);
+  $("#rawNum").textContent=`${n} / ${RAW_TOTAL}`;
+  $("#rawBar").style.width=(n/RAW_TOTAL*100).toFixed(0)+"%";
+  $("#rawList").innerHTML=RAWATIB.map(r=>`<label class="raw ${e[r.k]?"on":""}">
+      <input type="checkbox" data-k="${r.k}" ${e[r.k]?"checked":""}>
+      <span class="lbl">${r.ar} ${r.when}</span>
+      <span class="rk">${r.n}</span>
+    </label>`).join("");
+}
+$("#rawList").addEventListener("change",ev=>{
+  const i=ev.target;
+  if(!i||i.type!=="checkbox")return;
+  const iso=timeline(new Date()).today.greg;
+  setRaw(iso,i.dataset.k,i.checked);
+  renderRawatib(iso);
+  renderDay(true);
   renderTrack();
 });
 
@@ -662,10 +748,11 @@ function renderTrack(){
     return `<tr class="${cls}"><td><span class="dayname">${d.dayName}</span> ${FR_SHORT.format(parseISO(d.greg))}</td>${cells}</tr>`;
   }).join("");
 
-  let m=0,t=0,done=0,possible=0;
+  let m=0,t=0,done=0,possible=0,rk=0,rkPossible=0;
   const todayD=parseISO(todayISO);
   MONTH.days.forEach(d=>{
     if(parseISO(d.greg)>todayD)return;
+    rk+=rawCount(d.greg); rkPossible+=RAW_TOTAL;
     TRACKED.forEach(k=>{
       possible++;
       const e=entry(d.greg,k);
@@ -680,9 +767,11 @@ function renderTrack(){
       <div class="bar"><span style="width:${pc(m)}%;background:var(--gold)"></span></div></div>
     <div class="stat"><div class="n">${t}</div><div class="l">في الوقت</div>
       <div class="bar"><span style="width:${pc(t)}%;background:var(--azure)"></span></div></div>
-    <div class="stat"><div class="n">${possible-done}</div><div class="l">non renseignées</div>
+    <div class="stat"><div class="n">${possible-done}</div><div class="l">غير مسجّلة</div>
       <div class="bar"><span style="width:${pc(possible-done)}%;background:#C9BFA8"></span></div></div>
-    <div class="stat"><div class="n">${possible}</div><div class="l">prières écoulées ce mois</div></div>`;
+    <div class="stat"><div class="n">${possible}</div><div class="l">صلوات مضت هذا الشهر</div></div>
+    <div class="stat"><div class="n">${rk}</div><div class="l">ركعات الرواتب هذا الشهر</div>
+      <div class="bar"><span style="width:${rkPossible?Math.round(rk*100/rkPossible):0}%;background:var(--gold)"></span></div></div>`;
 }
 
 $("#tbody").addEventListener("click",ev=>{
@@ -718,33 +807,33 @@ function renderAll(){renderHeader();renderDay(true);renderMonth();renderTrack();
    6 bis. أذكار الصلاة
    ===================================================================== */
 const ADHKAR=[
- {t:"قبل الصلاة",c:"En entrant à la mosquée, et après l'appel",items:[
+ {t:"قبل الصلاة",c:"عند دخول المسجد، وبعد الأذان",items:[
   {a:"اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",s:"عند دخول المسجد"},
   {a:"اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",s:"عند الخروج من المسجد"},
   {a:"اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ",s:"بعد الأذان، بعد الصلاة على النبي ﷺ"}
  ]},
- {t:"بعد السلام من كل صلاة",c:"Dans l'ordre, après chacune des cinq prières",items:[
+ {t:"بعد السلام من كل صلاة",c:"بالترتيب، بعد كل صلاة من الصلوات الخمس",items:[
   {a:"أَسْتَغْفِرُ اللهَ",n:3},
   {a:"اللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ"},
   {a:"لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ"},
   {a:"لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ، لَا إِلَهَ إِلَّا اللهُ وَلَا نَعْبُدُ إِلَّا إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لَا إِلَهَ إِلَّا اللهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الْكَافِرُونَ"},
   {a:"اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",s:"دبر كل صلاة"}
  ]},
- {t:"التسبيح",c:"Trente-trois fois chacun, puis la centaine complétée",items:[
+ {t:"التسبيح",c:"ثلاثًا وثلاثين مرة لكل واحدة، ثم تمام المائة",items:[
   {a:"سُبْحَانَ اللهِ",n:33},
   {a:"الْحَمْدُ لِلَّهِ",n:33},
   {a:"اللهُ أَكْبَرُ",n:33},
   {a:"لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",s:"تمام المائة"}
  ]},
- {t:"آية الكرسي",c:"Après chaque prière",items:[
+ {t:"آية الكرسي",c:"بعد كل صلاة",items:[
   {a:"اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَئُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ",s:"سورة البقرة، الآية 255"}
  ]},
- {t:"المعوذات",c:"Une fois après chaque prière, trois fois après Fajr et Maghreb",items:[
+ {t:"المعوذات",c:"مرة بعد كل صلاة، وثلاث مرات بعد الصبح والمغرب",items:[
   {a:"قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ",s:"سورة الإخلاص"},
   {a:"قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ",s:"سورة الفلق"},
   {a:"قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ",s:"سورة الناس"}
  ]},
- {t:"بعد الصبح والمغرب",c:"En plus des précédents",items:[
+ {t:"بعد الصبح والمغرب",c:"زيادة على ما سبق",items:[
   {a:"لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",n:10},
   {a:"اللَّهُمَّ أَجِرْنِي مِنَ النَّارِ",n:7},
   {a:"اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",s:"بعد صلاة الصبح خاصة"}
@@ -847,7 +936,7 @@ function parsePasted(text,startISO,cityName){
     const iso=r.greg||isoOf(new Date(cur.getTime()+i*864e5));
     return{greg:iso,hijri:i+1,fajr:r.times[0],shuruq:r.times[1],dhuhr:r.times[2],asr:r.times[3],maghrib:r.times[4],isha:r.times[5]};
   });
-  return{city:cityName||MONTH.city,hijriMonth:MONTH.hijriMonth||"",hijriYear:MONTH.hijriYear||"",source:"officiel",note:"Tableau officiel des Habous.",days};
+  return{city:cityName||MONTH.city,hijriMonth:MONTH.hijriMonth||"",hijriYear:MONTH.hijriYear||"",source:"officiel",note:"الجدول الرسمي لوزارة الأوقاف والشؤون الإسلامية.",days};
 }
 
 /* =====================================================================
@@ -908,7 +997,7 @@ function genForCity(city){
   });
   if(days.some(d=>!d))return null;
   return{city:city.n,hijriMonth:MONTH.hijriMonth,hijriYear:MONTH.hijriYear,source:"calcul",
-    note:`Horaires calculés pour ${city.n} — méthode des Habous (19° / 17°), à une minute près du tableau officiel.`,
+    note:`مواقيت محسوبة لمدينة ${city.n} — بطريقة وزارة الأوقاف (19° / 17°)، بفارق دقيقة تقريبًا عن الجدول الرسمي.`,
     days};
 }
 
@@ -938,22 +1027,22 @@ async function switchCity(name,recompute){
   const cached=MONTHS[name];
   if(!recompute&&cached&&cached.days&&cached.days.length){
     await useMonth(cached);
-    setStatus(`${name} — ${cached.source==="calcul"?"horaires calculés":"table officielle"} déjà en mémoire.`,"ok");
+    setStatus(`${name} — ${cached.source==="calcul"?"المواقيت المحسوبة":"الجدول الرسمي"} محفوظة مسبقًا.`,"ok");
     return;
   }
-  if(!city){setStatus("Ville inconnue.","err");return;}
+  if(!city){setStatus("مدينة غير معروفة.","err");return;}
   const m=genForCity(city);
-  if(!m){setStatus("Calcul impossible pour cette ville.","err");return;}
+  if(!m){setStatus("تعذّر حساب المواقيت لهذه المدينة.","err");return;}
   await useMonth(m);
-  setStatus(`Horaires de ${city.n} calculés pour ${MONTH.hijriMonth} ${MONTH.hijriYear}. Pour la table officielle, importez l'image ou collez le tableau.`,"ok");
+  setStatus(`حُسبت مواقيت ${city.n} لشهر ${MONTH.hijriMonth} ${MONTH.hijriYear}. للحصول على الجدول الرسمي، استورد الصورة أو ألصق الجدول.`,"ok");
 }
 
 /* favoris */
 function renderFavs(){
   $("#favList").innerHTML=FAVS.length
-    ? FAVS.map(n=>`<span class="fav">${n}<button data-fav="${n}" aria-label="retirer ${n}">×</button></span>`).join("")
-    : `<span class="note" style="margin:0">Aucune ville favorite pour l'instant.</span>`;
-  $("#btnFav").textContent=FAVS.includes(sel.value)?"Retirer des favoris":"Ajouter aux favoris";
+    ? FAVS.map(n=>`<span class="fav">${n}<button data-fav="${n}" aria-label="إزالة ${n}">×</button></span>`).join("")
+    : `<span class="note" style="margin:0">لا توجد مدن مفضلة بعد.</span>`;
+  $("#btnFav").textContent=FAVS.includes(sel.value)?"إزالة من المفضلة":"إضافة إلى المفضلة";
 }
 $("#favList").addEventListener("click",e=>{
   const b=e.target.closest("button[data-fav]");
@@ -965,7 +1054,7 @@ $("#btnFav").addEventListener("click",()=>{
   const n=sel.value;
   FAVS=FAVS.includes(n)?FAVS.filter(x=>x!==n):FAVS.concat(n);
   saveCityPrefs();renderFavs();renderHeader();
-  setStatus(FAVS.includes(n)?`${n} ajoutée aux favoris.`:`${n} retirée des favoris.`,"ok");
+  setStatus(FAVS.includes(n)?`أُضيفت ${n} إلى المفضلة.`:`أُزيلت ${n} من المفضلة.`,"ok");
 });
 
 sel.addEventListener("change",async()=>{
@@ -987,26 +1076,26 @@ $("#vidUp").addEventListener("click",()=>bump(1));
 $("#vidDown").addEventListener("click",()=>bump(-1));
 $("#btnTry").addEventListener("click",()=>{
   window.open(vidUrl($("#vid").value||1),"_blank","noopener");
-  setStatus("La page affiche le nom de la ville en tête du tableau. Si ce n'est pas la vôtre, changez de numéro et rouvrez.");
+  setStatus("تعرض الصفحة اسم المدينة في رأس الجدول. إن لم تكن مدينتك، غيّر الرقم وأعد الفتح.");
 });
 $("#btnKeep").addEventListener("click",()=>{
   const u=vidUrl($("#vid").value||1);
   LINKS[sel.value]=u;
   $("#hlink").value=u;
   Store.set(K_CITY,{ville:sel.value,links:LINKS,vid:$("#vid").value});
-  setStatus(`Lien mémorisé pour ${sel.value}. Chaque mois : « Ouvrir le tableau du mois », copier, coller, lire.`,"ok");
+  setStatus(`حُفظ الرابط لمدينة ${sel.value}. كل شهر: «فتح جدول الشهر»، ثم انسخ، وألصق، واقرأ.`,"ok");
 });
 
 $("#btnOpen").addEventListener("click",()=>{
   const url=($("#hlink").value.trim())||HABOUS_HOME;
   window.open(url,"_blank","noopener");
-  setStatus("Sur la page des Habous, choisissez votre ville, sélectionnez le tableau du mois, copiez-le, puis revenez le coller ici. Gardez le lien de votre ville dans le champ ci-dessus : il sera mémorisé.");
+  setStatus("في صفحة وزارة الأوقاف، اختر مدينتك، وحدّد جدول الشهر، وانسخه، ثم عد لإلصاقه هنا. احتفظ برابط مدينتك في الحقل أعلاه: سيُحفظ تلقائيًا.");
 });
 
 $("#btnFetch").addEventListener("click",async()=>{
   const url=$("#hlink").value.trim();
-  if(!url){setStatus("Indiquez d'abord le lien de la page mensuelle de votre ville.","err");return;}
-  setStatus("Tentative de lecture directe…");
+  if(!url){setStatus("أدخل أولًا رابط الصفحة الشهرية لمدينتك.","err");return;}
+  setStatus("جارٍ محاولة القراءة المباشرة…");
   try{
     const r=await fetch(url);
     if(!r.ok)throw new Error("HTTP "+r.status);
@@ -1016,20 +1105,20 @@ $("#btnFetch").addEventListener("click",async()=>{
     if(!m)throw new Error("tableau illisible");
     pending=normalizeMonth(m);
     showEditor(pending);
-    setStatus(`${pending.days.length} jours lus depuis le site.`,"ok");
+    setStatus(`قُرئ ${pending.days.length} يومًا من الموقع.`,"ok");
   }catch(err){
-    setStatus("Lecture directe impossible ("+err.message+"). Depuis un fichier local, le navigateur bloque la lecture d'un autre site : ouvrez la page, copiez le tableau, puis collez-le ci-dessous.","err");
+    setStatus("تعذّرت القراءة المباشرة ("+err.message+"). يمنع المتصفح قراءة موقع آخر من ملف محلي: افتح الصفحة، وانسخ الجدول، ثم ألصقه أدناه.","err");
   }
 });
 
 $("#btnPaste").addEventListener("click",()=>{
   const txt=$("#paste").value;
-  if(!txt.trim()){setStatus("Collez d'abord le tableau.","err");return;}
+  if(!txt.trim()){setStatus("ألصق الجدول أولًا.","err");return;}
   const m=parsePasted(txt,$("#startd").value||null,sel.value);
-  if(!m){setStatus("Aucune ligne exploitable. Vérifiez que vous avez copié les six colonnes d'horaires, et indiquez le premier jour du tableau.","err");return;}
+  if(!m){setStatus("لا يوجد سطر صالح. تأكد من نسخ أعمدة المواقيت الستة، وحدّد أول يوم في الجدول.","err");return;}
   pending=normalizeMonth(m);
   showEditor(pending);
-  setStatus(`${pending.days.length} jours lus. Vérifiez avant d'enregistrer.`,"ok");
+  setStatus(`قُرئ ${pending.days.length} يومًا. تحقق قبل الحفظ.`,"ok");
 });
 
 /* --- image --- */
@@ -1041,15 +1130,15 @@ drop.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDe
 drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)takeFile(f);});
 fileInput.addEventListener("change",e=>{const f=e.target.files[0];if(f)takeFile(f);});
 function takeFile(f){
-  if(!f.type.startsWith("image/")){setStatus("Ce fichier n'est pas une image.","err");return;}
+  if(!f.type.startsWith("image/")){setStatus("هذا الملف ليس صورة.","err");return;}
   const r=new FileReader();
   r.onload=()=>{
     fileB64=r.result.split(",")[1];
     fileType=f.type==="image/jpg"?"image/jpeg":f.type;
     $("#prevImg").src=r.result;$("#preview").style.display="block";
-    $("#btnRead").disabled=false;setStatus(`${f.name} prêt à être lu.`);
+    $("#btnRead").disabled=false;setStatus(`${f.name} جاهز للقراءة.`);
   };
-  r.onerror=()=>setStatus("Lecture du fichier impossible.","err");
+  r.onerror=()=>setStatus("تعذّرت قراءة الملف.","err");
   r.readAsDataURL(f);
 }
 const EXTRACT_PROMPT=`Tu lis un calendrier mensuel marocain des horaires de prière (ministère des Habous).
@@ -1060,12 +1149,12 @@ Points critiques :
 - Une cellule de la colonne grégorienne peut contenir un nom de mois (ex. أكتوبر) : cette ligne est le 1er de ce mois.
 - Les horaires ne varient que de quelques minutes par jour, sauf à la date du changement d'heure.
 Réponds UNIQUEMENT par un JSON, sans texte ni balises autour :
-{"city":"...","hijriMonth":"...","hijriYear":1448,"note":"note en français sur le changement d'heure sinon vide","days":[{"greg":"AAAA-MM-JJ","hijri":1,"fajr":"05:39","shuruq":"07:06","dhuhr":"13:28","asr":"16:55","maghrib":"19:41","isha":"20:56"}]}`;
+{"city":"...","hijriMonth":"...","hijriYear":1448,"note":"ملاحظة بالعربية عن تغيير الساعة وإلا فارغة","days":[{"greg":"AAAA-MM-JJ","hijri":1,"fajr":"05:39","shuruq":"07:06","dhuhr":"13:28","asr":"16:55","maghrib":"19:41","isha":"20:56"}]}`;
 
 $("#btnRead").addEventListener("click",async()=>{
   if(!fileB64)return;
   $("#btnRead").disabled=true;
-  setStatus("Lecture du tableau en cours… une trentaine de secondes.");
+  setStatus("جارٍ قراءة الجدول… نحو ثلاثين ثانية.");
   try{
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -1081,9 +1170,9 @@ $("#btnRead").addEventListener("click",async()=>{
     obj.source="officiel";
     pending=normalizeMonth(obj);
     showEditor(pending);
-    setStatus(`${pending.days.length} jours lus. Vérifiez avant d'enregistrer.`,"ok");
+    setStatus(`قُرئ ${pending.days.length} يومًا. تحقق قبل الحفظ.`,"ok");
   }catch(err){
-    setStatus("Lecture de l'image impossible ("+err.message+"). Hors connexion, utilisez le texte collé ou corrigez à la main.","err");
+    setStatus("تعذّرت قراءة الصورة ("+err.message+"). دون اتصال، استعمل النص الملصق أو صحّح يدويًا.","err");
   }finally{$("#btnRead").disabled=false;}
 });
 
@@ -1105,7 +1194,7 @@ $("#btnSave").addEventListener("click",async()=>{
   const m=pending; pending=null;
   await useMonth(m);
   $("#editor").classList.add("hidden");
-  setStatus(`Mois enregistré pour ${MONTH.city}. Le suivi déjà saisi reste intact.`,"ok");
+  setStatus(`حُفظ الشهر لمدينة ${MONTH.city}. تبقى المتابعة المسجّلة كما هي.`,"ok");
 });
 $("#btnCancel").addEventListener("click",()=>{pending=null;$("#editor").classList.add("hidden");setStatus("");});
 
@@ -1113,16 +1202,16 @@ $("#btnReset").addEventListener("click",async()=>{
   pending=null;$("#editor").classList.add("hidden");
   await useMonth(JSON.parse(JSON.stringify(DEFAULT_MONTH)));
   sel.value=MONTH.city;syncLink();renderFavs();
-  setStatus("Mois par défaut rétabli : ربيع الثاني 1448.","ok");
+  setStatus("أُعيد الشهر الافتراضي: ربيع الثاني 1448.","ok");
 });
 
 $("#btnExport").addEventListener("click",()=>{
-  const blob=new Blob([JSON.stringify({month:MONTH,log:LOG},null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify({month:MONTH,log:LOG,rawatib:RAW},null,2)],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download=`حصة صلاتي ${MONTH.hijriMonth||""} ${MONTH.hijriYear||""}.json`;
   a.click();URL.revokeObjectURL(a.href);
-  setStatus("Horaires et suivi exportés en JSON.","ok");
+  setStatus("صُدّرت المواقيت والمتابعة بصيغة JSON.","ok");
 });
 
 /* =====================================================================
@@ -1141,20 +1230,20 @@ async function sendFile(file,title){
       r.readAsDataURL(file);
     });
     window.AndroidBridge.saveFile(b64,file.name,file.type,title||"");
-    return "prêt à partager";
+    return "جاهز للمشاركة";
   }
   try{
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title,text:title});
-      return "partagé";
+      return "تمت المشاركة";
     }
-  }catch(e){ if(e&&e.name==="AbortError")return "annulé"; }
+  }catch(e){ if(e&&e.name==="AbortError")return "أُلغيت"; }
   const a=document.createElement("a");
   a.href=URL.createObjectURL(file);
   a.download=file.name;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-  return "enregistré dans vos téléchargements";
+  return "حُفظ في التنزيلات";
 }
 const slug=()=>`حصة صلاتي ${MONTH.days[0].greg.slice(0,7)}`;
 
@@ -1186,7 +1275,7 @@ async function monthCanvas(){
   c.fillStyle="#11212E";c.direction="rtl";c.font='700 24px Amiri, serif';
   ["الصبح","الشروق","الظهر","العصر","المغرب","العشاء"].forEach((t,i)=>c.fillText(t,x0+colW*(i+.5),y));
   c.direction="ltr";c.font='600 16px system-ui, sans-serif';c.textAlign="left";
-  c.fillText("Jour",padX+12,y-3);
+  c.direction="rtl";c.font='700 20px Amiri, serif';c.fillText("اليوم",padX+12,y-3);c.direction="ltr";
 
   MONTH.days.forEach((d,i)=>{
     const ry=headH+rowH*(i+1);
@@ -1205,23 +1294,23 @@ async function monthCanvas(){
   });
 
   c.textAlign="center";c.fillStyle="#8C7F68";c.font='400 16px system-ui, sans-serif';
-  c.fillText(MONTH.note||"Horaires du calendrier officiel des Habous.",W/2,H-30);
+  c.direction="rtl";c.font='400 20px Amiri, serif';c.fillText(MONTH.note||"مواقيت التقويم الرسمي لوزارة الأوقاف.",W/2,H-30);
   return cv;
 }
 
 $("#btnShareImg").addEventListener("click",async()=>{
-  setShare("Préparation de l'image…");
+  setShare("جارٍ تحضير الصورة…");
   try{
     const cv=await monthCanvas();
     const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
     const file=new File([blob],slug()+".png",{type:"image/png"});
-    setShare("Image du mois "+await sendFile(file,`${MONTH.city} — ${MONTH.hijriMonth} ${MONTH.hijriYear}`)+".");
-  }catch(e){ setShare("Création de l'image impossible ("+e.message+")."); }
+    setShare("صورة الشهر: "+await sendFile(file,`${MONTH.city} — ${MONTH.hijriMonth} ${MONTH.hijriYear}`)+".");
+  }catch(e){ setShare("تعذّر إنشاء الصورة ("+e.message+")."); }
 });
 
 function buildShareHtml(){
   const data=JSON.stringify({city:MONTH.city,hijriMonth:MONTH.hijriMonth,hijriYear:MONTH.hijriYear,note:MONTH.note||"",days:MONTH.days});
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>حصة صلاتي — ${MONTH.city}</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1240,31 +1329,31 @@ table{border-collapse:collapse;width:100%;margin-top:16px;background:#fff;border
 th{background:#F6F1E6;font-size:.7rem;color:#4A5C69;padding:8px 3px;border-bottom:1px solid #E6DECD}
 th span{display:block;font-family:Amiri,serif;font-size:1rem;color:#11212E}
 td{padding:7px 3px;text-align:center;border-bottom:1px solid #F3EEE3}
-td:first-child{text-align:left;padding-left:10px;white-space:nowrap;color:#4A5C69;font-size:.75rem}
+td:first-child{text-align:start;padding-inline-start:10px;white-space:nowrap;color:#4A5C69;font-size:.75rem}
 tr.f{background:#EAF3F6}tr.d{background:#FDF6E4;font-weight:600}
 .k{font-family:Amiri,serif;font-size:.95rem;color:#11212E}
 .note{font-size:.75rem;color:#4A5C69;margin-top:12px}
 </style></head><body><div class="w">
 <h1 id="c"></h1><div class="s" id="rg"></div>
 <div class="h"><div class="s" id="dt" style="color:rgba(255,255,255,.8)"></div>
-<div class="r" style="margin-top:14px"><div><div class="s" style="color:rgba(255,255,255,.8)">Prochaine prière</div><div id="fr"></div></div>
+<div class="r" style="margin-top:14px"><div><div class="s" style="color:rgba(255,255,255,.8)">الصلاة القادمة</div><div id="fr"></div></div>
 <div style="text-align:right"><div class="n" id="nm"></div><div class="t" id="tm"></div></div></div>
-<div class="cd"><span class="s" style="color:rgba(255,255,255,.8)">Temps restant</span><b id="cd">--:--:--</b></div></div>
-<table><thead><tr><th>Jour</th><th><span>الصبح</span>Fajr</th><th><span>الشروق</span>Lever</th><th><span>الظهر</span>Dohr</th><th><span>العصر</span>Asr</th><th><span>المغرب</span>Maghreb</th><th><span>العشاء</span>Icha</th></tr></thead><tbody id="b"></tbody></table>
+<div class="cd"><span class="s" style="color:rgba(255,255,255,.8)">الوقت المتبقي</span><b id="cd">--:--:--</b></div></div>
+<table><thead><tr><th>اليوم</th><th><span>الصبح</span></th><th><span>الشروق</span></th><th><span>الظهر</span></th><th><span>العصر</span></th><th><span>المغرب</span></th><th><span>العشاء</span></th></tr></thead><tbody id="b"></tbody></table>
 <p class="note" id="nt"></p></div>
 <script>
 var M=${data};
-var P=[["fajr","الصُّبح","Fajr"],["shuruq","الشُّروق","Chourouq"],["dhuhr","الظُّهر","Dohr"],["asr","العَصر","Asr"],["maghrib","المَغرب","Maghreb"],["isha","العِشاء","Icha"]];
+var P=[["fajr","الصُّبح","الفجر الصادق"],["shuruq","الشُّروق","طلوع الشمس"],["dhuhr","الظُّهر","الزوال"],["asr","العَصر","العصر"],["maghrib","المَغرب","الغروب"],["isha","العِشاء","العشاء"]];
 var AD=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 function p2(n){return String(n).padStart(2,"0")}
 function iso(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
 function pi(s){var a=s.split("-");return new Date(+a[0],a[1]-1,+a[2])}
 function at(s,t){var d=pi(s),a=t.split(":");d.setHours(+a[0],+a[1],0,0);return d}
-var FD=new Intl.DateTimeFormat("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-var FS=new Intl.DateTimeFormat("fr-FR",{day:"2-digit",month:"2-digit"});
+var FD=new Intl.DateTimeFormat("ar-MA-u-nu-latn",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+var FS={format:function(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)}};
 document.getElementById("c").textContent=M.city;
 document.getElementById("rg").textContent=M.hijriMonth+" "+M.hijriYear;
-document.getElementById("nt").textContent=M.note||"Horaires du calendrier officiel des Habous.";
+document.getElementById("nt").textContent=M.note||"مواقيت التقويم الرسمي لوزارة الأوقاف.";
 var today=iso(new Date());
 document.getElementById("b").innerHTML=M.days.map(function(d){
   var dn=AD[pi(d.greg).getDay()];
@@ -1274,13 +1363,13 @@ document.getElementById("b").innerHTML=M.days.map(function(d){
 function tick(){
   var now=new Date(),i=iso(now),day=null;
   for(var j=0;j<M.days.length;j++)if(M.days[j].greg===i)day=M.days[j];
-  if(!day){document.getElementById("dt").textContent="Mois de "+M.hijriMonth+" "+M.hijriYear;return;}
+  if(!day){document.getElementById("dt").textContent="شهر "+M.hijriMonth+" "+M.hijriYear;return;}
   document.getElementById("dt").textContent=FD.format(now);
   var L=P.map(function(p){return{ar:p[1],fr:p[2],w:at(day.greg,day[p[0]]),t:day[p[0]]}});
   var nx=null;for(var k=0;k<L.length;k++)if(L[k].w>now){nx=L[k];break;}
   if(!nx){var tm=new Date(now.getTime()+864e5),f=null;
     for(var q=0;q<M.days.length;q++)if(M.days[q].greg===iso(tm))f=M.days[q].fajr;
-    f=f||day.fajr;nx={ar:"الصُّبح",fr:"Fajr de demain",w:at(iso(tm),f),t:f};}
+    f=f||day.fajr;nx={ar:"الصُّبح",fr:"الفجر الصادق — غدًا",w:at(iso(tm),f),t:f};}
   document.getElementById("nm").textContent=nx.ar;
   document.getElementById("fr").textContent=nx.fr;
   document.getElementById("tm").textContent=nx.t;
@@ -1292,11 +1381,11 @@ tick();setInterval(tick,1000);
 }
 
 $("#btnShareFile").addEventListener("click",async()=>{
-  setShare("Préparation du fichier…");
+  setShare("جارٍ تحضير الملف…");
   try{
     const file=new File([buildShareHtml()],slug()+".html",{type:"text/html"});
-    setShare("Fichier "+await sendFile(file,`${MONTH.city} — ${MONTH.hijriMonth} ${MONTH.hijriYear}`)+". Il s'ouvre dans n'importe quel navigateur, sans installation.");
-  }catch(e){ setShare("Création du fichier impossible ("+e.message+")."); }
+    setShare("الملف: "+await sendFile(file,`${MONTH.city} — ${MONTH.hijriMonth} ${MONTH.hijriYear}`)+". يُفتح في أي متصفح دون تثبيت.");
+  }catch(e){ setShare("تعذّر إنشاء الملف ("+e.message+")."); }
 });
 
 /* =====================================================================
@@ -1308,6 +1397,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   MONTHS=(await Store.get(K_MONTHS))||{};
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
+  RAW=(await Store.get(K_RAW))||{};
   const c=await Store.get(K_CITY);
   if(c){
     LINKS=c.links||{};
