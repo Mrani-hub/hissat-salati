@@ -179,11 +179,6 @@ tbody tr.future .cell{opacity:.45}
 .dtools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 
 /* chargement */
-.drop{border:1.5px dashed #CFC4AC;border-radius:14px;background:var(--panel);padding:24px 18px;text-align:center;cursor:pointer}
-.drop.over{border-color:var(--azure);background:var(--azure-pale)}
-.drop p{margin:0;font-size:.84rem;color:var(--ink-soft)}
-.preview{margin-top:14px;display:none}
-.preview img{width:100%;border-radius:12px;border:1px solid var(--rule);display:block}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 button.act{font:inherit;font-size:.86rem;font-weight:500;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 15px;border-radius:9px;cursor:pointer}
 button.act.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
@@ -362,16 +357,6 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <label class="f" for="startd">أول يوم في الجدول (إن لم تكن التواريخ مذكورة فيه)</label>
       <input type="date" id="startd">
       <div class="row"><button class="act" id="btnPaste">قراءة النص الملصق</button></div>
-    </div>
-
-    <div class="card pad">
-      <h3>من صورة التقويم</h3>
-      <div class="drop" id="drop" tabindex="0" role="button">
-        <p>أسقط أو اختر صورة الجدول الشهري (JPG، PNG).</p>
-      </div>
-      <input type="file" id="file" accept="image/*" class="hidden">
-      <div class="preview" id="preview"><img id="prevImg" alt="التقويم المستورد"></div>
-      <div class="row"><button class="act" id="btnRead" disabled>قراءة الصورة</button></div>
     </div>
 
     <div class="row">
@@ -554,7 +539,7 @@ let MONTHS={};   // un mois mémorisé par ville
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
 let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
-let pending=null, fileB64=null, fileType=null, railKey="";
+let pending=null, railKey="";
 
 /* =====================================================================
    4. Suivi des prières
@@ -1119,61 +1104,6 @@ $("#btnPaste").addEventListener("click",()=>{
   pending=normalizeMonth(m);
   showEditor(pending);
   setStatus(`قُرئ ${pending.days.length} يومًا. تحقق قبل الحفظ.`,"ok");
-});
-
-/* --- image --- */
-const drop=$("#drop"),fileInput=$("#file");
-drop.addEventListener("click",()=>fileInput.click());
-drop.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fileInput.click();}});
-["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
-["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
-drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)takeFile(f);});
-fileInput.addEventListener("change",e=>{const f=e.target.files[0];if(f)takeFile(f);});
-function takeFile(f){
-  if(!f.type.startsWith("image/")){setStatus("هذا الملف ليس صورة.","err");return;}
-  const r=new FileReader();
-  r.onload=()=>{
-    fileB64=r.result.split(",")[1];
-    fileType=f.type==="image/jpg"?"image/jpeg":f.type;
-    $("#prevImg").src=r.result;$("#preview").style.display="block";
-    $("#btnRead").disabled=false;setStatus(`${f.name} جاهز للقراءة.`);
-  };
-  r.onerror=()=>setStatus("تعذّرت قراءة الملف.","err");
-  r.readAsDataURL(f);
-}
-const EXTRACT_PROMPT=`Tu lis un calendrier mensuel marocain des horaires de prière (ministère des Habous).
-Points critiques :
-- Tableau arabe lu de DROITE à GAUCHE. Colonnes de droite à gauche : nom du jour, quantième hégirien, quantième grégorien, الصبح, الشروق, الظهر, العصر, المغرب, العشاء.
-- Les heures sont imprimées inversées : "39:5" = 05:39, "28:1" = 13:28, "55:4" = 16:55, "06:7" = 07:06.
-- الظهر, العصر, المغرب, العشاء sont l'après-midi ou le soir : convertis en 24 h.
-- Une cellule de la colonne grégorienne peut contenir un nom de mois (ex. أكتوبر) : cette ligne est le 1er de ce mois.
-- Les horaires ne varient que de quelques minutes par jour, sauf à la date du changement d'heure.
-Réponds UNIQUEMENT par un JSON, sans texte ni balises autour :
-{"city":"...","hijriMonth":"...","hijriYear":1448,"note":"ملاحظة بالعربية عن تغيير الساعة وإلا فارغة","days":[{"greg":"AAAA-MM-JJ","hijri":1,"fajr":"05:39","shuruq":"07:06","dhuhr":"13:28","asr":"16:55","maghrib":"19:41","isha":"20:56"}]}`;
-
-$("#btnRead").addEventListener("click",async()=>{
-  if(!fileB64)return;
-  $("#btnRead").disabled=true;
-  setStatus("جارٍ قراءة الجدول… نحو ثلاثين ثانية.");
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:[
-        {type:"image",source:{type:"base64",media_type:fileType,data:fileB64}},
-        {type:"text",text:EXTRACT_PROMPT}]}]})
-    });
-    if(!res.ok)throw new Error("HTTP "+res.status);
-    const data=await res.json();
-    const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").replace(/```json|```/g,"");
-    const obj=JSON.parse(text.slice(text.indexOf("{"),text.lastIndexOf("}")+1));
-    if(!obj.days||!obj.days.length)throw new Error("aucune ligne lue");
-    obj.source="officiel";
-    pending=normalizeMonth(obj);
-    showEditor(pending);
-    setStatus(`قُرئ ${pending.days.length} يومًا. تحقق قبل الحفظ.`,"ok");
-  }catch(err){
-    setStatus("تعذّرت قراءة الصورة ("+err.message+"). دون اتصال، استعمل النص الملصق أو صحّح يدويًا.","err");
-  }finally{$("#btnRead").disabled=false;}
 });
 
 /* --- éditeur de vérification --- */

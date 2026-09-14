@@ -7,8 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -23,8 +21,6 @@ import java.io.FileOutputStream;
 public class MainActivity extends Activity {
 
     private WebView web;
-    private ValueCallback<Uri[]> filePath;
-    private static final int PICK_FILE = 101;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -54,44 +50,9 @@ public class MainActivity extends Activity {
             }
         });
 
-        // sélecteur de fichier pour « Lire l'image »
-        web.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb,
-                                             FileChooserParams params) {
-                if (filePath != null) filePath.onReceiveValue(null);
-                filePath = cb;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("image/*");
-                try {
-                    startActivityForResult(Intent.createChooser(i, getString(R.string.choose_image)), PICK_FILE);
-                } catch (Exception e) {
-                    filePath = null;
-                    return false;
-                }
-                return true;
-            }
-        });
-
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
         web.loadUrl("file:///android_asset/index.html");
         setContentView(web);
-    }
-
-    @Override
-    protected void onActivityResult(int req, int res, Intent data) {
-        if (req == PICK_FILE) {
-            if (filePath == null) return;
-            Uri[] out = null;
-            if (res == RESULT_OK && data != null && data.getData() != null) {
-                out = new Uri[]{data.getData()};
-            }
-            filePath.onReceiveValue(out);
-            filePath = null;
-            return;
-        }
-        super.onActivityResult(req, res, data);
     }
 
     @Override
