@@ -20,11 +20,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: SDK Android
-        uses: android-actions/setup-android@v3
-
-      - name: Composants du SDK
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      # Le SDK Android est déjà préinstallé sur les machines GitHub (ANDROID_HOME) :
+      # on installe seulement les composants dont le projet a besoin.
+      - name: Composants du SDK Android
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-34" "build-tools;34.0.0" > /dev/null
 
       - name: Gradle
         uses: gradle/actions/setup-gradle@v3
