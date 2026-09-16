@@ -1,10 +1,14 @@
 package ma.hissatsalati;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
@@ -21,6 +25,7 @@ import java.io.FileOutputStream;
 public class MainActivity extends Activity {
 
     private WebView web;
+    private boolean askedPerms = false;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -61,12 +66,56 @@ public class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
+    /** Notifications (Android 13+) et alarmes exactes (Android 12) : demandées une fois par ouverture. */
+    private void ensurePermissions() {
+        if (askedPerms) return;
+        askedPerms = true;
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 7);
+        }
+        if (Build.VERSION.SDK_INT >= 31 && Build.VERSION.SDK_INT < 33) {
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            if (!am.canScheduleExactAlarms()) {
+                try {
+                    startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                            Uri.parse("package:" + getPackageName())));
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(req, perms, res);
+        Schedule.scheduleNext(this);
+    }
+
     private void toast(String m) {
         runOnUiThread(() -> Toast.makeText(this, m, Toast.LENGTH_SHORT).show());
     }
 
     /** Reçoit les fichiers produits par la page (image du mois, fichier à partager, JSON). */
     private class Bridge {
+        /** La page envoie les horaires du mois et les réglages ; on programme la prochaine alarme. */
+        @JavascriptInterface
+        public void setSchedule(String json) {
+            Schedule.save(MainActivity.this, json);
+            Schedule.scheduleNext(MainActivity.this);
+            boolean wants = json != null
+                    && (json.contains("\"adhan\":true") || json.contains("\"notify\":true"));
+            if (wants) runOnUiThread(MainActivity.this::ensurePermissions);
+        }
+
+        /** Joue l'adhan tout de suite, pour vérifier le son et l'arrêt par les boutons de volume. */
+        @JavascriptInterface
+        public void testAdhan() {
+            Intent s = new Intent(MainActivity.this, AdhanService.class)
+                    .putExtra("prayer", getString(R.string.adhan_test)).putExtra("time", "");
+            if (Build.VERSION.SDK_INT >= 26) startForegroundService(s);
+            else startService(s);
+        }
+
         @JavascriptInterface
         public void saveFile(String base64, String name, String mime, String title) {
             try {

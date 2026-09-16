@@ -127,6 +127,32 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .rawfoot{font-family:var(--arab);font-size:1.05rem;line-height:1.9;color:var(--ink-soft);padding:12px 16px 14px;border-top:1px solid #F0EADC}
 .rawfoot .h{color:var(--ink)}
 
+/* نوافل بين الصلوات في جدول اليوم : سطر خفيف، والأجر يظهر عند اللمس */
+.slot.mini{padding:8px 16px;background:#FCFAF4}
+.slot.mini .dot{width:8px;height:8px;border-style:dashed}
+.slot.mini .ar{font-size:1rem;color:var(--ink-soft)}
+.slot.mini .sub{font-size:.7rem}
+.slot.mini.done .ar{color:#B8A46E}
+.ajr{margin-top:8px;font-family:var(--arab);font-size:1.08rem;line-height:1.9;color:var(--ink);background:var(--gold-pale);border:1px solid #F0E3C2;border-radius:10px;padding:8px 12px}
+.ajr .src{display:block;font-size:.88rem;color:var(--ink-soft);margin-top:2px}
+.tick{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--rule);background:var(--panel);color:transparent;cursor:pointer;font-size:1rem;line-height:1;align-self:start;padding:0}
+.tick[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#fff}
+.tick:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+/* إعدادات الأذان والتنبيه */
+.setcard{margin-top:18px}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px}
+.setrow + .setrow{border-top:1px solid #F0EADC}
+.setrow .t{font-family:var(--arab);font-size:1.2rem;color:var(--ink)}
+.setrow .s{font-size:.76rem;color:var(--ink-soft);margin-top:2px;line-height:1.5}
+.sw{position:relative;flex:none;width:48px;height:28px}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;border-radius:99px;background:#D8D0BE;cursor:pointer;transition:background .2s}
+.sw span::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw input:checked + span{background:var(--gold)}
+.sw input:checked + span::after{transform:translateX(-20px)}
+.sw input:focus-visible + span{outline:2px solid var(--azure);outline-offset:2px}
+
 /* tableaux */
 .card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
 .card + .card{margin-top:14px}
@@ -263,6 +289,20 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="rawbar"><span id="rawBar"></span></div>
       <div id="rawList"></div>
       <div class="rawfoot"><span class="h">«مَنْ صَلَّى اثْنَتَيْ عَشْرَةَ رَكْعَةً فِي يَوْمٍ وَلَيْلَةٍ بُنِيَ لَهُ بِهِنَّ بَيْتٌ فِي الْجَنَّةِ»</span> — رواه مسلم</div>
+    </div>
+    <div class="card setcard hidden" id="setcard">
+      <div class="setrow">
+        <div><div class="t">الأذان عند دخول الوقت</div><div class="s">يُرفع الأذان تلقائيًا عند كل صلاة من الصلوات الخمس. لإيقافه أثناء التشغيل اضغط أحد زري الصوت.</div></div>
+        <label class="sw"><input type="checkbox" id="swAdhan"><span></span></label>
+      </div>
+      <div class="setrow">
+        <div><div class="t">تنبيه قبل الأذان بخمس دقائق</div><div class="s">إشعار يذكّرك باقتراب وقت الصلاة.</div></div>
+        <label class="sw"><input type="checkbox" id="swNotify"><span></span></label>
+      </div>
+      <div class="setrow">
+        <div class="s">للتأكد من الصوت ومن الإيقاف بزر الصوت.</div>
+        <button class="act ghost" id="btnTestAdhan">تجربة الأذان</button>
+      </div>
     </div>
     <p class="note" id="dayNote"></p>
   </section>
@@ -440,6 +480,18 @@ const RAWATIB=[
   {k:"isha_a",   p:"isha",   pos:"a", n:2, ar:"ركعتان",     when:"بعد العشاء"}
 ];
 const RAW_TOTAL=RAWATIB.reduce((s,r)=>s+r.n,0);   // 12
+/* صلاة الضحى : نافلة زائدة على الرواتب، تُعرض في جدول اليوم فقط ولا تُحسب ضمن الاثنتي عشرة */
+const DUHA={k:"duha",ar:"صلاة الضحى",when:"",n:2};
+const HADITH_12="«مَنْ صَلَّى فِي يَوْمٍ وَلَيْلَةٍ ثِنْتَيْ عَشْرَةَ رَكْعَةً بُنِيَ لَهُ بَيْتٌ فِي الْجَنَّةِ: أَرْبَعًا قَبْلَ الظُّهْرِ، وَرَكْعَتَيْنِ بَعْدَهَا، وَرَكْعَتَيْنِ بَعْدَ الْمَغْرِبِ، وَرَكْعَتَيْنِ بَعْدَ الْعِشَاءِ، وَرَكْعَتَيْنِ قَبْلَ صَلَاةِ الْفَجْرِ»";
+const AJR={
+  fajr_b:{t:"«رَكْعَتَا الْفَجْرِ خَيْرٌ مِنَ الدُّنْيَا وَمَا فِيهَا»",s:"رواه مسلم"},
+  dhuhr_b:{t:"«مَنْ حَافَظَ عَلَى أَرْبَعِ رَكَعَاتٍ قَبْلَ الظُّهْرِ وَأَرْبَعٍ بَعْدَهَا حَرَّمَهُ اللَّهُ عَلَى النَّارِ»",s:"رواه أبو داود والترمذي"},
+  dhuhr_a:{t:HADITH_12,s:"رواه الترمذي، وأصله في صحيح مسلم"},
+  maghrib_a:{t:HADITH_12,s:"رواه الترمذي، وأصله في صحيح مسلم"},
+  isha_a:{t:HADITH_12,s:"رواه الترمذي، وأصله في صحيح مسلم"},
+  duha:{t:"«يُصْبِحُ عَلَى كُلِّ سُلَامَى مِنْ أَحَدِكُمْ صَدَقَةٌ، فَكُلُّ تَسْبِيحَةٍ صَدَقَةٌ، وَكُلُّ تَحْمِيدَةٍ صَدَقَةٌ، وَكُلُّ تَهْلِيلَةٍ صَدَقَةٌ، وَكُلُّ تَكْبِيرَةٍ صَدَقَةٌ، وَأَمْرٌ بِالْمَعْرُوفِ صَدَقَةٌ، وَنَهْيٌ عَنِ الْمُنْكَرِ صَدَقَةٌ، وَيُجْزِئُ مِنْ ذَلِكَ رَكْعَتَانِ يَرْكَعُهُمَا مِنَ الضُّحَى»",s:"رواه مسلم"}
+};
+const AJR_OPEN=new Set();   // النوافل التي فُتح نص أجرها
 const WINDOW=30;   // minutes pendant lesquelles la prière est annoncée « en cours »
 const AR_DAYS=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const SKY={
@@ -502,7 +554,7 @@ const Store=(()=>{
     }
   };
 })();
-const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1";
+const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1";
 
 /* =====================================================================
    3. Utilitaires
@@ -515,6 +567,7 @@ const FR_SHORT={format:d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}`};   // 13
 const FR_MONTH=new Intl.DateTimeFormat("ar-MA-u-nu-latn",{day:"numeric",month:"long"});
 function parseISO(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);}
 function at(iso,hhmm){const d=parseISO(iso);const[h,mi]=hhmm.split(":").map(Number);d.setHours(h,mi,0,0);return d;}
+function addMin(hhmm,m){const[h,mi]=hhmm.split(":").map(Number);let t=((h*60+mi+m)%1440+1440)%1440;return pad(Math.floor(t/60))+":"+pad(t%60);}
 function arDay(iso){return AR_DAYS[parseISO(iso).getDay()];}
 function human(ms){
   const t=Math.max(0,Math.round(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;
@@ -539,6 +592,7 @@ let MONTHS={};   // un mois mémorisé par ville
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
 let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
+let SET={adhan:true,notify:true};   // الأذان والتنبيه
 let pending=null, railKey="";
 
 /* =====================================================================
@@ -663,23 +717,54 @@ function renderDay(force){
   railKey=key;
   const iso=T.today.greg;
   renderRawatib(iso);
-  $("#rail").innerHTML=T.list.map((p,i)=>{
+  const rawToday=rawEntry(iso);
+  const mini=(r,hint)=>{
+    const done=!!rawToday[r.k], a=AJR[r.k]||{}, open=AJR_OPEN.has(r.k);
+    return `<div class="slot mini ${done?"done":""}" data-raw="${r.k}" role="button" tabindex="0">
+      <span class="dot"></span>
+      <div><div class="ar">${r.ar} ${r.when}</div><div class="sub">${hint}</div>
+        <div class="ajr ${open?"":"hidden"}">${a.t||""}<span class="src">${a.s||""}</span></div></div>
+      <button class="tick" data-k="${r.k}" aria-pressed="${done}" aria-label="${r.ar} ${r.when}">✓</button>
+    </div>`;
+  };
+  const rows=[];
+  T.list.forEach((p,i)=>{
+    RAWATIB.filter(r=>r.p===p.k&&r.pos==="b").forEach(r=>rows.push(mini(r,"بعد الأذان وقبل الفريضة")));
     let cls=T.out?"":i<T.currentIdx?"done":i===T.currentIdx?"now":i===T.nextIdx?"next":"";
     const e=entry(iso,p.k);
     const chips=p.track?`<div class="chips">
         <button class="chip m" data-k="${p.k}" data-f="m" aria-pressed="${e.m}">في المسجد</button>
         <button class="chip t" data-k="${p.k}" data-f="t" aria-pressed="${e.t}">في الوقت</button>
       </div>`:"";
-    return `<div class="slot ${cls}">
+    rows.push(`<div class="slot ${cls}">
       <span class="dot"></span>
       <div><div class="ar">${p.ar}</div><div class="sub">${p.sub}</div></div>
       <div class="time">${p.time}</div>
       ${chips}
-    </div>`;
-  }).join("");
+    </div>`);
+    RAWATIB.filter(r=>r.p===p.k&&r.pos==="a").forEach(r=>rows.push(mini(r,"بعد الفريضة")));
+    if(p.k==="shuruq") rows.push(mini(DUHA,`من ${addMin(T.today.shuruq,20)} إلى ${addMin(T.today.dhuhr,-15)} — ركعتان إلى ثمان`));
+  });
+  $("#rail").innerHTML=rows.join("");
 }
 
 $("#rail").addEventListener("click",ev=>{
+  /* علامة « أُدّيت » على نافلة */
+  const tick=ev.target.closest(".tick");
+  if(tick){
+    const iso=timeline(new Date()).today.greg, k=tick.dataset.k;
+    setRaw(iso,k,!rawEntry(iso)[k]);
+    renderDay(true);renderTrack();
+    return;
+  }
+  /* لمس سطر النافلة يعرض أجرها أو يخفيه */
+  const m=ev.target.closest(".slot.mini");
+  if(m){
+    const k=m.dataset.raw;
+    if(AJR_OPEN.has(k))AJR_OPEN.delete(k); else AJR_OPEN.add(k);
+    m.querySelector(".ajr").classList.toggle("hidden",!AJR_OPEN.has(k));
+    return;
+  }
   const b=ev.target.closest(".chip");
   if(!b)return;
   const iso=timeline(new Date()).today.greg;
@@ -770,7 +855,27 @@ $("#tbody").addEventListener("click",ev=>{
   renderDay(true);
 });
 
-function renderAll(){renderHeader();renderDay(true);renderMonth();renderTrack();renderDhikr();}
+function renderAll(){renderHeader();renderDay(true);renderMonth();renderTrack();renderDhikr();pushSchedule();}
+
+/* =====================================================================
+   5 bis. الأذان والتنبيه : تُرسل مواقيت الشهر إلى التطبيق الأصلي الذي يبرمج المنبهات
+   ===================================================================== */
+const NATIVE=!!(window.AndroidBridge&&window.AndroidBridge.setSchedule);
+function pushSchedule(){
+  if(!NATIVE)return;
+  try{
+    AndroidBridge.setSchedule(JSON.stringify({adhan:!!SET.adhan,notify:!!SET.notify,
+      days:MONTH.days.map(d=>({d:d.greg,fajr:d.fajr,dhuhr:d.dhuhr,asr:d.asr,maghrib:d.maghrib,isha:d.isha}))}));
+  }catch(e){}
+}
+function renderSettings(){
+  $("#setcard").classList.toggle("hidden",!NATIVE);
+  $("#swAdhan").checked=!!SET.adhan;
+  $("#swNotify").checked=!!SET.notify;
+}
+$("#swAdhan").addEventListener("change",e=>{SET.adhan=e.target.checked;Store.set(K_SET,SET);pushSchedule();});
+$("#swNotify").addEventListener("change",e=>{SET.notify=e.target.checked;Store.set(K_SET,SET);pushSchedule();});
+$("#btnTestAdhan").addEventListener("click",()=>{if(NATIVE)try{AndroidBridge.testAdhan();}catch(e){}});
 
 /* =====================================================================
    6. Onglets
@@ -1328,6 +1433,8 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
+  SET=Object.assign({adhan:true,notify:true},(await Store.get(K_SET))||{});
+  renderSettings();
   const c=await Store.get(K_CITY);
   if(c){
     LINKS=c.links||{};
