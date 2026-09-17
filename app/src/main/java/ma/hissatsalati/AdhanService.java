@@ -12,7 +12,9 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 
 import android.support.v4.media.session.MediaSessionCompat;
@@ -32,11 +34,24 @@ import androidx.media.VolumeProviderCompat;
 public class AdhanService extends Service {
     static final String ACTION_STOP = "ma.hissatsalati.STOP_ADHAN";
     static volatile boolean playing = false;
+    /** Le volume part de zéro et atteint le niveau normal au bout de ce délai. */
+    static final long FADE_MS = 30_000L;
+    static final long FADE_STEP_MS = 250L;
 
     private MediaPlayer mp;
     private BroadcastReceiver volumeWatcher;
     private MediaSessionCompat session;
     private long startedAt = 0;
+    private final Handler fadeHandler = new Handler(Looper.getMainLooper());
+    private final Runnable fade = new Runnable() {
+        @Override public void run() {
+            if (mp == null || !playing) return;
+            float t = Math.min(1f, (SystemClock.elapsedRealtime() - startedAt) / (float) FADE_MS);
+            float v = t * t;   // courbe douce : l'oreille perçoit mieux une montée quadratique
+            try { mp.setVolume(v, v); } catch (Exception ignored) {}
+            if (t < 1f) fadeHandler.postDelayed(this, FADE_STEP_MS);
+        }
+    };
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -72,9 +87,12 @@ public class AdhanService extends Service {
             mp.setOnCompletionListener(p -> stopAdhan());
             mp.setOnErrorListener((p, w, e) -> { stopAdhan(); return true; });
             mp.prepare();
+            mp.setVolume(0f, 0f);   // montée progressive : voir fade
             mp.start();
             playing = true;
             startedAt = SystemClock.elapsedRealtime();
+            fadeHandler.removeCallbacks(fade);
+            fadeHandler.post(fade);
         } catch (Exception e) {
             stopAdhan();
             return START_NOT_STICKY;
@@ -148,6 +166,7 @@ public class AdhanService extends Service {
     }
 
     private void stopPlayer() {
+        fadeHandler.removeCallbacks(fade);
         try { if (mp != null) { if (mp.isPlaying()) mp.stop(); mp.release(); } } catch (Exception ignored) {}
         mp = null;
         playing = false;

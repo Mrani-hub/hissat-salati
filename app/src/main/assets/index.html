@@ -435,6 +435,12 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       </div>
     </div>
 
+    <div class="card pad hidden" id="sharecard" style="margin-top:14px">
+      <h3>مشاركة التطبيق</h3>
+      <p class="note" style="margin:0 0 10px">أرسل التطبيق لمن تحب عبر واتساب أو غيره: يصله ملف «حصة صلاتي.apk» ويثبّته مباشرة. عند التثبيت يطلب أندرويد السماح بتطبيق من خارج المتجر.</p>
+      <div class="row" style="margin-top:0"><button class="act" id="btnShareApp">مشاركة التطبيق</button></div>
+    </div>
+
     <div class="card pad hidden" id="updcard" style="margin-top:14px">
       <h3>تحديث التطبيق</h3>
       <p class="note" style="margin:0">الإصدار المثبّت: <span id="updCur">—</span></p>
@@ -922,6 +928,7 @@ if(UPDATABLE){try{INFO=Object.assign(INFO,JSON.parse(AndroidBridge.appInfo()||"{
 function setUpd(msg,cls){const s=$("#updStatus");s.textContent=msg||"";s.className="status "+(cls||"");}
 function updAvailable(){return !!UPD.available&&Number(UPD.latestCode||0)>Number(INFO.code||0);}
 function renderUpdate(){
+  $("#sharecard").classList.toggle("hidden",!(NATIVE&&window.AndroidBridge.shareApp));
   $("#updcard").classList.toggle("hidden",!UPDATABLE);
   if(!UPDATABLE){$("#updBanner").classList.add("hidden");return;}
   $("#updCur").textContent=INFO.name?`${INFO.name} — رقم البناء ${INFO.code}`:"—";
@@ -978,6 +985,7 @@ window.onUpdateError=function(s){
   setUpd("تعذّر التنزيل ("+String(s||"")+"). أعد المحاولة لاحقًا.","err");
   renderUpdate();
 };
+$("#btnShareApp").addEventListener("click",()=>{try{AndroidBridge.shareApp();}catch(e){}});
 $("#btnUpdCheck").addEventListener("click",()=>checkUpdate(false));
 $("#btnUpdGet").addEventListener("click",startDownload);
 $("#btnUpdOpen").addEventListener("click",()=>{try{AndroidBridge.openDownloads();}catch(e){}});

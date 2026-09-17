@@ -22,6 +22,7 @@ import androidx.core.content.FileProvider;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 public class MainActivity extends Activity {
@@ -160,6 +161,37 @@ public class MainActivity extends Activity {
                     .putExtra("prayer", getString(R.string.adhan_test)).putExtra("time", "");
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(s);
             else startService(s);
+        }
+
+        /**
+         * Envoie l'APK de l'application elle-même (WhatsApp, Bluetooth…) sous le nom
+         * « حصة صلاتي.apk ». Le fichier est copié depuis l'installation vers le cache
+         * de partage, puis exposé par le FileProvider comme les autres fichiers partagés.
+         */
+        @JavascriptInterface
+        public void shareApp() {
+            try {
+                File src = new File(getApplicationInfo().sourceDir);
+                File dir = new File(getCacheDir(), "partage");
+                if (!dir.exists() && !dir.mkdirs()) throw new Exception("dossier");
+                File f = new File(dir, getString(R.string.apk_share_name));
+                try (FileInputStream in = new FileInputStream(src);
+                     FileOutputStream out = new FileOutputStream(f)) {
+                    byte[] buf = new byte[64 * 1024];
+                    int n;
+                    while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                }
+                Uri uri = FileProvider.getUriForFile(
+                        MainActivity.this, getPackageName() + ".fileprovider", f);
+                Intent send = new Intent(Intent.ACTION_SEND)
+                        .setType("application/vnd.android.package-archive")
+                        .putExtra(Intent.EXTRA_STREAM, uri)
+                        .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(send, getString(R.string.share)));
+            } catch (Exception e) {
+                toast(getString(R.string.share_failed, e.getMessage()));
+            }
         }
 
         @JavascriptInterface

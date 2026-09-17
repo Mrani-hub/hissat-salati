@@ -4,6 +4,8 @@
     <string name="no_app_for_link">لا يوجد تطبيق لفتح هذا الرابط</string>
     <string name="share">مشاركة</string>
     <string name="share_failed">تعذّرت المشاركة: %1$s</string>
+    <!-- nom du fichier envoyé par « مشاركة التطبيق » (GitHub n'accepte pas l'arabe, le partage direct oui) -->
+    <string name="apk_share_name">حصة صلاتي.apk</string>
 
     <string name="ch_adhan">الأذان</string>
     <string name="ch_reminder">التنبيه قبل الأذان</string>
