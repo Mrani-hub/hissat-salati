@@ -15,4 +15,8 @@
     <string name="reminder_title">اقترب وقت صلاة %1$s</string>
     <string name="reminder_text">الأذان بعد خمس دقائق، على الساعة %1$s</string>
     <string name="adhan_test">تجربة</string>
+
+    <string name="update_downloading">جارٍ تنزيل تحديث حصة صلاتي…</string>
+    <string name="update_allow_install">اسمح للتطبيق بتثبيت التحديث، ثم عد إليه</string>
+    <string name="update_failed">تعذّر تثبيت التحديث</string>
 </resources>

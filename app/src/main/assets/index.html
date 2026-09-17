@@ -152,6 +152,14 @@ nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .sw input:checked + span{background:var(--gold)}
 .sw input:checked + span::after{transform:translateX(-20px)}
 .sw input:focus-visible + span{outline:2px solid var(--azure);outline-offset:2px}
+.setrow .act{white-space:nowrap}
+
+/* تحديث التطبيق */
+.upd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;
+  background:var(--azure-pale);border:1px solid var(--azure);border-radius:12px;padding:10px 14px}
+.upd .t{font-family:var(--arab);font-size:1.15rem;color:var(--azure);line-height:1.3}
+.upd .s{font-size:.76rem;color:var(--ink-soft);margin-top:2px}
+.upd .act{white-space:nowrap}
 
 /* tableaux */
 .card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
@@ -253,6 +261,10 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
 
   <!-- ===== jour ===== -->
   <section id="v-day" role="tabpanel" aria-labelledby="t-day">
+    <div class="upd hidden" id="updBanner">
+      <div><div class="t">يتوفر إصدار جديد من التطبيق</div><div class="s" id="updBannerSub"></div></div>
+      <button class="act" id="btnUpdBanner">تنزيل</button>
+    </div>
     <div class="hero" id="hero">
       <div class="date" id="heroDate">—</div>
       <div class="main">
@@ -290,16 +302,20 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div id="rawList"></div>
       <div class="rawfoot"><span class="h">«مَنْ صَلَّى اثْنَتَيْ عَشْرَةَ رَكْعَةً فِي يَوْمٍ وَلَيْلَةٍ بُنِيَ لَهُ بِهِنَّ بَيْتٌ فِي الْجَنَّةِ»</span> — رواه مسلم</div>
     </div>
-    <div class="card setcard hidden" id="setcard">
+    <div class="card setcard" id="setcard">
       <div class="setrow">
+        <div><div class="t">إظهار السنن الرواتب والنوافل</div><div class="s">بطاقة الرواتب، وسطور النوافل في جدول اليوم، والتذكير بها. عند الإخفاء تبقى المتابعة محفوظة.</div></div>
+        <label class="sw"><input type="checkbox" id="swRawatib"><span></span></label>
+      </div>
+      <div class="setrow native hidden">
         <div><div class="t">الأذان عند دخول الوقت</div><div class="s">يُرفع الأذان تلقائيًا عند كل صلاة من الصلوات الخمس. لإيقافه أثناء التشغيل اضغط أحد زري الصوت.</div></div>
         <label class="sw"><input type="checkbox" id="swAdhan"><span></span></label>
       </div>
-      <div class="setrow">
+      <div class="setrow native hidden">
         <div><div class="t">تنبيه قبل الأذان بخمس دقائق</div><div class="s">إشعار يذكّرك باقتراب وقت الصلاة.</div></div>
         <label class="sw"><input type="checkbox" id="swNotify"><span></span></label>
       </div>
-      <div class="setrow">
+      <div class="setrow native hidden">
         <div class="s">للتأكد من الصوت ومن الإيقاف بزر الصوت.</div>
         <button class="act ghost" id="btnTestAdhan">تجربة الأذان</button>
       </div>
@@ -417,6 +433,18 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
         <button class="act" id="btnSave">حفظ هذا الشهر</button>
         <button class="act ghost" id="btnCancel">إلغاء</button>
       </div>
+    </div>
+
+    <div class="card pad hidden" id="updcard" style="margin-top:14px">
+      <h3>تحديث التطبيق</h3>
+      <p class="note" style="margin:0">الإصدار المثبّت: <span id="updCur">—</span></p>
+      <div class="status" id="updStatus"></div>
+      <div class="bar hidden" id="updBar" style="margin-top:6px"><span id="updBarFill" style="width:0;background:var(--azure)"></span></div>
+      <div class="row">
+        <button class="act ghost" id="btnUpdCheck">التحقق من وجود تحديث</button>
+        <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد وتثبيته</button>
+      </div>
+      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub، ثم يطلب أندرويد تأكيد التثبيت. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
     </div>
   </section>
 </div>
@@ -554,7 +582,7 @@ const Store=(()=>{
     }
   };
 })();
-const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1";
+const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1", K_UPD="prayer-update-v1";
 
 /* =====================================================================
    3. Utilitaires
@@ -592,7 +620,7 @@ let MONTHS={};   // un mois mémorisé par ville
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
 let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
-let SET={adhan:true,notify:true};   // الأذان والتنبيه
+let SET={adhan:true,notify:true,rawatib:true};   // الأذان والتنبيه وإظهار الرواتب
 let pending=null, railKey="";
 
 /* =====================================================================
@@ -700,9 +728,10 @@ function renderDay(force){
   else flag.classList.add("hidden");
 
   /* تذكير بالراتبة : البعدية للصلاة الحالية إن لم تُصلَّ بعد، وإلا القبلية للصلاة القادمة */
+  const showRaw=SET.rawatib!==false;   // إعداد « إظهار الرواتب »
   const rawHint=$("#heroRaw");
   let hint="";
-  if(!T.out){
+  if(!T.out&&showRaw){
     const todayRaw=rawEntry(T.today.greg);
     const after=cur?RAWATIB.find(r=>r.p===cur.k&&r.pos==="a"):null;
     const before=RAWATIB.find(r=>r.p===T.next.k&&r.pos==="b");
@@ -712,10 +741,11 @@ function renderDay(force){
   rawHint.innerHTML=hint;
   rawHint.classList.toggle("hidden",!hint);
 
-  const key=`${T.today.greg}|${T.currentIdx}|${T.out?1:0}|${running?1:0}`;
+  const key=`${T.today.greg}|${T.currentIdx}|${T.out?1:0}|${running?1:0}|${showRaw?1:0}`;
   if(!force&&key===railKey)return;
   railKey=key;
   const iso=T.today.greg;
+  $("#rawcard").classList.toggle("hidden",!showRaw);
   renderRawatib(iso);
   const rawToday=rawEntry(iso);
   const mini=(r,hint)=>{
@@ -729,7 +759,7 @@ function renderDay(force){
   };
   const rows=[];
   T.list.forEach((p,i)=>{
-    RAWATIB.filter(r=>r.p===p.k&&r.pos==="b").forEach(r=>rows.push(mini(r,"بعد الأذان وقبل الفريضة")));
+    if(showRaw)RAWATIB.filter(r=>r.p===p.k&&r.pos==="b").forEach(r=>rows.push(mini(r,"بعد الأذان وقبل الفريضة")));
     let cls=T.out?"":i<T.currentIdx?"done":i===T.currentIdx?"now":i===T.nextIdx?"next":"";
     const e=entry(iso,p.k);
     const chips=p.track?`<div class="chips">
@@ -742,6 +772,7 @@ function renderDay(force){
       <div class="time">${p.time}</div>
       ${chips}
     </div>`);
+    if(!showRaw)return;
     RAWATIB.filter(r=>r.p===p.k&&r.pos==="a").forEach(r=>rows.push(mini(r,"بعد الفريضة")));
     if(p.k==="shuruq") rows.push(mini(DUHA,`من ${addMin(T.today.shuruq,20)} إلى ${addMin(T.today.dhuhr,-15)} — ركعتان إلى ثمان`));
   });
@@ -840,8 +871,8 @@ function renderTrack(){
     <div class="stat"><div class="n">${possible-done}</div><div class="l">غير مسجّلة</div>
       <div class="bar"><span style="width:${pc(possible-done)}%;background:#C9BFA8"></span></div></div>
     <div class="stat"><div class="n">${possible}</div><div class="l">صلوات مضت هذا الشهر</div></div>
-    <div class="stat"><div class="n">${rk}</div><div class="l">ركعات الرواتب هذا الشهر</div>
-      <div class="bar"><span style="width:${rkPossible?Math.round(rk*100/rkPossible):0}%;background:var(--gold)"></span></div></div>`;
+    ${SET.rawatib!==false?`<div class="stat"><div class="n">${rk}</div><div class="l">ركعات الرواتب هذا الشهر</div>
+      <div class="bar"><span style="width:${rkPossible?Math.round(rk*100/rkPossible):0}%;background:var(--gold)"></span></div></div>`:""}`;
 }
 
 $("#tbody").addEventListener("click",ev=>{
@@ -869,13 +900,84 @@ function pushSchedule(){
   }catch(e){}
 }
 function renderSettings(){
-  $("#setcard").classList.toggle("hidden",!NATIVE);
+  document.querySelectorAll("#setcard .native").forEach(el=>el.classList.toggle("hidden",!NATIVE));
+  $("#swRawatib").checked=SET.rawatib!==false;
   $("#swAdhan").checked=!!SET.adhan;
   $("#swNotify").checked=!!SET.notify;
 }
+$("#swRawatib").addEventListener("change",e=>{SET.rawatib=e.target.checked;Store.set(K_SET,SET);renderDay(true);renderTrack();});
 $("#swAdhan").addEventListener("change",e=>{SET.adhan=e.target.checked;Store.set(K_SET,SET);pushSchedule();});
 $("#swNotify").addEventListener("change",e=>{SET.notify=e.target.checked;Store.set(K_SET,SET);pushSchedule();});
 $("#btnTestAdhan").addEventListener("click",()=>{if(NATIVE)try{AndroidBridge.testAdhan();}catch(e){}});
+
+/* =====================================================================
+   5 ter. تحديث التطبيق : التطبيق الأصلي يسأل GitHub عن آخر إصدار، ويحمّل الملف ويثبّته
+   ===================================================================== */
+const UPDATABLE=NATIVE&&!!window.AndroidBridge.checkUpdate;
+let INFO={name:"",code:0};   // الإصدار المثبّت
+let UPD={};                  // {at, available, latest, latestCode} — آخر نتيجة تحقق
+let UPD_BUSY=false;
+if(UPDATABLE){try{INFO=Object.assign(INFO,JSON.parse(AndroidBridge.appInfo()||"{}"));}catch(e){}}
+function setUpd(msg,cls){const s=$("#updStatus");s.textContent=msg||"";s.className="status "+(cls||"");}
+function updAvailable(){return !!UPD.available&&Number(UPD.latestCode||0)>Number(INFO.code||0);}
+function renderUpdate(){
+  $("#updcard").classList.toggle("hidden",!UPDATABLE);
+  if(!UPDATABLE){$("#updBanner").classList.add("hidden");return;}
+  $("#updCur").textContent=INFO.name?`${INFO.name} — رقم البناء ${INFO.code}`:"—";
+  const av=updAvailable();
+  $("#updBanner").classList.toggle("hidden",!av);
+  $("#btnUpdGet").classList.toggle("hidden",!av);
+  if(av){
+    $("#updBannerSub").textContent=`الإصدار ${UPD.latest} جاهز للتنزيل`;
+    $("#btnUpdGet").textContent=`تنزيل الإصدار ${UPD.latest} وتثبيته`;
+  }
+}
+function checkUpdate(silent){
+  if(!UPDATABLE||UPD_BUSY)return;
+  UPD_BUSY=true;
+  if(!silent)setUpd("جارٍ التحقق…");
+  try{AndroidBridge.checkUpdate();}catch(e){UPD_BUSY=false;setUpd("تعذّر التحقق.","err");}
+}
+window.onUpdateResult=function(s){
+  UPD_BUSY=false;
+  let r={};try{r=JSON.parse(s);}catch(e){}
+  if(!r.ok){setUpd("تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة.","err");return;}
+  UPD={at:Date.now(),available:!!r.available,latest:String(r.latest||""),latestCode:Number(r.latestCode)||0};
+  Store.set(K_UPD,UPD);
+  renderUpdate();
+  if(updAvailable())setUpd(`يتوفر إصدار جديد: ${UPD.latest}`);
+  else setUpd("لديك أحدث إصدار.","ok");
+};
+function setUpdButtons(on){$("#btnUpdGet").disabled=!on;$("#btnUpdBanner").disabled=!on;$("#btnUpdCheck").disabled=!on;}
+function startDownload(){
+  if(!UPDATABLE||UPD_BUSY)return;
+  UPD_BUSY=true;
+  setUpdButtons(false);
+  $("#updBar").classList.remove("hidden");$("#updBarFill").style.width="0%";
+  setUpd("جارٍ التنزيل… 0%");
+  $("#updBannerSub").textContent="جارٍ التنزيل…";
+  try{AndroidBridge.downloadUpdate();}catch(e){UPD_BUSY=false;setUpdButtons(true);setUpd("تعذّر بدء التنزيل.","err");}
+}
+window.onUpdateProgress=function(s){
+  const p=Math.max(0,Math.min(100,parseInt(s,10)||0));
+  $("#updBarFill").style.width=p+"%";
+  setUpd(`جارٍ التنزيل… ${p}%`);
+  $("#updBannerSub").textContent=`جارٍ التنزيل… ${p}%`;
+};
+window.onUpdateDone=function(){
+  UPD_BUSY=false;setUpdButtons(true);
+  setUpd("اكتمل التنزيل. أكّد التثبيت في نافذة أندرويد.","ok");
+  $("#updBannerSub").textContent="اكتمل التنزيل — أكّد التثبيت في نافذة أندرويد";
+};
+window.onUpdateError=function(s){
+  UPD_BUSY=false;setUpdButtons(true);
+  $("#updBar").classList.add("hidden");
+  setUpd("تعذّر التنزيل ("+String(s||"")+"). أعد المحاولة لاحقًا.","err");
+  renderUpdate();
+};
+$("#btnUpdCheck").addEventListener("click",()=>checkUpdate(false));
+$("#btnUpdGet").addEventListener("click",startDownload);
+$("#btnUpdBanner").addEventListener("click",()=>{$("#t-load").click();$("#updcard").scrollIntoView({block:"start"});startDownload();});
 
 /* =====================================================================
    6. Onglets
@@ -1433,7 +1535,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
-  SET=Object.assign({adhan:true,notify:true},(await Store.get(K_SET))||{});
+  SET=Object.assign({adhan:true,notify:true,rawatib:true},(await Store.get(K_SET))||{});
   renderSettings();
   const c=await Store.get(K_CITY);
   if(c){
@@ -1446,6 +1548,11 @@ $("#btnShareFile").addEventListener("click",async()=>{
   $("#startd").value=MONTH.days[0].greg;
   renderAll();
   setInterval(()=>{if(!$("#v-day").classList.contains("hidden"))renderDay(false);},1000);
+  if(UPDATABLE){
+    UPD=(await Store.get(K_UPD))||{};
+    renderUpdate();
+    if(!UPD.at||Date.now()-UPD.at>6*3600e3)checkUpdate(true);
+  }
 })();
 </script>
 </body>
