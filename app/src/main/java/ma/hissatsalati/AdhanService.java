@@ -15,12 +15,19 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.media.VolumeProviderCompat;
 
 /**
  * Joue l'adhan au premier plan. S'arrête : à la fin du fichier, par le bouton
- * « إيقاف », ou dès qu'un bouton de volume est pressé (le volume change).
+ * « إيقاف », ou dès qu'un bouton de volume est pressé.
+ * Les touches de volume sont captées par une session média « à distance » : Android
+ * lui envoie chaque appui (+ ou −) même si le volume est déjà au minimum ou au maximum,
+ * ce que la simple écoute du changement de volume ne garantit pas.
  */
 public class AdhanService extends Service {
     static final String ACTION_STOP = "ma.hissatsalati.STOP_ADHAN";
@@ -28,6 +35,7 @@ public class AdhanService extends Service {
 
     private MediaPlayer mp;
     private BroadcastReceiver volumeWatcher;
+    private MediaSessionCompat session;
     private long startedAt = 0;
 
     @Override
@@ -72,7 +80,9 @@ public class AdhanService extends Service {
             return START_NOT_STICKY;
         }
 
-        // un appui sur volume + ou volume − change le volume : on s'arrête
+        startSession();
+
+        // filet de sécurité : un changement de volume arrête aussi l'adhan
         if (volumeWatcher == null) {
             volumeWatcher = new BroadcastReceiver() {
                 @Override public void onReceive(Context c, Intent i) {
@@ -109,6 +119,34 @@ public class AdhanService extends Service {
                 .build();
     }
 
+    /** Session média active : les touches de volume arrivent dans onAdjustVolume. */
+    private void startSession() {
+        if (session != null) return;
+        try {
+            session = new MediaSessionCompat(this, "adhan");
+            session.setPlaybackState(new PlaybackStateCompat.Builder()
+                    .setActions(PlaybackStateCompat.ACTION_STOP)
+                    .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1f).build());
+            session.setPlaybackToRemote(new VolumeProviderCompat(
+                    VolumeProviderCompat.VOLUME_CONTROL_RELATIVE, 100, 50) {
+                @Override public void onAdjustVolume(int direction) {
+                    // direction : +1 volume +, −1 volume −, 0 simple affichage → on ignore le 0
+                    if (direction != 0 && SystemClock.elapsedRealtime() - startedAt > 800) stopAdhan();
+                }
+                @Override public void onSetVolumeTo(int volume) { stopAdhan(); }
+            });
+            session.setActive(true);
+        } catch (Exception e) {
+            session = null;
+        }
+    }
+
+    private void stopSession() {
+        if (session == null) return;
+        try { session.setActive(false); session.release(); } catch (Exception ignored) {}
+        session = null;
+    }
+
     private void stopPlayer() {
         try { if (mp != null) { if (mp.isPlaying()) mp.stop(); mp.release(); } } catch (Exception ignored) {}
         mp = null;
@@ -117,6 +155,7 @@ public class AdhanService extends Service {
 
     private void stopAdhan() {
         stopPlayer();
+        stopSession();
         if (volumeWatcher != null) {
             try { unregisterReceiver(volumeWatcher); } catch (Exception ignored) {}
             volumeWatcher = null;
@@ -128,6 +167,7 @@ public class AdhanService extends Service {
     @Override
     public void onDestroy() {
         stopPlayer();
+        stopSession();
         if (volumeWatcher != null) {
             try { unregisterReceiver(volumeWatcher); } catch (Exception ignored) {}
             volumeWatcher = null;

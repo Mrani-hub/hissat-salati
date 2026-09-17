@@ -91,13 +91,16 @@ public class AdhanActivity extends Activity {
         finish();
     }
 
+    /** dispatchKeyEvent passe avant onKeyDown : on attrape volume + et volume − à coup sûr. */
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            stopAndClose();
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int k = event.getKeyCode();
+        if (k == KeyEvent.KEYCODE_VOLUME_UP || k == KeyEvent.KEYCODE_VOLUME_DOWN
+                || k == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) stopAndClose();
             return true;
         }
-        return super.onKeyDown(keyCode, event);
+        return super.dispatchKeyEvent(event);
     }
 
     @Override

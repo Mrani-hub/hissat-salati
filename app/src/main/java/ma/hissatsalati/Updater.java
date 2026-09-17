@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.core.content.FileProvider;
 import androidx.core.content.pm.PackageInfoCompat;
 
 import org.json.JSONObject;
@@ -30,8 +29,10 @@ import java.util.regex.Pattern;
  *  - check()    : interroge l'API GitHub, lit l'étiquette de la dernière Release
  *                 (v<versionName>-<versionCode>) et la compare au build installé.
  *  - download() : récupère l'APK signé avec DownloadManager dans le dossier privé
- *                 de l'application et suit l'avancement.
- *  - install()  : ouvre l'installateur Android sur le fichier téléchargé.
+ *                 de l'application et suit l'avancement. L'installation se fait en
+ *                 touchant la notification de téléchargement : l'application n'a donc
+ *                 pas besoin de la permission « installer des applications », que
+ *                 Google Play Protect considère comme un signal d'application à risque.
  * Les adresses sont fixes dans le code : la page web ne peut pas en imposer une autre.
  */
 public final class Updater {
@@ -139,7 +140,7 @@ public final class Updater {
                 .setTitle(app.getString(R.string.app_name))
                 .setDescription(app.getString(R.string.update_downloading))
                 .setMimeType("application/vnd.android.package-archive")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationInExternalFilesDir(app, Environment.DIRECTORY_DOWNLOADS, APK_NAME);
         final long id;
         try {
@@ -181,12 +182,9 @@ public final class Updater {
         }, 500);
     }
 
-    /** Ouvre l'installateur Android sur l'APK téléchargé (l'utilisateur confirme lui-même). */
-    static void install(Context c, File apk) {
-        Uri u = FileProvider.getUriForFile(c, c.getPackageName() + ".fileprovider", apk);
-        Intent i = new Intent(Intent.ACTION_VIEW)
-                .setDataAndType(u, "application/vnd.android.package-archive")
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-        c.startActivity(i);
+    /** Ouvre l'écran des téléchargements du système ; l'utilisateur touche l'APK pour l'installer. */
+    static void openDownloads(Context c) {
+        c.startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 }

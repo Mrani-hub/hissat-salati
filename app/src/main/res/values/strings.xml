@@ -17,6 +17,6 @@
     <string name="adhan_test">تجربة</string>
 
     <string name="update_downloading">جارٍ تنزيل تحديث حصة صلاتي…</string>
-    <string name="update_allow_install">اسمح للتطبيق بتثبيت التحديث، ثم عد إليه</string>
-    <string name="update_failed">تعذّر تثبيت التحديث</string>
+    <string name="update_done">اكتمل التنزيل: اضغط على إشعار التنزيل لتثبيت التحديث</string>
+    <string name="update_no_downloads">لا يوجد تطبيق لعرض التنزيلات</string>
 </resources>

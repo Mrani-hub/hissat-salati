@@ -28,7 +28,6 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private boolean askedPerms = false;
-    private File pendingInstall;   // APK téléchargé, en attente de l'autorisation d'installer
 
     @Override
     protected void onCreate(Bundle b) {
@@ -61,17 +60,6 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
         web.loadUrl("file:///android_asset/index.html");
         setContentView(web);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // retour du réglage « installer des applications inconnues » : on reprend l'installation
-        if (pendingInstall != null && pendingInstall.exists() && canInstall()) {
-            File f = pendingInstall;
-            pendingInstall = null;
-            installOrAsk(f);
-        }
     }
 
     @Override
@@ -116,29 +104,6 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> { if (web != null) web.evaluateJavascript(code, null); });
     }
 
-    private boolean canInstall() {
-        return Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls();
-    }
-
-    /** Lance l'installateur, ou envoie d'abord vers le réglage qui autorise cette appli à installer. */
-    private void installOrAsk(File apk) {
-        if (!canInstall()) {
-            pendingInstall = apk;
-            toast(getString(R.string.update_allow_install));
-            try {
-                startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:" + getPackageName())));
-            } catch (Exception ignored) {}
-            return;
-        }
-        pendingInstall = null;
-        try {
-            Updater.install(this, apk);
-        } catch (Exception e) {
-            toast(getString(R.string.update_failed));
-        }
-    }
-
     /** Reçoit les fichiers produits par la page (image du mois, fichier à partager, JSON). */
     private class Bridge {
         /** La page envoie les horaires du mois et les réglages ; on programme la prochaine alarme. */
@@ -169,14 +134,23 @@ public class MainActivity extends Activity {
             Updater.check(MainActivity.this, r -> js("onUpdateResult", r.toString()));
         }
 
-        /** Télécharge l'APK de la dernière Release, puis ouvre l'installateur. */
+        /** Télécharge l'APK de la dernière Release ; l'installation se fait depuis la notification. */
         @JavascriptInterface
         public void downloadUpdate() {
             runOnUiThread(() -> Updater.download(MainActivity.this, new Updater.OnDownload() {
                 @Override public void onProgress(int pct) { js("onUpdateProgress", String.valueOf(pct)); }
-                @Override public void onDone(File apk) { js("onUpdateDone", ""); installOrAsk(apk); }
+                @Override public void onDone(File apk) { js("onUpdateDone", ""); toast(getString(R.string.update_done)); }
                 @Override public void onError(String why) { js("onUpdateError", why); }
             }));
+        }
+
+        /** Ouvre l'écran des téléchargements pour retrouver l'APK et l'installer. */
+        @JavascriptInterface
+        public void openDownloads() {
+            runOnUiThread(() -> {
+                try { Updater.openDownloads(MainActivity.this); }
+                catch (Exception e) { toast(getString(R.string.update_no_downloads)); }
+            });
         }
 
         /** Joue l'adhan tout de suite, pour vérifier le son et l'arrêt par les boutons de volume. */

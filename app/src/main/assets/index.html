@@ -442,9 +442,10 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="bar hidden" id="updBar" style="margin-top:6px"><span id="updBarFill" style="width:0;background:var(--azure)"></span></div>
       <div class="row">
         <button class="act ghost" id="btnUpdCheck">التحقق من وجود تحديث</button>
-        <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد وتثبيته</button>
+        <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد</button>
+        <button class="act ghost hidden" id="btnUpdOpen">فتح التنزيلات</button>
       </div>
-      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub، ثم يطلب أندرويد تأكيد التثبيت. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
+      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub. بعد اكتمال التنزيل اضغط على إشعار التنزيل (أو زر «فتح التنزيلات») ثم على الملف لتثبيته. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
     </div>
   </section>
 </div>
@@ -929,7 +930,7 @@ function renderUpdate(){
   $("#btnUpdGet").classList.toggle("hidden",!av);
   if(av){
     $("#updBannerSub").textContent=`الإصدار ${UPD.latest} جاهز للتنزيل`;
-    $("#btnUpdGet").textContent=`تنزيل الإصدار ${UPD.latest} وتثبيته`;
+    $("#btnUpdGet").textContent=`تنزيل الإصدار ${UPD.latest}`;
   }
 }
 function checkUpdate(silent){
@@ -953,6 +954,7 @@ function startDownload(){
   if(!UPDATABLE||UPD_BUSY)return;
   UPD_BUSY=true;
   setUpdButtons(false);
+  $("#btnUpdOpen").classList.add("hidden");
   $("#updBar").classList.remove("hidden");$("#updBarFill").style.width="0%";
   setUpd("جارٍ التنزيل… 0%");
   $("#updBannerSub").textContent="جارٍ التنزيل…";
@@ -966,8 +968,9 @@ window.onUpdateProgress=function(s){
 };
 window.onUpdateDone=function(){
   UPD_BUSY=false;setUpdButtons(true);
-  setUpd("اكتمل التنزيل. أكّد التثبيت في نافذة أندرويد.","ok");
-  $("#updBannerSub").textContent="اكتمل التنزيل — أكّد التثبيت في نافذة أندرويد";
+  $("#btnUpdOpen").classList.remove("hidden");
+  setUpd("اكتمل التنزيل. اضغط على إشعار التنزيل، أو زر «فتح التنزيلات»، ثم على الملف لتثبيته.","ok");
+  $("#updBannerSub").textContent="اكتمل التنزيل — اضغط على إشعار التنزيل لتثبيته";
 };
 window.onUpdateError=function(s){
   UPD_BUSY=false;setUpdButtons(true);
@@ -977,6 +980,7 @@ window.onUpdateError=function(s){
 };
 $("#btnUpdCheck").addEventListener("click",()=>checkUpdate(false));
 $("#btnUpdGet").addEventListener("click",startDownload);
+$("#btnUpdOpen").addEventListener("click",()=>{try{AndroidBridge.openDownloads();}catch(e){}});
 $("#btnUpdBanner").addEventListener("click",()=>{$("#t-load").click();$("#updcard").scrollIntoView({block:"start"});startDownload();});
 
 /* =====================================================================

@@ -8,8 +8,8 @@ android {
         applicationId "ma.hissatsalati"
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName "1.4"
+        versionCode 6
+        versionName "1.5"
     }
 
     // Signature : la clé vient des variables d'environnement (secrets GitHub),
@@ -42,4 +42,5 @@ android {
 
 dependencies {
     implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.media:media:1.7.0'   // session média : touches de volume pendant l'adhan
 }
