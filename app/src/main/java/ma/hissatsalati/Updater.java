@@ -10,12 +10,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.core.content.FileProvider;
 import androidx.core.content.pm.PackageInfoCompat;
 
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -29,10 +31,10 @@ import java.util.regex.Pattern;
  *  - check()    : interroge l'API GitHub, lit l'étiquette de la dernière Release
  *                 (v<versionName>-<versionCode>) et la compare au build installé.
  *  - download() : récupère l'APK signé avec DownloadManager dans le dossier privé
- *                 de l'application et suit l'avancement. L'installation se fait en
- *                 touchant la notification de téléchargement : l'application n'a donc
- *                 pas besoin de la permission « installer des applications », que
- *                 Google Play Protect considère comme un signal d'application à risque.
+ *                 de l'application et suit l'avancement.
+ *  - install()  : ouvre l'installateur Android sur le fichier téléchargé (permission
+ *                 REQUEST_INSTALL_PACKAGES ; Android vérifie lui-même que la signature
+ *                 est celle de la version déjà installée).
  * Les adresses sont fixes dans le code : la page web ne peut pas en imposer une autre.
  */
 public final class Updater {
@@ -180,6 +182,25 @@ public final class Updater {
                 h.postDelayed(this, 500);
             }
         }, 500);
+    }
+
+    /** Un APK est une archive zip : elle commence par les octets « PK ». */
+    static boolean looksLikeApk(File f) {
+        if (f == null || !f.isFile() || f.length() < 1024) return false;
+        try (FileInputStream in = new FileInputStream(f)) {
+            return in.read() == 'P' && in.read() == 'K';
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Ouvre l'installateur Android sur l'APK téléchargé (l'utilisateur confirme lui-même). */
+    static void install(Context c, File apk) {
+        Uri u = FileProvider.getUriForFile(c, c.getPackageName() + ".fileprovider", apk);
+        Intent i = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(u, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+        c.startActivity(i);
     }
 
     /** Ouvre l'écran des téléchargements du système ; l'utilisateur touche l'APK pour l'installer. */

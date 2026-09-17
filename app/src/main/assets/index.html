@@ -448,10 +448,10 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="bar hidden" id="updBar" style="margin-top:6px"><span id="updBarFill" style="width:0;background:var(--azure)"></span></div>
       <div class="row">
         <button class="act ghost" id="btnUpdCheck">التحقق من وجود تحديث</button>
-        <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد</button>
-        <button class="act ghost hidden" id="btnUpdOpen">فتح التنزيلات</button>
+        <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد وتثبيته</button>
+        <button class="act ghost hidden" id="btnUpdOpen">إعادة فتح التثبيت</button>
       </div>
-      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub. بعد اكتمال التنزيل اضغط على إشعار التنزيل (أو زر «فتح التنزيلات») ثم على الملف لتثبيته. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
+      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub، ثم تُفتح نافذة التثبيت تلقائيًا. في المرة الأولى يطلب أندرويد السماح لحصة صلاتي بتثبيت التطبيقات: اسمح ثم عد إلى التطبيق. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
     </div>
   </section>
 </div>
@@ -937,7 +937,7 @@ function renderUpdate(){
   $("#btnUpdGet").classList.toggle("hidden",!av);
   if(av){
     $("#updBannerSub").textContent=`الإصدار ${UPD.latest} جاهز للتنزيل`;
-    $("#btnUpdGet").textContent=`تنزيل الإصدار ${UPD.latest}`;
+    $("#btnUpdGet").textContent=`تنزيل الإصدار ${UPD.latest} وتثبيته`;
   }
 }
 function checkUpdate(silent){
@@ -976,8 +976,8 @@ window.onUpdateProgress=function(s){
 window.onUpdateDone=function(){
   UPD_BUSY=false;setUpdButtons(true);
   $("#btnUpdOpen").classList.remove("hidden");
-  setUpd("اكتمل التنزيل. اضغط على إشعار التنزيل، أو زر «فتح التنزيلات»، ثم على الملف لتثبيته.","ok");
-  $("#updBannerSub").textContent="اكتمل التنزيل — اضغط على إشعار التنزيل لتثبيته";
+  setUpd("اكتمل التنزيل. أكّد التثبيت في نافذة أندرويد، أو اضغط «إعادة فتح التثبيت».","ok");
+  $("#updBannerSub").textContent="اكتمل التنزيل — أكّد التثبيت في نافذة أندرويد";
 };
 window.onUpdateError=function(s){
   UPD_BUSY=false;setUpdButtons(true);
@@ -988,8 +988,8 @@ window.onUpdateError=function(s){
 $("#btnShareApp").addEventListener("click",()=>{try{AndroidBridge.shareApp();}catch(e){}});
 $("#btnUpdCheck").addEventListener("click",()=>checkUpdate(false));
 $("#btnUpdGet").addEventListener("click",startDownload);
-$("#btnUpdOpen").addEventListener("click",()=>{try{AndroidBridge.openDownloads();}catch(e){}});
-$("#btnUpdBanner").addEventListener("click",()=>{$("#t-load").click();$("#updcard").scrollIntoView({block:"start"});startDownload();});
+$("#btnUpdOpen").addEventListener("click",()=>{try{AndroidBridge.installUpdate();}catch(e){}});
+$("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur اليوم : l'avancement s'affiche dans الشريط
 
 /* =====================================================================
    6. Onglets
