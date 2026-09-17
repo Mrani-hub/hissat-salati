@@ -50,10 +50,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           gradle assembleRelease --no-daemon
-          # deux copies du même APK : nom latin (lien stable, mise à jour automatique)
-          # et nom arabe (fichier à partager)
           cp app/build/outputs/apk/release/app-release.apk hissat-salati.apk
-          cp app/build/outputs/apk/release/app-release.apk "حصة صلاتي.apk"
 
       - name: Lire le numéro de version
         id: ver
@@ -75,6 +72,4 @@ jobs:
         with:
           tag_name: v${{ steps.ver.outputs.name }}-${{ steps.ver.outputs.code }}
           name: حصة صلاتي ${{ steps.ver.outputs.name }} (build ${{ steps.ver.outputs.code }})
-          files: |
-            hissat-salati.apk
-            حصة صلاتي.apk
+          files: hissat-salati.apk
