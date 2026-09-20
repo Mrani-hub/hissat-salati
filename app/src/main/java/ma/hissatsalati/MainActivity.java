@@ -3,7 +3,10 @@ package ma.hissatsalati;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -17,6 +20,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import org.json.JSONObject;
@@ -24,12 +28,31 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
 
     private WebView web;
     private boolean askedPerms = false;
     private File pendingInstall;   // APK téléchargé, en attente de l'autorisation d'installer
+
+    /**
+     * Changement d'heure (heure d'été, fuseau, réglage manuel).
+     *
+     * Le côté Android relit toujours le fuseau horaire, mais la WebView garde
+     * celui qu'elle avait au démarrage de son processus : son new Date() reste
+     * décalé d'une heure tant que l'application n'est pas relancée.
+     * On reprogramme donc l'alarme et on prévient la page, qui resynchronise
+     * son horloge sur celle du téléphone.
+     */
+    private final BroadcastReceiver clockWatch = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent i) {
+            Schedule.scheduleNext(MainActivity.this);
+            js("onClockChanged", "");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle b) {
@@ -65,8 +88,25 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter f = new IntentFilter();
+        f.addAction(Intent.ACTION_TIME_CHANGED);
+        f.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        ContextCompat.registerReceiver(this, clockWatch, f, ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    @Override
+    protected void onStop() {
+        try { unregisterReceiver(clockWatch); } catch (Exception ignored) {}
+        super.onStop();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        // l'heure a pu changer pendant que l'application était en arrière-plan
+        js("onClockChanged", "");
         // retour du réglage « installer des applications inconnues » : on reprend l'installation
         if (pendingInstall != null && pendingInstall.exists() && canInstall()) {
             File f = pendingInstall;
@@ -154,6 +194,21 @@ public class MainActivity extends Activity {
             boolean wants = json != null
                     && (json.contains("\"adhan\":true") || json.contains("\"notify\":true"));
             if (wants) runOnUiThread(MainActivity.this::ensurePermissions);
+        }
+
+        /**
+         * Heure locale réelle du téléphone, au format "2026-09-20 04:32:10".
+         *
+         * La page s'en sert pour mesurer l'écart avec sa propre horloge : la WebView
+         * garde en mémoire l'ancien fuseau horaire après un changement d'heure, alors
+         * qu'ici Calendar relit toujours le réglage en cours.
+         */
+        @JavascriptInterface
+        public String localNow() {
+            Calendar c = Calendar.getInstance();
+            return String.format(Locale.US, "%04d-%02d-%02d %02d:%02d:%02d",
+                    c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH),
+                    c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
         }
 
         /** Version installée, pour l'afficher dans la page : {"name":"1.4","code":5}. */

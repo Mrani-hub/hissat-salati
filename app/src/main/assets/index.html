@@ -614,6 +614,37 @@ function hms(ms){
   const t=Math.max(0,Math.round(ms/1000));
   return `${pad(Math.floor(t/3600))}:${pad(Math.floor(t%3600/60))}:${pad(t%60)}`;
 }
+/* ---------------------------------------------------------------------
+   Horloge : l'heure de référence de la page.
+
+   Après un changement d'heure (heure d'été, fuseau, réglage manuel), la
+   WebView continue d'utiliser l'ancien décalage horaire tant que son
+   processus n'a pas redémarré : son new Date() peut être en avance ou en
+   retard d'une heure, alors que les alarmes Android, elles, restent justes.
+   On demande donc l'heure au côté Android et on garde l'écart dans CLOCK_FIX.
+   Tout ce qui a besoin de « maintenant » passe par nowLocal().
+   Hors application (navigateur), il n'y a pas de pont : CLOCK_FIX reste à 0.
+   --------------------------------------------------------------------- */
+let CLOCK_FIX=0;
+const nowLocal=()=>new Date(Date.now()+CLOCK_FIX);
+function syncClock(){
+  let s="";
+  try{ s=(window.AndroidBridge&&window.AndroidBridge.localNow)?String(window.AndroidBridge.localNow()||""):""; }
+  catch(e){ return false; }
+  const m=/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(s);
+  if(!m)return false;
+  const real=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6],0).getTime();
+  /* un décalage de fuseau est toujours un nombre entier de minutes : on arrondit
+     à la minute pour ignorer le temps d'aller-retour de l'appel. */
+  const fix=Math.round((real-Date.now())/60000)*60000;
+  if(fix===CLOCK_FIX)return false;
+  CLOCK_FIX=fix;
+  return true;
+}
+/* appelé par MainActivity quand l'heure du téléphone change ou au retour d'arrière-plan */
+function onClockChanged(){ if(syncClock()&&typeof renderAll==="function")renderAll(); }
+window.onClockChanged=onClockChanged;
+
 function normalizeMonth(m){
   m.days=(m.days||[]).filter(d=>d&&d.greg).map((d,i)=>({
     greg:d.greg, hijri:d.hijri||i+1, dayName:arDay(d.greg),
@@ -695,7 +726,7 @@ function timeline(now){
 }
 
 function renderDay(force){
-  const now=new Date(), T=timeline(now);
+  const now=nowLocal(), T=timeline(now);
   const d=parseISO(T.today.greg);
   $("#heroDate").innerHTML=`<b>${FR_DATE.format(d)}</b> &nbsp;·&nbsp; <span style="font-family:var(--arab);font-size:1.05em">${T.today.dayName} ${T.today.hijri} ${MONTH.hijriMonth||""}</span>`;
 
@@ -790,7 +821,7 @@ $("#rail").addEventListener("click",ev=>{
   /* علامة « أُدّيت » على نافلة */
   const tick=ev.target.closest(".tick");
   if(tick){
-    const iso=timeline(new Date()).today.greg, k=tick.dataset.k;
+    const iso=timeline(nowLocal()).today.greg, k=tick.dataset.k;
     setRaw(iso,k,!rawEntry(iso)[k]);
     renderDay(true);renderTrack();
     return;
@@ -805,7 +836,7 @@ $("#rail").addEventListener("click",ev=>{
   }
   const b=ev.target.closest(".chip");
   if(!b)return;
-  const iso=timeline(new Date()).today.greg;
+  const iso=timeline(nowLocal()).today.greg;
   const k=b.dataset.k, f=b.dataset.f;
   const e={...entry(iso,k)};
   e[f]=!e[f];
@@ -815,7 +846,7 @@ $("#rail").addEventListener("click",ev=>{
 });
 
 function renderRawatib(iso){
-  iso=iso||timeline(new Date()).today.greg;
+  iso=iso||timeline(nowLocal()).today.greg;
   const e=rawEntry(iso), n=rawCount(iso);
   $("#rawNum").textContent=`${n} / ${RAW_TOTAL}`;
   $("#rawBar").style.width=(n/RAW_TOTAL*100).toFixed(0)+"%";
@@ -828,7 +859,7 @@ function renderRawatib(iso){
 $("#rawList").addEventListener("change",ev=>{
   const i=ev.target;
   if(!i||i.type!=="checkbox")return;
-  const iso=timeline(new Date()).today.greg;
+  const iso=timeline(nowLocal()).today.greg;
   setRaw(iso,i.dataset.k,i.checked);
   renderRawatib(iso);
   renderDay(true);
@@ -836,7 +867,7 @@ $("#rawList").addEventListener("change",ev=>{
 });
 
 function renderMonth(){
-  const todayISO=isoOf(new Date());
+  const todayISO=isoOf(nowLocal());
   $("#mbody").innerHTML=MONTH.days.map(d=>{
     const cls=[d.dayName==="الجمعة"?"fri":"",d.greg===todayISO?"today":""].filter(Boolean).join(" ");
     return `<tr class="${cls}"><td><span class="dayname">${d.dayName}</span> ${FR_SHORT.format(parseISO(d.greg))} <span style="color:#B4A98E">· ${d.hijri}</span></td>
@@ -845,7 +876,7 @@ function renderMonth(){
 }
 
 function renderTrack(){
-  const todayISO=isoOf(new Date());
+  const todayISO=isoOf(nowLocal());
   $("#tbody").innerHTML=MONTH.days.map(d=>{
     const future=d.greg>todayISO;
     const cls=[d.dayName==="الجمعة"?"fri":"",d.greg===todayISO?"today":"",future?"future":""].filter(Boolean).join(" ");
@@ -1403,7 +1434,7 @@ async function monthCanvas(){
   const cv=document.createElement("canvas");
   const S=2; cv.width=W*S; cv.height=H*S;
   const c=cv.getContext("2d"); c.scale(S,S);
-  const todayISO=isoOf(new Date());
+  const todayISO=isoOf(nowLocal());
 
   c.fillStyle="#FBF9F4";c.fillRect(0,0,W,H);
   c.strokeStyle="#B98B2E";c.lineWidth=3;c.strokeRect(10,10,W-20,H-20);
@@ -1558,8 +1589,17 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(CITIES.some(v=>v.n===MONTH.city))sel.value=MONTH.city;
   syncLink();renderFavs();
   $("#startd").value=MONTH.days[0].greg;
+  syncClock();                      // caler l'horloge de la page avant le premier affichage
   renderAll();
-  setInterval(()=>{if(!$("#v-day").classList.contains("hidden"))renderDay(false);},1000);
+  let ticks=0;
+  setInterval(()=>{
+    /* filet de sécurité : on revérifie l'heure du téléphone chaque minute, au cas où
+       le changement d'heure n'aurait pas été annoncé à l'application. */
+    if(++ticks%60===0&&syncClock()){ renderAll(); return; }
+    if(!$("#v-day").classList.contains("hidden"))renderDay(false);
+  },1000);
+  /* retour sur l'écran après une longue mise en veille */
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden)onClockChanged(); });
   if(UPDATABLE){
     UPD=(await Store.get(K_UPD))||{};
     renderUpdate();

@@ -8,8 +8,8 @@ android {
         applicationId "ma.hissatsalati"
         minSdk 24
         targetSdk 34
-        versionCode 8
-        versionName "1.7"
+        versionCode 9
+        versionName "1.8"
     }
 
     // Signature : la clé vient des variables d'environnement (secrets GitHub),
