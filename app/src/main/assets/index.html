@@ -450,8 +450,9 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
         <button class="act ghost" id="btnUpdCheck">التحقق من وجود تحديث</button>
         <button class="act hidden" id="btnUpdGet">تنزيل الإصدار الجديد وتثبيته</button>
         <button class="act ghost hidden" id="btnUpdOpen">إعادة فتح التثبيت</button>
+        <button class="act ghost hidden" id="btnUpdShare">إرسال ملف التثبيت</button>
       </div>
-      <p class="note">يُحمَّل الإصدار الجديد من صفحة التطبيق على GitHub، ثم تُفتح نافذة التثبيت تلقائيًا. في المرة الأولى يطلب أندرويد السماح لحصة صلاتي بتثبيت التطبيقات: اسمح ثم عد إلى التطبيق. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
+      <p class="note">في المرة الأولى يطلب أندرويد السماح لحصة صلاتي بتثبيت التطبيقات: اسمح ثم عد إلى التطبيق، ويبدأ التنزيل تلقائيًا من صفحة التطبيق على GitHub، ثم تُفتح نافذة التثبيت وحدها. إن أغلقت النافذة بالخطأ، استعمل «إعادة فتح التثبيت» أو «إرسال ملف التثبيت»: الملف محفوظ داخل التطبيق ولا يظهر في مجلد التنزيلات. تبقى مواقيتك ومتابعتك محفوظة بعد التحديث.</p>
     </div>
   </section>
 </div>
@@ -988,16 +989,35 @@ window.onUpdateResult=function(s){
   else setUpd("لديك أحدث إصدار.","ok");
 };
 function setUpdButtons(on){$("#btnUpdGet").disabled=!on;$("#btnUpdBanner").disabled=!on;$("#btnUpdCheck").disabled=!on;}
+/* Le fichier téléchargé est rangé dans un dossier privé de l'application, invisible
+   depuis Android 11 : ces deux boutons sont le seul moyen d'y revenir. On les montre
+   dès qu'un APK attend, y compris après avoir fermé puis rouvert l'application. */
+function showUpdFile(on){
+  $("#btnUpdOpen").classList.toggle("hidden",!on);
+  $("#btnUpdShare").classList.toggle("hidden",!on);
+}
+window.onUpdateFile=function(s){ showUpdFile(!!s); };
+function refreshUpdFile(){
+  let has=false;
+  try{ has=!!(window.AndroidBridge&&window.AndroidBridge.hasUpdateFile&&AndroidBridge.hasUpdateFile()); }catch(e){}
+  showUpdFile(has);
+}
 function startDownload(){
   if(!UPDATABLE||UPD_BUSY)return;
   UPD_BUSY=true;
   setUpdButtons(false);
-  $("#btnUpdOpen").classList.add("hidden");
   $("#updBar").classList.remove("hidden");$("#updBarFill").style.width="0%";
   setUpd("جارٍ التنزيل… 0%");
   $("#updBannerSub").textContent="جارٍ التنزيل…";
   try{AndroidBridge.downloadUpdate();}catch(e){UPD_BUSY=false;setUpdButtons(true);setUpd("تعذّر بدء التنزيل.","err");}
 }
+/* l'application attend l'autorisation d'installer : le téléchargement suivra tout seul */
+window.onUpdateWait=function(){
+  UPD_BUSY=false;setUpdButtons(true);
+  $("#updBar").classList.add("hidden");
+  setUpd("اسمح لحصة صلاتي بتثبيت التطبيقات، ثم عد إلى هنا: يبدأ التنزيل تلقائيًا.");
+  $("#updBannerSub").textContent="بانتظار الإذن بالتثبيت";
+};
 window.onUpdateProgress=function(s){
   const p=Math.max(0,Math.min(100,parseInt(s,10)||0));
   $("#updBarFill").style.width=p+"%";
@@ -1006,13 +1026,14 @@ window.onUpdateProgress=function(s){
 };
 window.onUpdateDone=function(){
   UPD_BUSY=false;setUpdButtons(true);
-  $("#btnUpdOpen").classList.remove("hidden");
+  showUpdFile(true);
   setUpd("اكتمل التنزيل. أكّد التثبيت في نافذة أندرويد، أو اضغط «إعادة فتح التثبيت».","ok");
   $("#updBannerSub").textContent="اكتمل التنزيل — أكّد التثبيت في نافذة أندرويد";
 };
 window.onUpdateError=function(s){
   UPD_BUSY=false;setUpdButtons(true);
   $("#updBar").classList.add("hidden");
+  refreshUpdFile();
   setUpd("تعذّر التنزيل ("+String(s||"")+"). أعد المحاولة لاحقًا.","err");
   renderUpdate();
 };
@@ -1020,6 +1041,7 @@ $("#btnShareApp").addEventListener("click",()=>{try{AndroidBridge.shareApp();}ca
 $("#btnUpdCheck").addEventListener("click",()=>checkUpdate(false));
 $("#btnUpdGet").addEventListener("click",startDownload);
 $("#btnUpdOpen").addEventListener("click",()=>{try{AndroidBridge.installUpdate();}catch(e){}});
+$("#btnUpdShare").addEventListener("click",()=>{try{AndroidBridge.shareUpdate();}catch(e){}});
 $("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur اليوم : l'avancement s'affiche dans الشريط
 
 /* =====================================================================
@@ -1603,6 +1625,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(UPDATABLE){
     UPD=(await Store.get(K_UPD))||{};
     renderUpdate();
+    refreshUpdFile();
     if(!UPD.at||Date.now()-UPD.at>6*3600e3)checkUpdate(true);
   }
 })();

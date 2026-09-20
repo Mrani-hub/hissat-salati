@@ -184,6 +184,20 @@ public final class Updater {
         }, 500);
     }
 
+    /**
+     * Numéro de build contenu dans un fichier APK, ou 0 s'il est illisible.
+     * Sert à ne plus proposer un fichier déjà installé : après une mise à jour
+     * réussie, l'APK téléchargé reste sur le téléphone.
+     */
+    static long archiveCode(Context c, File apk) {
+        try {
+            PackageInfo p = c.getPackageManager().getPackageArchiveInfo(apk.getAbsolutePath(), 0);
+            return p == null ? 0 : PackageInfoCompat.getLongVersionCode(p);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     /** Un APK est une archive zip : elle commence par les octets « PK ». */
     static boolean looksLikeApk(File f) {
         if (f == null || !f.isFile() || f.length() < 1024) return false;
@@ -201,11 +215,5 @@ public final class Updater {
                 .setDataAndType(u, "application/vnd.android.package-archive")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
         c.startActivity(i);
-    }
-
-    /** Ouvre l'écran des téléchargements du système ; l'utilisateur touche l'APK pour l'installer. */
-    static void openDownloads(Context c) {
-        c.startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 }

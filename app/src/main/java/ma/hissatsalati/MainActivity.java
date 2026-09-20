@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -36,6 +37,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private boolean askedPerms = false;
     private File pendingInstall;   // APK téléchargé, en attente de l'autorisation d'installer
+    private boolean resumed = false;      // l'écran est-il au premier plan ?
+    private boolean wantDownload = false; // téléchargement demandé, en attente de l'autorisation d'installer
 
     /**
      * Changement d'heure (heure d'été, fuseau, réglage manuel).
@@ -105,14 +108,28 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        resumed = true;
         // l'heure a pu changer pendant que l'application était en arrière-plan
         js("onClockChanged", "");
-        // retour du réglage « installer des applications inconnues » : on reprend l'installation
-        if (pendingInstall != null && pendingInstall.exists() && canInstall()) {
+
+        // retour du réglage « installer des applications inconnues »
+        if (wantDownload) {                       // on attendait l'autorisation pour télécharger
+            wantDownload = false;
+            if (canInstall()) runDownload();
+            else js("onUpdateError", getString(R.string.update_allow_install));
+        } else if (pendingInstall != null) {      // l'APK est déjà là, il reste à l'installer
             File f = pendingInstall;
             pendingInstall = null;
             installOrAsk(f);
         }
+        js("onUpdateFile", downloadedApk() != null ? "1" : "");
+    }
+
+    @Override
+    protected void onPause() {
+        // Android refuse d'ouvrir l'installateur depuis l'arrière-plan : on saura qu'il faut attendre.
+        resumed = false;
+        super.onPause();
     }
 
     @Override
@@ -154,19 +171,59 @@ public class MainActivity extends Activity {
         return Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls();
     }
 
-    /** Lance l'installateur, ou envoie d'abord vers le réglage qui autorise cette appli à installer. */
+    /** Envoie vers le réglage Android « installer des applications inconnues » pour cette appli. */
+    private void askInstallPermission() {
+        toast(getString(R.string.update_allow_install));
+        try {
+            startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:" + getPackageName())));
+        } catch (Exception ignored) {}
+    }
+
+    /**
+     * L'APK de mise à jour déjà téléchargé, ou null.
+     *
+     * Il est rangé dans le dossier privé de l'application
+     * (Android/data/ma.hissatsalati/files/Download) : depuis Android 11 ce dossier
+     * n'est plus visible dans l'application Fichiers, l'utilisateur ne peut donc pas
+     * l'ouvrir lui-même. Tout doit passer par les boutons de la page.
+     */
+    private File downloadedApk() {
+        File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File f = dir == null ? null : new File(dir, Updater.APK_NAME);
+        if (!Updater.looksLikeApk(f)) return null;
+        // après une mise à jour réussie le fichier reste là : on ne le propose plus
+        return Updater.archiveCode(this, f) > Updater.currentCode(this) ? f : null;
+    }
+
+    /** Télécharge l'APK puis ouvre l'installateur dès la fin. */
+    private void runDownload() {
+        Updater.download(this, new Updater.OnDownload() {
+            @Override public void onProgress(int pct) { js("onUpdateProgress", String.valueOf(pct)); }
+            @Override public void onDone(File apk) { js("onUpdateDone", ""); installOrAsk(apk); }
+            @Override public void onError(String why) { js("onUpdateError", why); }
+        });
+    }
+
+    /**
+     * Ouvre l'installateur sur l'APK téléchargé.
+     * Deux cas font échouer l'ouverture, et chacun est repris au retour sur l'application :
+     * l'autorisation d'installer manque, ou l'écran est passé en arrière-plan pendant
+     * le téléchargement (Android bloque alors le lancement de l'installateur).
+     */
     private void installOrAsk(File apk) {
         if (!Updater.looksLikeApk(apk)) {
             toast(getString(R.string.update_bad_file));
+            js("onUpdateError", getString(R.string.update_bad_file));
             return;
         }
         if (!canInstall()) {
             pendingInstall = apk;
-            toast(getString(R.string.update_allow_install));
-            try {
-                startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:" + getPackageName())));
-            } catch (Exception ignored) {}
+            askInstallPermission();
+            return;
+        }
+        if (!resumed) {
+            pendingInstall = apk;   // on rouvrira l'installateur dans onResume
             return;
         }
         pendingInstall = null;
@@ -174,6 +231,7 @@ public class MainActivity extends Activity {
             Updater.install(this, apk);
         } catch (Exception e) {
             toast(getString(R.string.update_failed));
+            js("onUpdateError", getString(R.string.update_failed));
         }
     }
 
@@ -229,33 +287,66 @@ public class MainActivity extends Activity {
             Updater.check(MainActivity.this, r -> js("onUpdateResult", r.toString()));
         }
 
-        /** Télécharge l'APK de la dernière Release, puis ouvre l'installateur dès la fin. */
+        /**
+         * Télécharge l'APK de la dernière Release, puis ouvre l'installateur dès la fin.
+         *
+         * L'autorisation d'installer est demandée AVANT le téléchargement : sinon
+         * l'utilisateur télécharge cinq mégaoctets pour se retrouver devant un réglage
+         * Android, et le fichier finit dans un dossier qu'il ne peut pas ouvrir.
+         * Au retour du réglage, onResume enchaîne tout seul sur le téléchargement.
+         */
         @JavascriptInterface
         public void downloadUpdate() {
-            runOnUiThread(() -> Updater.download(MainActivity.this, new Updater.OnDownload() {
-                @Override public void onProgress(int pct) { js("onUpdateProgress", String.valueOf(pct)); }
-                @Override public void onDone(File apk) { js("onUpdateDone", ""); installOrAsk(apk); }
-                @Override public void onError(String why) { js("onUpdateError", why); }
-            }));
+            runOnUiThread(() -> {
+                if (!canInstall()) {
+                    wantDownload = true;
+                    js("onUpdateWait", getString(R.string.update_allow_install));
+                    askInstallPermission();
+                    return;
+                }
+                runDownload();
+            });
         }
 
         /** Relance l'installateur sur le dernier APK téléchargé (si l'installation a été fermée). */
         @JavascriptInterface
         public void installUpdate() {
-            File dir = getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS);
-            File apk = dir == null ? null : new File(dir, Updater.APK_NAME);
             runOnUiThread(() -> {
-                if (apk != null && apk.exists()) installOrAsk(apk);
+                File apk = downloadedApk();
+                if (apk != null) installOrAsk(apk);
                 else toast(getString(R.string.update_bad_file));
             });
         }
 
-        /** Ouvre l'écran des téléchargements pour retrouver l'APK et l'installer. */
+        /** Un APK de mise à jour est-il déjà téléchargé ? La page affiche alors ses boutons. */
         @JavascriptInterface
-        public void openDownloads() {
+        public boolean hasUpdateFile() {
+            return downloadedApk() != null;
+        }
+
+        /**
+         * Dernier recours : envoie l'APK téléchargé vers une autre application
+         * (Fichiers, WhatsApp, Drive…). Le dossier de téléchargement de l'application
+         * étant inaccessible depuis Android 11, c'est la seule façon pour l'utilisateur
+         * de remettre la main sur le fichier si l'installateur refuse de s'ouvrir.
+         */
+        @JavascriptInterface
+        public void shareUpdate() {
             runOnUiThread(() -> {
-                try { Updater.openDownloads(MainActivity.this); }
-                catch (Exception e) { toast(getString(R.string.update_no_downloads)); }
+                File apk = downloadedApk();
+                if (apk == null) { toast(getString(R.string.update_bad_file)); return; }
+                try {
+                    Uri uri = FileProvider.getUriForFile(
+                            MainActivity.this, getPackageName() + ".fileprovider", apk);
+                    Intent send = new Intent(Intent.ACTION_SEND)
+                            .setType("application/vnd.android.package-archive")
+                            .putExtra(Intent.EXTRA_STREAM, uri)
+                            .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(send, getString(R.string.share)));
+                } catch (Exception e) {
+                    toast(getString(R.string.share_failed, e.getMessage()));
+                }
             });
         }
 
