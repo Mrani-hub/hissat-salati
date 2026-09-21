@@ -39,7 +39,19 @@ jobs:
         with:
           node-version: '20'
 
+      # Placé AVANT la fabrication : c'est lui qui donne l'adresse publique du
+      # site, dont la page a besoin pour la vignette affichée dans WhatsApp.
+      # enablement: true active GitHub Pages tout seul au premier lancement.
+      # Si GitHub le refuse (droits du dépôt), il faut le faire à la main :
+      #   Settings → Pages → Build and deployment → Source : « GitHub Actions »
+      - uses: actions/configure-pages@v5
+        id: pages
+        with:
+          enablement: true
+
       - name: Fabriquer le site depuis index.html
+        env:
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
         run: node web/build.mjs
 
       # Filet de sécurité : si un jour l'injection échoue en silence,
@@ -60,15 +72,10 @@ jobs:
           if grep -q '__VERSION__' sw.js; then
             echo "::error::version non remplacée dans sw.js"; exit 1
           fi
+          # La vignette WhatsApp : sans adresse ENTIÈRE, aucun aperçu ne s'affiche.
+          grep -q 'property="og:image" content="https://' index.html \
+            || { echo "::error::vignette WhatsApp absente ou en adresse relative"; exit 1; }
           echo "page installable : OK"
-
-      # enablement: true active GitHub Pages tout seul au premier lancement,
-      # pour éviter à Ali le passage par Settings → Pages. Si GitHub le refuse
-      # (droits du dépôt), l'étape le dit et il reste à le faire à la main :
-      #   Settings → Pages → Build and deployment → Source : « GitHub Actions »
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

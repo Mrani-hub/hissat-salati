@@ -36,6 +36,37 @@ const VERSION = createHash("sha256").update(html).digest("hex").slice(0, 12);
 
 /* ---------- 2. Les lignes qui rendent la page installable ------------ */
 
+/* Adresse publique du site. WhatsApp, Messenger et Telegram n'affichent une
+   vignette (icône + nom + description) que si l'adresse de l'image est
+   ENTIÈRE : « ./icons/… » ne leur suffit pas, il leur faut « https://… ».
+   Elle vient du workflow (SITE_URL), sinon on la déduit du nom du dépôt. */
+function adressePublique() {
+  const fournie = (process.env.SITE_URL || "").trim();
+  if (fournie) return fournie.endsWith("/") ? fournie : fournie + "/";
+  const depot = process.env.GITHUB_REPOSITORY || "";      // « Mrani-hub/hissat-salati »
+  const [proprietaire, nom] = depot.split("/");
+  if (proprietaire && nom) return `https://${proprietaire.toLowerCase()}.github.io/${nom}/`;
+  return "";                                              // construction locale
+}
+const BASE = adressePublique();
+
+/* La vignette du lien partagé. Sans adresse publique connue (essai local),
+   on n'écrit rien plutôt que des adresses relatives qui ne marcheraient pas. */
+const VIGNETTE = !BASE ? "" : `
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="حصة صلاتي">
+<meta property="og:title" content="حصة صلاتي — مواقيت الصلاة">
+<meta property="og:description" content="المواقيت والرواتب والأذكار والمتابعة. يعمل بدون إنترنت. أضِفه إلى شاشتك الرئيسية.">
+<meta property="og:locale" content="ar_MA">
+<meta property="og:url" content="${BASE}">
+<meta property="og:image" content="${BASE}icons/icon-512.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="حصة صلاتي">
+<meta name="twitter:card" content="summary">
+`;
+
 const TETE = `
 <!-- ajouté par web/build.mjs : rend la page installable sur l'écran d'accueil -->
 <link rel="manifest" href="./manifest.webmanifest">
@@ -47,7 +78,7 @@ const TETE = `
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
-`;
+${VIGNETTE}`;
 
 // Le paramètre ?v= force le navigateur à relire pwa.js quand la page change,
 // au lieu de ressortir une vieille copie de son propre cache.
@@ -101,5 +132,6 @@ await writeFile(join(SORTIE, ".nojekyll"), "");
 const ko = n => (n / 1024).toFixed(0) + " Ko";
 console.log("\n  Site fabriqué : " + SORTIE);
 console.log("  version       : " + VERSION);
+console.log("  adresse       : " + (BASE || "inconnue (essai local) — pas de vignette WhatsApp"));
 console.log("  page          : " + ko(Buffer.byteLength(html)) + " (tout compris : polices, code, données)");
 console.log("\n  Essai local   : npx serve web/_site   puis ouvrir l'adresse affichée\n");
