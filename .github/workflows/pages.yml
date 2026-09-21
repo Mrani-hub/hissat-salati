@@ -62,7 +62,13 @@ jobs:
           fi
           echo "page installable : OK"
 
+      # enablement: true active GitHub Pages tout seul au premier lancement,
+      # pour éviter à Ali le passage par Settings → Pages. Si GitHub le refuse
+      # (droits du dépôt), l'étape le dit et il reste à le faire à la main :
+      #   Settings → Pages → Build and deployment → Source : « GitHub Actions »
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
