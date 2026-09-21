@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- position : adopter les horaires de la ville la plus proche en voyage.
+         Les deux sont declarees pour qu'Android laisse le choix entre position
+         approximative et precise : sans la precise, le GPS refuse de repondre sur
+         les telephones depourvus de localisation par le reseau. L'approximative
+         suffit a l'application, qui ne cherche qu'une ville. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- adhan et rappels -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />

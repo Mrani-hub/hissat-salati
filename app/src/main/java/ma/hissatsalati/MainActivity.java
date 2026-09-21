@@ -34,11 +34,14 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
+    private static final int REQ_LOCATION = 9;   // code de la demande d'autorisation « localisation »
+
     private WebView web;
     private boolean askedPerms = false;
     private File pendingInstall;   // APK téléchargé, en attente de l'autorisation d'installer
     private boolean resumed = false;      // l'écran est-il au premier plan ?
     private boolean wantDownload = false; // téléchargement demandé, en attente de l'autorisation d'installer
+    private boolean wantLocation = false; // position demandée, en attente de l'autorisation de localiser
 
     /**
      * Changement d'heure (heure d'été, fuseau, réglage manuel).
@@ -160,7 +163,34 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
         super.onRequestPermissionsResult(req, perms, res);
+        if (req == REQ_LOCATION) {
+            boolean ok = false;   // approximative OU precise : l'une des deux suffit
+            for (int r : res) if (r == PackageManager.PERMISSION_GRANTED) ok = true;
+            if (!wantLocation) return;
+            wantLocation = false;
+            if (ok) fetchLocation();
+            else js("onLocationError", "permission");
+            return;
+        }
         Schedule.scheduleNext(this);
+    }
+
+    /** Lit la position et la renvoie à la page : onLocation({"lat":…,"lon":…,"acc":…}). */
+    private void fetchLocation() {
+        Loc.get(this, new Loc.OnFix() {
+            @Override public void onFix(double lat, double lon, float acc) {
+                String payload;
+                try {
+                    payload = new JSONObject()
+                            .put("lat", lat).put("lon", lon).put("acc", acc).toString();
+                } catch (Exception e) {
+                    js("onLocationError", "error");
+                    return;
+                }
+                js("onLocation", payload);
+            }
+            @Override public void onError(String code) { js("onLocationError", code); }
+        });
     }
 
     private void toast(String m) {
@@ -347,6 +377,28 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     toast(getString(R.string.share_failed, e.getMessage()));
                 }
+            });
+        }
+
+        /**
+         * Demande la position approximative du téléphone.
+         *
+         * L'autorisation n'est réclamée qu'ici, c'est-à-dire au moment où l'utilisateur
+         * active « اتّباع الموقع » ou appuie sur « تحديد موقعي الآن » : jamais au démarrage,
+         * où il ne comprendrait pas pourquoi on la demande. La réponse arrive dans la page
+         * par onLocation(json) ou onLocationError(code).
+         */
+        @JavascriptInterface
+        public void requestLocation() {
+            runOnUiThread(() -> {
+                if (!Loc.granted(MainActivity.this)) {
+                    wantLocation = true;   // la suite se joue dans onRequestPermissionsResult
+                    requestPermissions(new String[]{
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION}, REQ_LOCATION);
+                    return;
+                }
+                fetchLocation();
             });
         }
 

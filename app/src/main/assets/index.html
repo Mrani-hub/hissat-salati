@@ -265,6 +265,10 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div><div class="t">يتوفر إصدار جديد من التطبيق</div><div class="s" id="updBannerSub"></div></div>
       <button class="act" id="btnUpdBanner">تنزيل</button>
     </div>
+    <div class="upd hidden" id="geoBanner">
+      <div><div class="t" id="geoBannerT">—</div><div class="s" id="geoBannerS">—</div></div>
+      <button class="act ghost" id="btnGeoUndo">العودة</button>
+    </div>
     <div class="hero" id="hero">
       <div class="date" id="heroDate">—</div>
       <div class="main">
@@ -318,6 +322,14 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="setrow native hidden">
         <div class="s">للتأكد من الصوت ومن الإيقاف بزر الصوت.</div>
         <button class="act ghost" id="btnTestAdhan">تجربة الأذان</button>
+      </div>
+      <div class="setrow">
+        <div><div class="t">اتّباع الموقع عند السفر</div><div class="s">إذا غادرت مدينتك، تُعتمد تلقائيًا مواقيت أقرب مدينة إليك، ويتبعها الأذان والتنبيه. يبقى موقعك داخل الهاتف ولا يُرسل إلى أي جهة.</div></div>
+        <label class="sw"><input type="checkbox" id="swGeo"><span></span></label>
+      </div>
+      <div class="setrow">
+        <div class="s" id="geoState">—</div>
+        <button class="act ghost" id="btnGeoNow">تحديد موقعي الآن</button>
       </div>
     </div>
     <p class="note" id="dayNote"></p>
@@ -590,7 +602,7 @@ const Store=(()=>{
     }
   };
 })();
-const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1", K_UPD="prayer-update-v1";
+const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1", K_UPD="prayer-update-v1", K_GEO="prayer-geo-v1";
 
 /* =====================================================================
    3. Utilitaires
@@ -659,7 +671,7 @@ let MONTHS={};   // un mois mémorisé par ville
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
 let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
-let SET={adhan:true,notify:true,rawatib:true};   // الأذان والتنبيه وإظهار الرواتب
+let SET={adhan:true,notify:true,rawatib:true,geo:false};   // الأذان والتنبيه والرواتب واتّباع الموقع
 let pending=null, railKey="";
 
 /* =====================================================================
@@ -943,6 +955,7 @@ function renderSettings(){
   $("#swRawatib").checked=SET.rawatib!==false;
   $("#swAdhan").checked=!!SET.adhan;
   $("#swNotify").checked=!!SET.notify;
+  $("#swGeo").checked=!!SET.geo;
 }
 $("#swRawatib").addEventListener("change",e=>{SET.rawatib=e.target.checked;Store.set(K_SET,SET);renderDay(true);renderTrack();});
 $("#swAdhan").addEventListener("change",e=>{SET.adhan=e.target.checked;Store.set(K_SET,SET);pushSchedule();});
@@ -950,7 +963,167 @@ $("#swNotify").addEventListener("change",e=>{SET.notify=e.target.checked;Store.s
 $("#btnTestAdhan").addEventListener("click",()=>{if(NATIVE)try{AndroidBridge.testAdhan();}catch(e){}});
 
 /* =====================================================================
-   5 ter. تحديث التطبيق : التطبيق الأصلي يسأل GitHub عن آخر إصدار، ويحمّل الملف ويثبّته
+   5 ter. الموقع : اعتماد مواقيت أقرب مدينة عند السفر
+   ---------------------------------------------------------------------
+   Un seul code pour les deux mondes :
+     . Android -> AndroidBridge.requestLocation(), qui repond dans onLocation ;
+     . iPhone / navigateur -> navigator.geolocation, le standard du web.
+   La position n'est jamais envoyee nulle part : on cherche en memoire la ville
+   la plus proche dans CITIES, et on bascule dessus. Les alarmes de l'adhan
+   suivent toutes seules, puisque switchCity -> renderAll -> pushSchedule.
+   ===================================================================== */
+const GEO_MARGE = 15;          // km : avance minimale de la nouvelle ville (evite l'aller-retour entre deux villes voisines)
+const GEO_MAX   = 150;         // km : au-dela, aucune ville de la liste n'est pertinente - on ne touche a rien
+const GEO_PAUSE = 10*60e3;     // on ne relance pas la localisation plus d'une fois par dix minutes
+const GEO_FLOU  = 25;          // km : une position plus imprecise que ca ne decide de rien
+
+let GEO={};                    // derniere position connue : {at,lat,lon,acc,city,km,from}
+let GEO_BUSY=false, GEO_LAST=0, GEO_WAIT=null;
+
+/* distance en kilometres entre deux points de la Terre */
+function kmBetween(lat1,lon1,lat2,lon2){
+  const dLat=(lat2-lat1)*RAD, dLon=(lon2-lon1)*RAD;
+  const h=Math.sin(dLat/2)**2+Math.cos(lat1*RAD)*Math.cos(lat2*RAD)*Math.sin(dLon/2)**2;
+  return 2*6371*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function nearestCity(lat,lon){
+  let city=null,km=Infinity;
+  for(const c of CITIES){const d=kmBetween(lat,lon,c.lat,c.lon);if(d<km){km=d;city=c;}}
+  return{city,km};
+}
+/* le mois garde en memoire pour cette ville couvre-t-il bien les memes jours ? */
+const sameSpan=m=>!!(m&&m.days&&m.days.length&&m.days[0].greg===MONTH.days[0].greg
+                    &&m.days[m.days.length-1].greg===MONTH.days[MONTH.days.length-1].greg);
+
+/* une position recue vaut-elle quelque chose ? on ne fait confiance a rien */
+function sanePos(p){
+  if(!p||typeof p!=="object")return null;
+  const lat=Number(p.lat), lon=Number(p.lon), acc=Number(p.acc);
+  if(!isFinite(lat)||!isFinite(lon)||lat<-90||lat>90||lon<-180||lon>180)return null;
+  if(lat===0&&lon===0)return null;                 // position vide renvoyee par certains telephones
+  return{lat,lon,acc:isFinite(acc)&&acc>0?acc:0};
+}
+
+const GEO_NATIVE=!!(window.AndroidBridge&&window.AndroidBridge.requestLocation);
+const GEO_OK=GEO_NATIVE||!!navigator.geolocation;
+
+/* demande une position ; renvoie une promesse. Une seule demande a la fois. */
+function locate(){
+  if(GEO_WAIT)return GEO_WAIT;
+  GEO_WAIT=new Promise((resolve,reject)=>{
+    const clear=()=>{window.onLocation=null;window.onLocationError=null;};
+    const done=r=>{GEO_WAIT=null;const v=sanePos(r);v?resolve(v):reject(new Error("unavailable"));};
+    const fail=m=>{GEO_WAIT=null;reject(new Error(m||"error"));};
+    if(GEO_NATIVE){
+      const t=setTimeout(()=>{clear();fail("timeout");},40000);
+      window.onLocation=j=>{clearTimeout(t);clear();
+        try{done(typeof j==="string"?JSON.parse(j):j);}catch(e){fail("error");}};
+      window.onLocationError=m=>{clearTimeout(t);clear();fail(m);};
+      try{AndroidBridge.requestLocation();}catch(e){clearTimeout(t);clear();fail("error");}
+      return;
+    }
+    if(!navigator.geolocation){fail("unsupported");return;}
+    navigator.geolocation.getCurrentPosition(
+      p=>done({lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy}),
+      e=>fail(e&&e.code===1?"permission":(e&&e.code===3?"timeout":"unavailable")),
+      {enableHighAccuracy:false,timeout:30000,maximumAge:5*60e3});
+  });
+  return GEO_WAIT;
+}
+
+const setGeoState=m=>{const el=$("#geoState");if(el)el.textContent=m;};
+function geoWhy(code){
+  if(code==="permission") return "لم يُسمح بالوصول إلى الموقع. اسمح به ثم أعد المحاولة.";
+  if(code==="disabled")   return "خدمة تحديد الموقع مغلقة في الهاتف. شغّلها ثم أعد المحاولة.";
+  if(code==="timeout")    return "تعذّر تحديد الموقع الآن. جرّب في مكان مكشوف.";
+  if(code==="unsupported")return "هذا الجهاز لا يوفر تحديد الموقع.";
+  return "تعذّر تحديد الموقع.";
+}
+
+/* passe a la ville la plus proche si elle est nettement plus proche que celle en cours */
+async function applyGeo(){
+  const{city,km}=nearestCity(GEO.lat,GEO.lon);
+  GEO.city=city?city.n:"";GEO.km=km;
+  await Store.set(K_GEO,GEO);
+  const d=Math.round(km);
+  if(GEO.acc&&GEO.acc/1000>GEO_FLOU){
+    setGeoState(`الموقع غير دقيق بما يكفي. لم تتغيّر المواقيت.`);return;
+  }
+  if(!city||km>GEO_MAX){
+    setGeoState(`موقعك بعيد عن المدن المعروفة في التطبيق. لم تتغيّر المواقيت.`);return;
+  }
+  if(city.n===MONTH.city){
+    setGeoState(`أنت قرب ${city.n} (${d} كلم) — المواقيت المعتمدة هي الصحيحة.`);
+    $("#geoBanner").classList.add("hidden");return;
+  }
+  const cur=CITIES.find(c=>c.n===MONTH.city);
+  const curKm=cur?kmBetween(GEO.lat,GEO.lon,cur.lat,cur.lon):Infinity;
+  if(curKm-km<GEO_MARGE){
+    setGeoState(`أنت بين ${MONTH.city} و${city.n}، ولا تزال ${MONTH.city} قريبة. أُبقيت المواقيت على حالها.`);return;
+  }
+  const from=MONTH.city;
+  await switchCity(city.n,!sameSpan(MONTHS[city.n]));
+  if(MONTH.city!==city.n){setGeoState(`تعذّر حساب مواقيت ${city.n}.`);return;}
+  GEO.from=from;await Store.set(K_GEO,GEO);
+  $("#geoBannerT").textContent=`اعتُمدت مواقيت ${city.n}`;
+  $("#geoBannerS").textContent=`أقرب مدينة إلى موقعك (${d} كلم) — كنت على ${from}.`;
+  $("#btnGeoUndo").textContent=`العودة إلى ${from}`;
+  $("#geoBanner").classList.remove("hidden");
+  setGeoState(`اعتُمدت مواقيت ${city.n} (${d} كلم) بدل ${from}.`);
+}
+
+/* manual = true : l'utilisateur a demande lui-meme (bouton, ou activation du reglage) */
+async function geoCheck(manual){
+  if(GEO_BUSY)return;
+  if(!manual&&!SET.geo)return;
+  if(!GEO_OK){setGeoState(geoWhy("unsupported"));return;}
+  if(!manual&&GEO_LAST&&Date.now()-GEO_LAST<GEO_PAUSE)return;
+  GEO_BUSY=true;setGeoState("جارٍ تحديد الموقع…");
+  try{
+    const p=await locate();
+    GEO_LAST=Date.now();
+    GEO={at:GEO_LAST,lat:p.lat,lon:p.lon,acc:p.acc,from:GEO.from};
+    await applyGeo();
+  }catch(e){
+    setGeoState(geoWhy(e&&e.message));
+  }finally{GEO_BUSY=false;}
+}
+
+$("#swGeo").addEventListener("change",async e=>{
+  SET.geo=e.target.checked;
+  await Store.set(K_SET,SET);
+  if(SET.geo)geoCheck(true);
+  else{$("#geoBanner").classList.add("hidden");setGeoState("اتّباع الموقع متوقّف.");}
+});
+$("#btnGeoNow").addEventListener("click",()=>geoCheck(true));
+/* « العودة إلى … » : on rend la main a l'utilisateur et on coupe le suivi,
+   sinon la ville serait reprise automatiquement dans les secondes qui suivent. */
+$("#btnGeoUndo").addEventListener("click",async()=>{
+  const from=GEO.from;
+  $("#geoBanner").classList.add("hidden");
+  SET.geo=false;await Store.set(K_SET,SET);$("#swGeo").checked=false;
+  if(from&&CITIES.some(c=>c.n===from)){
+    sel.value=from;syncLink();saveCityPrefs();
+    await switchCity(from,!sameSpan(MONTHS[from]));
+  }
+  setGeoState("أُوقف اتّباع الموقع. يمكنك تشغيله متى شئت.");
+});
+/* au demarrage : on affiche d'abord ce qu'on sait deja (pas d'ecran vide),
+   puis on demande une position fraiche si le suivi est actif. */
+function geoBoot(){
+  if(!GEO_OK){setGeoState(geoWhy("unsupported"));return;}
+  if(!SET.geo){
+    setGeoState(GEO.city
+      ? `اتّباع الموقع متوقّف. آخر موقع معروف : ${GEO.city}.`
+      : "اتّباع الموقع متوقّف.");
+    return;
+  }
+  if(GEO.city)setGeoState(`آخر موقع معروف : ${GEO.city}.`);
+  geoCheck(false);
+}
+
+/* =====================================================================
+   5 quater. تحديث التطبيق : التطبيق الأصلي يسأل GitHub عن آخر إصدار، ويحمّل الملف ويثبّته
    ===================================================================== */
 const UPDATABLE=NATIVE&&!!window.AndroidBridge.checkUpdate;
 let INFO={name:"",code:0};   // الإصدار المثبّت
@@ -1600,7 +1773,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
-  SET=Object.assign({adhan:true,notify:true,rawatib:true},(await Store.get(K_SET))||{});
+  SET=Object.assign({adhan:true,notify:true,rawatib:true,geo:false},(await Store.get(K_SET))||{});
   renderSettings();
   const c=await Store.get(K_CITY);
   if(c){
@@ -1611,8 +1784,10 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(CITIES.some(v=>v.n===MONTH.city))sel.value=MONTH.city;
   syncLink();renderFavs();
   $("#startd").value=MONTH.days[0].greg;
+  GEO=(await Store.get(K_GEO))||{};
   syncClock();                      // caler l'horloge de la page avant le premier affichage
   renderAll();
+  geoBoot();                        // اتّباع الموقع : رسالة الحالة ثم التحقق
   let ticks=0;
   setInterval(()=>{
     /* filet de sécurité : on revérifie l'heure du téléphone chaque minute, au cas où
@@ -1621,7 +1796,11 @@ $("#btnShareFile").addEventListener("click",async()=>{
     if(!$("#v-day").classList.contains("hidden"))renderDay(false);
   },1000);
   /* retour sur l'écran après une longue mise en veille */
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden)onClockChanged(); });
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden)return;
+    onClockChanged();               // l'heure a pu changer pendant la veille
+    if(SET.geo)geoCheck(false);     // le lieu aussi : c'est ici qu'un voyage est detecte
+  });
   if(UPDATABLE){
     UPD=(await Store.get(K_UPD))||{};
     renderUpdate();

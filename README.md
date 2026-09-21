@@ -42,6 +42,45 @@ Copiez l'APK sur l'appareil, ouvrez-le, et autorisez l'installation depuis
 Remplacez `app/src/main/assets/index.html` par la nouvelle version,
 augmentez `versionCode` dans `app/build.gradle`, reconstruisez.
 
+## Suivre le lieu en voyage (اتّباع الموقع)
+
+Réglage à activer dans la carte des réglages, écran اليوم. Éteint par défaut :
+tant qu'on n'y touche pas, l'application ne demande jamais la position.
+
+Une fois activé, à chaque ouverture de l'application (et au retour à l'écran
+après une mise en veille), la position est relevée, la ville la plus proche des
+55 de la liste est cherchée, et ses horaires sont adoptés — l'adhan et le
+rappel suivent, puisqu'ils sont reprogrammés à partir du mois affiché. Un
+bandeau annonce le changement et propose « العودة إلى … » pour reprendre la
+main. Au retour chez soi, la ville d'origine redevient la plus proche et le
+tableau officiel qui y était enregistré est repris tel quel.
+
+Trois garde-fous, réglables en tête de la section « 5 ter » d'`index.html` :
+
+| Constante | Valeur | Rôle |
+|---|---|---|
+| `GEO_MARGE` | 15 km | La nouvelle ville doit être *nettement* plus proche, sinon la ville ne changerait pas d'un relevé à l'autre entre deux villes voisines. |
+| `GEO_MAX`   | 150 km | Au-delà (hors du Maroc), aucune ville de la liste n'a de sens : rien ne change, car le calcul suppose le fuseau du pays. |
+| `GEO_FLOU`  | 25 km | Une position trop imprécise ne décide de rien. |
+
+Le même code sert aux deux plateformes :
+
+- **Android** : `Loc.java` lit la position via `LocationManager`, sans Google
+  Play Services. Il prend d'abord une position déjà connue de moins d'un quart
+  d'heure (gratuite en batterie), sinon il demande une mesure au réseau puis au
+  GPS, et abandonne au bout de vingt-cinq secondes. `MainActivity.requestLocation()`
+  réclame l'autorisation au moment du clic, jamais au démarrage.
+- **iPhone / navigateur** : `navigator.geolocation`, sans une ligne de code en
+  plus. La page installée depuis GitHub Pages est servie en HTTPS, ce qu'iOS
+  exige pour donner la position.
+
+**Ce que ça ne fait pas** : il n'y a pas de suivi en arrière-plan. Si vous
+voyagez pendant que l'application est fermée, l'adhan de la prochaine prière
+utilise encore les horaires de la ville précédente ; ouvrir l'application une
+fois sur place remet tout d'aplomb. Un suivi en arrière-plan exigerait
+`ACCESS_BACKGROUND_LOCATION`, coûterait de la batterie, et reste impossible sur
+iPhone hors App Store.
+
 ## Ce qui change par rapport au navigateur
 - Le partage passe par un pont natif : l'image du mois et le fichier partageable
   ouvrent directement le sélecteur Android (WhatsApp, Gmail…).
