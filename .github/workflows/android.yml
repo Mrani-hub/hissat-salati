@@ -3,6 +3,13 @@ name: APK
 on:
   push:
     branches: [ main ]
+    # Une retouche du site iPhone ne doit pas relancer la fabrication de l'APK :
+    # elle referait une Release avec une étiquette déjà prise.
+    # index.html n'est pas dans web/ : le modifier reconstruit bien les deux.
+    paths-ignore:
+      - 'web/**'
+      - '.github/workflows/pages.yml'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:

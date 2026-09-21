@@ -20,6 +20,20 @@ Le fichier sort dans `app/build/outputs/apk/debug/`.
 gradle assembleDebug          # ou ./gradlew assembleDebug
 ```
 
+## Version iPhone
+
+Apple interdit d'installer une application reçue par WhatsApp : sur iPhone, la
+seule voie hors App Store est la page web installable. Le dossier `web/`
+fabrique exactement cela à partir du **même** `index.html` que l'APK, et le
+publie sur GitHub Pages (workflow **Site iPhone**).
+
+On envoie alors un lien au lieu d'un fichier : la personne l'ouvre, fait
+« Ajouter à l'écran d'accueil », et obtient une icône plein écran qui fonctionne
+sans connexion. Seul l'adhan automatique, application fermée, reste impossible
+en web — un verrou d'iOS.
+
+Mode d'emploi complet : [`web/LISEZ-MOI.md`](web/LISEZ-MOI.md).
+
 ## Installation sur le téléphone
 Copiez l'APK sur l'appareil, ouvrez-le, et autorisez l'installation depuis
 « sources inconnues » pour l'application qui ouvre le fichier (Fichiers ou Chrome).

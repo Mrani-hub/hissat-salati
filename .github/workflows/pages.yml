@@ -1,0 +1,85 @@
+name: Site iPhone
+
+# Publie l'application en page web installable (GitHub Pages).
+# C'est la version que les iPhone peuvent ajouter à leur écran d'accueil :
+# Apple n'autorise aucune autre façon d'installer une application reçue
+# par WhatsApp.
+#
+# À FAIRE UNE SEULE FOIS sur GitHub, avant le premier lancement :
+#   Settings → Pages → Build and deployment → Source : « GitHub Actions »
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      # la page elle-même, partagée avec l'APK
+      - 'app/src/main/assets/index.html'
+      - 'web/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication à la fois ; si deux poussées se suivent,
+# c'est la plus récente qui gagne.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fabriquer le site depuis index.html
+        run: node web/build.mjs
+
+      # Filet de sécurité : si un jour l'injection échoue en silence,
+      # on veut que le workflow s'arrête ici plutôt que de publier une
+      # page qui ne s'installe pas.
+      - name: Vérifier que la page est bien installable
+        run: |
+          cd web/_site
+          for f in index.html sw.js pwa.js manifest.webmanifest icons/apple-touch-icon.png; do
+            [ -s "$f" ] || { echo "::error::fichier manquant ou vide : $f"; exit 1; }
+          done
+          grep -q 'rel="manifest"'             index.html || { echo "::error::manifeste absent de la page"; exit 1; }
+          grep -q 'apple-mobile-web-app-title' index.html || { echo "::error::réglages iPhone absents"; exit 1; }
+          grep -q 'pwa.js'                     index.html || { echo "::error::script PWA absent"; exit 1; }
+          # Ici on veut l'inverse : le repère doit avoir DISPARU de sw.js.
+          # (« if grep » et non « grep && », sinon l'absence — le cas normal —
+          #  ferait échouer l'étape à cause du mode « arrêt à la 1re erreur ».)
+          if grep -q '__VERSION__' sw.js; then
+            echo "::error::version non remplacée dans sw.js"; exit 1
+          fi
+          echo "page installable : OK"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/_site
+
+  publier:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4
+
+      - name: Adresse à partager
+        run: |
+          echo "### حصة صلاتي est en ligne" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Lien à envoyer par WhatsApp : ${{ steps.pages.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"

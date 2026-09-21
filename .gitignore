@@ -5,6 +5,10 @@ app/build/
 .idea/
 *.iml
 local.properties
+
+# Site web fabriqué par web/build.mjs : reconstruit à chaque fois
+web/_site/
+node_modules/
 .DS_Store
 Thumbs.db
 
