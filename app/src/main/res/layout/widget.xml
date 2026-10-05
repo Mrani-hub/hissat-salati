@@ -250,10 +250,10 @@
         android:layout_weight="1"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:textSize="12sp"
-        android:textColor="#D8BE86"
-        android:lineSpacingExtra="1dp"
-        android:maxLines="2"
+        android:textSize="15sp"
+        android:textColor="#E0C68E"
+        android:lineSpacingExtra="0dp"
+        android:maxLines="3"
         android:ellipsize="end"
         android:text="@string/widget_ayah" />
 </LinearLayout>
