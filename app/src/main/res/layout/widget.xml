@@ -88,9 +88,10 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:format12Hour="@null"
-            android:format24Hour="HH:mm:ss"
-            android:textSize="20sp"
-            android:textColor="#CCFFFFFF"
+            android:format24Hour="HH:mm"
+            android:textSize="27sp"
+            android:textStyle="bold"
+            android:textColor="#EAF3F8"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -236,4 +237,23 @@
                 android:textSize="14sp" android:textColor="#FFFFFF" android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Le verset, dans la place qui reste.
+
+         hauteur 0 + poids 1 : il prend tout l'espace libre quand il y en a, et se
+         réduit à rien quand il n'y en a pas. Une vignette aplatie par l'utilisateur
+         le fait donc disparaître au lieu de rogner les horaires, qui eux comptent. -->
+    <TextView
+        android:id="@+id/wAyah"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="#D8BE86"
+        android:lineSpacingExtra="1dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:text="@string/widget_ayah" />
 </LinearLayout>

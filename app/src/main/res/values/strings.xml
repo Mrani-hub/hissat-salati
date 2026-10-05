@@ -34,4 +34,6 @@
     <string name="widget_just_now">الأذان الآن</string>
     <string name="widget_since">مضى %1$d د على الأذان</string>
     <string name="widget_no_month">افتح التطبيق لتحديث المواقيت</string>
+    <!-- verset affiché en bas du widget : la prière à son heure -->
+    <string name="widget_ayah">﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾ ـ النساء 103</string>
 </resources>

@@ -70,6 +70,13 @@ processus de l'écran d'accueil, sans réveil ni redessin de notre part. Il est
 forcé en 24 heures (`format12Hour="@null"`) pour s'accorder aux horaires du
 tableau, quel que soit le réglage du téléphone.
 
+**Le verset du bas** — النساء 103, sur la prière à son heure — occupe la place qui
+reste : hauteur zéro et poids 1. Il prend tout l'espace libre quand il y en a, et
+se réduit à rien quand il n'y en a pas. Une vignette aplatie par l'utilisateur le
+fait donc disparaître au lieu de rogner les horaires, qui eux comptent. Si le
+verset ne s'affiche pas, c'est que la vignette est trop basse : il suffit de
+l'étirer d'une rangée.
+
 **Le clignotement** du nom, dans la dernière demi-heure avant l'adhan, ne peut pas
 venir du widget lui-même : ce qu'un widget affiche est figé jusqu'au prochain
 dessin, et redessiner plusieurs fois par seconde coûterait la batterie qu'on
