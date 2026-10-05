@@ -28,8 +28,15 @@ final class Times {
     /** Le lever du soleil n'est pas une prière : on ne l'annonce pas « en cours ». */
     static final boolean[] IS_PRAYER = {true, false, true, true, true, true};
 
-    /** Comme la page : pendant une demi-heure après l'adhan, on annonce la prière en cours. */
-    static final long WINDOW_MS = 30 * 60 * 1000L;
+    /**
+     * Minutes pendant lesquelles la prière reste annoncée « en cours » après son adhan,
+     * repère par repère. Le Maghreb n'en garde qu'un quart d'heure : son temps est court
+     * et l'Icha suit de près, mieux vaut annoncer la suivante plus tôt.
+     * La page applique exactement les mêmes valeurs (constante WINDOW d'index.html).
+     */
+    static final int[] WINDOW_MIN = {30, 0, 30, 30, 15, 30};
+
+    static long windowMs(int k) { return WINDOW_MIN[k] * 60 * 1000L; }
 
     private static final String[] AR_DAYS =
             {"الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"};
@@ -105,7 +112,7 @@ final class Times {
             }
             if (x.cur >= 0) {
                 x.since = now - x.when[x.cur];
-                x.running = IS_PRAYER[x.cur] && x.since < WINDOW_MS;
+                x.running = IS_PRAYER[x.cur] && x.since < windowMs(x.cur);
             }
 
             for (int k = 0; k < 6; k++) {
@@ -144,7 +151,7 @@ final class Times {
 
     /** Part du créneau déjà écoulée, de 0 à 100, pour la barre du widget. */
     int progress() {
-        if (running) return (int) Math.min(100, since * 100 / WINDOW_MS);
+        if (running) return (int) Math.min(100, since * 100 / windowMs(cur));
         if (cur < 0 || nextWhen <= when[cur]) return 0;
         long total = nextWhen - when[cur];
         return (int) Math.max(0, Math.min(100, (System.currentTimeMillis() - when[cur]) * 100 / total));

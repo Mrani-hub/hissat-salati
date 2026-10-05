@@ -37,6 +37,9 @@ public class Widget extends AppWidgetProvider {
     private static final int[] CELL_NAME = {R.id.wN0, R.id.wN1, R.id.wN2, R.id.wN3, R.id.wN4};
     private static final int[] CELL_TIME = {R.id.wT0, R.id.wT1, R.id.wT2, R.id.wT3, R.id.wT4};
 
+    /** À moins d'une demi-heure de l'adhan, le nom de la prière se met à clignoter. */
+    private static final long ALERTE_MS = 30 * 60 * 1000L;
+
     private static final int DORE  = 0xFFE3B457;   // la prière mise en valeur
     private static final int PLEIN = 0xFFFFFFFF;
     private static final int PALE  = 0x8CFFFFFF;   // blanc atténué : les prières déjà passées
@@ -120,9 +123,10 @@ public class Widget extends AppWidgetProvider {
         if (!t.has || t.nextWhen == 0) {
             // le mois enregistré ne couvre pas aujourd'hui : on renvoie vers l'application
             v.setTextViewText(R.id.wLead, c.getString(R.string.widget_lead_next));
-            v.setTextViewText(R.id.wName, "—");
+            nom(v, "—", false);
             v.setTextViewText(R.id.wAt, "");
             v.setTextViewText(R.id.wLeft, c.getString(R.string.widget_no_month));
+            v.setTextColor(R.id.wLeft, PLEIN);
             v.setProgressBar(R.id.wBar, 100, 0, false);
             for (int i = 0; i < 5; i++) {
                 v.setTextViewText(CELL_NAME[i], Times.NAMES[CELL_KEY[i]]);
@@ -134,20 +138,24 @@ public class Widget extends AppWidgetProvider {
             // la demi-heure qui suit l'adhan : c'est la prière en cours qu'on annonce
             long min = t.since / 60000L;
             v.setTextViewText(R.id.wLead, c.getString(R.string.widget_lead_now));
-            v.setTextViewText(R.id.wName, Times.NAMES[t.cur]);
+            nom(v, Times.NAMES[t.cur], false);   // l'heure est là : plus rien à annoncer
             v.setTextViewText(R.id.wAt, t.time[t.cur]);
             v.setTextViewText(R.id.wLeft, min < 1
                     ? c.getString(R.string.widget_just_now)
                     : c.getString(R.string.widget_since, min));
+            v.setTextColor(R.id.wLeft, PLEIN);
             v.setProgressBar(R.id.wBar, 100, t.progress(), false);
             fillRow(v, t);
         } else {
+            long reste = t.nextWhen - System.currentTimeMillis();
+            boolean urgent = reste > 0 && reste <= ALERTE_MS;
             v.setTextViewText(R.id.wLead, t.tomorrow
                     ? c.getString(R.string.widget_lead_tomorrow)
                     : c.getString(R.string.widget_lead_next));
-            v.setTextViewText(R.id.wName, t.nextName);
+            nom(v, t.nextName, urgent);
             v.setTextViewText(R.id.wAt, t.nextTime);
-            v.setTextViewText(R.id.wLeft, left(c, t.nextWhen - System.currentTimeMillis()));
+            v.setTextViewText(R.id.wLeft, left(c, reste));
+            v.setTextColor(R.id.wLeft, urgent ? DORE : PLEIN);
             v.setProgressBar(R.id.wBar, 100, t.progress(), false);
             fillRow(v, t);
         }
@@ -158,6 +166,25 @@ public class Widget extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         try { m.updateAppWidget(id, v); } catch (Exception ignored) {}
+    }
+
+    /**
+     * Le nom de la prière, écrit dans les deux exemplaires que le ViewFlipper alterne.
+     *
+     * Un widget ne sait pas animer : tout ce qu'il affiche est figé jusqu'au prochain
+     * dessin. Le clignotement vient donc du ViewFlipper, qui alterne les deux
+     * exemplaires tout seul, dans le processus de l'écran d'accueil. Hors urgence les
+     * deux sont blancs et l'alternance ne se voit pas ; dans la dernière demi-heure le
+     * second passe au doré, et le nom clignote sans qu'on redessine quoi que ce soit.
+     *
+     * Le temps restant passe au doré en même temps : si un lanceur refuse d'animer ses
+     * widgets, l'approche de l'heure reste visible.
+     */
+    private static void nom(RemoteViews v, String texte, boolean urgent) {
+        v.setTextViewText(R.id.wName, texte);
+        v.setTextViewText(R.id.wName2, texte);
+        v.setTextColor(R.id.wName, PLEIN);
+        v.setTextColor(R.id.wName2, urgent ? DORE : PLEIN);
     }
 
     /** La rangée du bas : la prochaine prière en doré, celles déjà passées atténuées. */

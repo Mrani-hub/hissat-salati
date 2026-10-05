@@ -44,7 +44,8 @@
             android:maxLines="1" />
     </LinearLayout>
 
-    <!-- la prière annoncée : à droite son nom et son heure, à gauche le temps restant -->
+    <!-- La prière annoncée. Trois colonnes : le temps restant à droite, l'heure
+         qu'il est au milieu, le nom de la prière et son heure à gauche. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,8 +55,7 @@
         android:baselineAligned="false">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -77,20 +77,61 @@
                 android:maxLines="1" />
         </LinearLayout>
 
+        <!-- L'heure qu'il est. TextClock se met à jour tout seul, dans le processus de
+             l'écran d'accueil : aucun réveil, aucun redessin du widget de notre part.
+             format12Hour="@null" force les 24 heures quel que soit le réglage du
+             téléphone, pour que l'horloge s'accorde aux horaires du tableau. -->
+        <TextClock
+            android:id="@+id/wClock"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:format12Hour="@null"
+            android:format24Hour="HH:mm:ss"
+            android:textSize="20sp"
+            android:textColor="#CCFFFFFF"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="end">
 
-            <TextView
-                android:id="@+id/wName"
+            <!-- Le nom clignote dans la dernière demi-heure. Un widget ne sait pas
+                 animer : c'est le ViewFlipper qui alterne tout seul, côté écran
+                 d'accueil, entre deux exemplaires du même mot. Hors urgence les deux
+                 sont de la même couleur, l'alternance ne se voit donc pas ; à l'approche
+                 de l'heure, le second passe au doré et le nom se met à clignoter —
+                 sans qu'Android ait à redessiner quoi que ce soit. -->
+            <ViewFlipper
+                android:id="@+id/wFlip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="27sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:maxLines="1" />
+                android:autoStart="true"
+                android:flipInterval="750"
+                android:measureAllChildren="true">
+
+                <TextView
+                    android:id="@+id/wName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="27sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/wName2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="27sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:maxLines="1" />
+            </ViewFlipper>
 
             <TextView
                 android:id="@+id/wAt"

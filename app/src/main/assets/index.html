@@ -615,6 +615,11 @@ const AJR={
 };
 const AJR_OPEN=new Set();   // النوافل التي فُتح نص أجرها
 const WINDOW=30;   // minutes pendant lesquelles la prière est annoncée « en cours »
+/* المغرب : وقته قصير والعشاء قريب منه — une demi-heure y est trop longue, on
+   annonce l'Icha plus tôt. Times.WINDOW_MIN, côté Android, porte les mêmes valeurs :
+   le widget de l'écran d'accueil et la carte « اليوم » ne doivent jamais se contredire. */
+const WINDOW_PAR={maghrib:15};
+const windowOf=k=>(WINDOW_PAR[k]||WINDOW)*60000;
 const AR_DAYS=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const SKY={
   fajr:"linear-gradient(150deg,#1E2A50,#5B4A72 60%,#8A6A73)",
@@ -817,10 +822,11 @@ function renderDay(force){
   const d=parseISO(T.today.greg);
   $("#heroDate").innerHTML=`<b>${FR_DATE.format(d)}</b> &nbsp;·&nbsp; <span style="font-family:var(--arab);font-size:1.05em">${T.today.dayName} ${T.today.hijri} ${MONTH.hijriMonth||""}</span>`;
 
-  /* prière en cours : pendant WINDOW minutes après l'adhan, on n'annonce pas la suivante */
+  /* prière en cours : pendant sa fenêtre après l'adhan, on n'annonce pas la suivante */
   const cur=T.currentIdx>=0?T.list[T.currentIdx]:null;
   const since=cur?now-cur.when:Infinity;
-  const running=!T.out&&cur&&cur.track&&since<WINDOW*60000;
+  const win=cur?windowOf(cur.k):0;
+  const running=!T.out&&cur&&cur.track&&since<win;
 
   if(running){
     $("#heroLead").textContent="الصلاة الحالية";
@@ -830,7 +836,7 @@ function renderDay(force){
     $("#heroAt").textContent=cur.time;
     $("#cdLab").textContent="منذ الأذان";
     $("#cdNum").textContent=hms(since);
-    $("#cdBar").style.width=Math.min(100,since/(WINDOW*60000)*100).toFixed(1)+"%";
+    $("#cdBar").style.width=Math.min(100,since/win*100).toFixed(1)+"%";
     $("#heroCall").classList.remove("hidden");
     $("#hero").style.background=SKY[cur.k]||SKY.night;
   }else{

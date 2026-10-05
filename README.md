@@ -65,9 +65,42 @@ que celui-ci soit debout. Écran éteint, le widget ne coûte rien ; écran allu
 il est juste à la minute. Le réveil est reposé après chaque dessin, et arrêté
 dès que le dernier widget est retiré de l'écran d'accueil.
 
+**L'horloge du milieu** est un `TextClock` : il se met à jour tout seul, dans le
+processus de l'écran d'accueil, sans réveil ni redessin de notre part. Il est
+forcé en 24 heures (`format12Hour="@null"`) pour s'accorder aux horaires du
+tableau, quel que soit le réglage du téléphone.
+
+**Le clignotement** du nom, dans la dernière demi-heure avant l'adhan, ne peut pas
+venir du widget lui-même : ce qu'un widget affiche est figé jusqu'au prochain
+dessin, et redessiner plusieurs fois par seconde coûterait la batterie qu'on
+économise par ailleurs. Le nom est donc écrit **deux fois**, dans un `ViewFlipper`
+qui les alterne de lui-même toutes les trois quarts de seconde. Hors urgence les
+deux exemplaires sont blancs et l'alternance ne se voit pas ; à l'approche de
+l'heure, le second passe au doré et le nom se met à clignoter — sans qu'Android
+ait rien à redessiner. Le temps restant passe au doré en même temps, pour que
+l'urgence reste visible même sur un lanceur qui refuse d'animer ses widgets.
+
 Fichiers concernés : `Widget.java` (le réveil et le dessin), `Times.java` (où
 en est-on dans la journée), `res/layout/widget.xml` (les cases à remplir),
 `res/xml/widget_info.xml` (la fiche lue par l'écran d'accueil).
+
+## La fenêtre « الصلاة الحالية »
+
+Après l'adhan, l'application continue d'annoncer la prière qui vient de commencer
+au lieu de passer tout de suite à la suivante. Cette durée est de **trente minutes**,
+sauf pour le **Maghreb où elle tombe à quinze** : son temps est court et l'Icha suit
+de près, mieux vaut annoncer la suivante plus tôt.
+
+Les valeurs sont écrites **deux fois**, et doivent le rester à l'identique :
+
+| Où | Quoi |
+|---|---|
+| `index.html` | `WINDOW` (30) et `WINDOW_PAR` (`{maghrib:15}`) |
+| `Times.java` | `WINDOW_MIN` = `{30, 0, 30, 30, 15, 30}` — dans l'ordre صبح، شروق، ظهر، عصر، مغرب، عشاء |
+
+C'est la seule chose que la page et le widget doivent se dire à l'identique sans
+passer l'un par l'autre : si l'une des deux change, l'autre doit suivre, sinon la
+carte « اليوم » et la vignette de l'écran d'accueil se contrediraient.
 
 ## La Qibla (اتجاه القبلة)
 
