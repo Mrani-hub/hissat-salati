@@ -17,10 +17,15 @@ const VERSION = "__VERSION__";
 const CACHE   = "hissat-salati-" + VERSION;
 
 /* Tout ce dont l'application a besoin pour s'ouvrir hors connexion.
-   La page est un fichier unique : polices, images et code sont dedans. */
+   La page porte ses propres polices et son code ; le Coran et la police du
+   mushaf sont à part, et ne sont lus qu'à l'ouverture de l'onglet القرآن.
+   On les met quand même ici : sans eux, celui qui ouvre cet onglet pour la
+   première fois dans l'avion ne verrait rien. */
 const FILES = [
   "./",
   "./index.html",
+  "./quran-warsh.js",
+  "./UthmanicWarsh_V21.ttf",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

@@ -20,7 +20,11 @@ import { fileURLToPath } from "node:url";
 
 const ICI    = dirname(fileURLToPath(import.meta.url));   // …/apk/web
 const RACINE = join(ICI, "..");                           // …/apk
-const SOURCE = join(RACINE, "app", "src", "main", "assets", "index.html");
+const ASSETS = join(RACINE, "app", "src", "main", "assets");
+const SOURCE = join(ASSETS, "index.html");
+/* Le Coran et sa police ne sont pas dans la page : ce sont des fichiers voisins,
+   chargés seulement quand on ouvre l'onglet القرآن. Ils doivent donc suivre. */
+const VOISINS = ["quran-warsh.js", "UthmanicWarsh_V21.ttf"];
 const SORTIE = join(ICI, "_site");
 
 const stop = msg => { console.error("\n  ERREUR : " + msg + "\n"); process.exit(1); };
@@ -116,6 +120,12 @@ const sw = (await readFile(join(ICI, "sw.js"), "utf8")).replace("__VERSION__", V
 if (sw.includes("__VERSION__")) stop("sw.js : le repère __VERSION__ n'a pas été remplacé.");
 await writeFile(join(SORTIE, "sw.js"), sw, "utf8");
 
+for (const nom of VOISINS) {
+  const src = join(ASSETS, nom);
+  if (!existsSync(src)) stop("fichier voisin introuvable : " + src);
+  await copyFile(src, join(SORTIE, nom));
+}
+
 await copyFile(join(ICI, "pwa.js"), join(SORTIE, "pwa.js"));
 await copyFile(join(ICI, "manifest.webmanifest"), join(SORTIE, "manifest.webmanifest"));
 
@@ -133,5 +143,7 @@ const ko = n => (n / 1024).toFixed(0) + " Ko";
 console.log("\n  Site fabriqué : " + SORTIE);
 console.log("  version       : " + VERSION);
 console.log("  adresse       : " + (BASE || "inconnue (essai local) — pas de vignette WhatsApp"));
-console.log("  page          : " + ko(Buffer.byteLength(html)) + " (tout compris : polices, code, données)");
+console.log("  page          : " + ko(Buffer.byteLength(html)) + " (polices, code, données du calendrier)");
+for (const nom of VOISINS)
+  console.log("  " + nom.padEnd(14).slice(0, 14) + ": " + ko((await readFile(join(ASSETS, nom))).length) + " (chargé à la demande)");
 console.log("\n  Essai local   : npx serve web/_site   puis ouvrir l'adresse affichée\n");

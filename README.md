@@ -150,37 +150,70 @@ soleil levant, et l'ombre de midi — qui, elle, ne tombe jamais en panne.
 
 ## Le Coran (القرآن)
 
-Cinquième onglet. Il garde la page où l'on s'est arrêté, et rappelle ce qui
-distingue la riwaya de Warsh.
+Cinquième onglet : le texte du mushaf en riwaya de **Warsh**, la page où l'on
+s'est arrêté, et ce qui distingue Warsh de Hafs.
 
-**Le découpage** est celui du Maroc : soixante أحزاب, huit أثمان chacun, soit
-quatre cent quatre-vingts أثمان — un par page du mushaf. C'est de l'arithmétique
-pure : aucune borne n'est recopiée d'une source, il n'y a donc rien à se tromper.
+### D'où vient le texte
 
-**La position tient dans un seul nombre**, de 0 à 480 (`QUR.pos`) : 0 quand rien
-n'est marqué, 181 pour le 181e thumn, c'est-à-dire le thumn 5 du hizb 23. Un seul
-nombre interdit les états impossibles — un thumn 9, un hizb 61 — et rend
-l'avancement, le retour et la ختمة immédiats à calculer. Au 480e, le compteur de
-ختمات monte d'un cran et la marque repart à zéro.
+Du **مجمع الملك فهد لطباعة المصحف الشريف** (Médine), numérisé et structuré par
+[Quranpedia.net](https://quranpedia.net), dont la licence autorise l'usage dans une
+application sans obligation de mention — on les crédite quand même, à l'écran et ici.
+**6 214 versets** (numérotation de Warsh ; Hafs en compte 6 236).
 
-**Les أحكام** listés sont seulement ceux où Warsh (طريق الأزرق, celui du Maroc)
-s'écarte de Hafs : مد البدل, l'équivalent des deux grands mad, النقل,
-إبدال الهمز الساكن, التقليل والإمالة, تغليظ اللام, ترقيق الراء,
-صلة ميم الجمع, et la basmala entre deux sourates. C'est une aide-mémoire, pas une
-référence : l'écran le dit lui-même.
+Rien n'a été saisi à la main et rien n'a été deviné. Un seul défaut a été corrigé :
+26 versets — tous des derniers versets de sourate, effet de la numérotation de Warsh,
+plus longue — portaient `ربع = 0` ; chacun a repris le ربع du verset qui le précède.
+Vérification automatique : les 240 tranches couvrent **exactement** les 6 214 versets,
+sans trou ni doublon.
 
-### Ce qui manque encore : le texte
+### Pourquoi أرباع et non أثمان
 
-L'onglet ne contient **pas** le texte coranique, et ce n'est pas un oubli. Un
-texte en riwaya de Warsh ne s'écrit pas de mémoire ni ne se devine : il doit venir
-d'une source en laquelle on a confiance, intégrée telle quelle, sans retouche.
+Le découpage est celui du **مصحف الأرباع** publié par مؤسسة محمد السادس
+لنشر المصحف الشريف : soixante أحزاب, quatre أرباع chacun, **un ربع par page**.
+C'est l'édition marocaine de référence pour « une division par page », et c'est aussi
+le seul découpage dont les bornes existent sous forme exploitable. Les أثمان (480)
+auraient demandé 240 bornes de plus — les milieux de chaque ربع — introuvables
+ailleurs que sur le papier, et hors de question d'inventer.
 
-Pour l'ajouter il faut **deux choses**, et la première ne suffit pas :
+La position tient dans **un seul nombre**, de 1 à 240 : le ربع où l'on en est. Un seul
+nombre interdit les états impossibles — un ربع 5, un حزب 61. Une marque enregistrée
+par une version précédente, qui comptait en أثمان de 0 à 480, est convertie au premier
+démarrage (`qurMigre`) : elle n'est pas perdue.
 
-1. le texte lui-même, en Warsh, dans un fichier lisible (`.txt`, `.json`, `.xml`) ;
-2. les **bornes des 480 أثمان** — à quelle sourate et quelle آية commence chacun.
-   Sans elles, impossible de paginé à un thumn par page ; beaucoup de fichiers du
-   Coran ne portent que les sourates et les versets.
+### Le poids, et comment il a été tenu
+
+Le texte (1 370 Ko) et la police (250 Ko) **ne sont pas dans `index.html`**. Ce sont
+deux fichiers voisins, dans `assets/`, chargés seulement à la première ouverture de
+l'onglet — par une balise `<script>` ajoutée au vol, et non par `fetch`, qui est
+interdit d'un fichier à l'autre en `file://`, c'est-à-dire dans l'APK. Le même code
+sert donc aux deux plateformes.
+
+| | tel quel | dans l'APK |
+|---|---|---|
+| `index.html` | 418 Ko | 252 Ko |
+| `quran-warsh.js` | 1 370 Ko | 271 Ko |
+| `UthmanicWarsh_V21.ttf` | 250 Ko | 124 Ko |
+
+L'application démarre donc aussi vite qu'avant, et qui n'ouvre jamais le Coran n'en
+paie jamais le prix.
+
+### La police
+
+**L'Amiri embarquée ne sait pas écrire ce texte.** Le texte de Warsh emploie quatorze
+signes particuliers, dont `U+06EC` dix mille fois ; Amiri les pose de travers, détachés
+au-dessus de la ligne. Il faut la police assortie, **KFGQPC Warsh Uthmanic Script**.
+
+Sa licence, lue dans le fichier lui-même, autorise la copie et la distribution gratuites
+mais **interdit toute modification** : elle est donc embarquée telle quelle, ni allégée
+ni convertie en woff2. Les ronds de fin de verset sont des glyphes de cette police, à
+`U+FC00 + numéro - 1` : ils se calculent et ne sont pas stockés.
+
+### Les أحكام
+
+Seulement ce où ورش من طريق الأزرق — la riwaya du Maroc — s'écarte de حفص :
+مد البدل, les deux grands mad, النقل, إبدال الهمز الساكن, التقليل والإمالة,
+تغليظ اللام, ترقيق الراء, صلة ميم الجمع, et la basmala entre deux sourates.
+C'est une aide-mémoire, et l'écran le dit lui-même.
 
 ## Suivre le lieu en voyage (اتّباع الموقع)
 

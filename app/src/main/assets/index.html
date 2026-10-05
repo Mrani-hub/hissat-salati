@@ -253,7 +253,6 @@ tbody tr.future .cell{opacity:.45}
 
 .thumnwrap{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
 .thumnlab{font-family:var(--arab);font-size:1.08rem;margin-bottom:8px;direction:rtl}
-.thumnrow{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
 .th{font:inherit;font-family:var(--arab);font-size:1rem;font-variant-numeric:tabular-nums;
   border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);
   border-radius:9px;padding:9px 0;cursor:pointer;line-height:1.2;text-align:center}
@@ -271,6 +270,41 @@ tbody tr.future .cell{opacity:.45}
 .tajbtn:focus-visible{outline:2px solid var(--azure);outline-offset:-2px;border-radius:8px}
 .tajtxt{font-family:var(--arab);font-size:1.12rem;line-height:1.95;direction:rtl;
   background:var(--gold-pale);border-radius:10px;padding:11px 14px;margin:0 0 12px}
+
+/* La police du mushaf, dans un fichier voisin. Elle n'est téléchargée que
+   lorsqu'un texte l'emploie : tant qu'on n'ouvre pas l'onglet القرآن, elle
+   ne coûte rien. Elle est embarquée telle quelle, sans retouche ni
+   conversion : sa licence (KFGQPC) autorise la copie et la distribution
+   gratuites, mais interdit toute modification. */
+@font-face{
+  font-family:"Warsh";
+  src:url("UthmanicWarsh_V21.ttf") format("truetype");
+  font-display:swap;
+}
+
+/* lecture du ربع */
+.qlirehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.qou{font-family:var(--arab);font-size:1.25rem;font-weight:700;color:var(--azure);direction:rtl}
+.qnav{display:flex;gap:6px}
+.qnav .act{font-size:.8rem;padding:7px 12px}
+.qtexte{
+  margin-top:12px;max-height:62vh;overflow-y:auto;direction:rtl;text-align:justify;
+  font-family:"Warsh","Amiri",serif;font-size:1.55rem;line-height:2.5;
+  color:var(--ink);background:var(--gold-pale);border:1px solid #EEE2C4;
+  border-radius:12px;padding:16px 15px;
+}
+.qsura{
+  font-family:var(--arab);font-size:1.05rem;font-weight:700;color:#8A671C;text-align:center;
+  background:#fff;border:1px solid var(--gold);border-radius:99px;
+  padding:3px 14px;margin:14px auto 10px;width:max-content;line-height:1.6;
+}
+.qsura:first-child{margin-top:0}
+.qaya{display:inline}
+.qnum{color:var(--gold);padding:0 .12em}
+.qmot{font-family:var(--arab);font-size:1.1rem;line-height:1.8;color:var(--ink-soft);text-align:center;padding:22px 6px}
+
+/* les quatre أرباع */
+.rubrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 
 /* adhkar */
 .dsec{margin-top:18px}
@@ -489,7 +523,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
           <h3>علامة القراءة</h3>
           <div class="qurwhen" id="qurWhen">—</div>
         </div>
-        <div class="qurpos"><b id="qurHizb">—</b><span id="qurThumn"></span></div>
+        <div class="qurpos"><b id="qurHizb">—</b><span id="qurRub"></span></div>
       </div>
       <div class="qurbar"><span id="qurBar"></span></div>
       <div class="qurnum">
@@ -497,21 +531,34 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
         <span id="qurLeft"></span>
       </div>
       <div class="qurbtns">
-        <button class="act" id="btnQurNext">أنهيت هذا الثمن</button>
-        <button class="act ghost" id="btnQurBack">رجوع ثمنًا</button>
+        <button class="act" id="btnQurNext">أنهيت هذا الربع</button>
+        <button class="act ghost" id="btnQurBack">رجوع ربعًا</button>
         <button class="act ghost" id="btnQurReset">تصفير</button>
       </div>
       <div class="qurkhat hidden" id="qurKhat"></div>
     </div>
 
+    <!-- le texte du rub' courant -->
+    <div class="card pad">
+      <div class="qlirehead">
+        <div class="qou" id="qurOu">—</div>
+        <div class="qnav">
+          <button class="act ghost" id="btnRubPrev" aria-label="الربع السابق">السابق</button>
+          <button class="act ghost" id="btnRubNext" aria-label="الربع التالي">التالي</button>
+        </div>
+      </div>
+      <div class="qtexte" id="qurTexte"></div>
+      <p class="note">نصّ المصحف برواية ورش عن نافع، من إصدار مجمع الملك فهد لطباعة المصحف الشريف، برقمنة Quranpedia.net. الخطّ: KFGQPC Warsh Uthmanic Script.</p>
+    </div>
+
     <!-- la grille -->
     <div class="card pad">
-      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">الأحزاب والأثمان</h3>
-      <div class="sub">ستون حزبًا، في كل حزب ثمانية أثمان — أربعُ مئةٍ وثمانون ثمنًا، ثمنٌ لكل صفحة. اختر الحزب ثم الثمن الذي وقفت عنده.</div>
+      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">الأحزاب والأرباع</h3>
+      <div class="sub">ستون حزبًا، في كل حزب أربعة أرباع — مئتان وأربعون ربعًا، ربعٌ لكل صفحة، كما في مصحف الأرباع. اختر الحزب ثم الربع.</div>
       <div class="hizbgrid" id="hizbGrid"></div>
       <div class="thumnwrap">
-        <div class="thumnlab" id="thumnLab">—</div>
-        <div class="thumnrow" id="thumnRow"></div>
+        <div class="thumnlab" id="rubLab">—</div>
+        <div class="rubrow" id="rubRow"></div>
       </div>
     </div>
 
@@ -1688,31 +1735,43 @@ $("#btnQLoc").addEventListener("click",async()=>{
 
 
 /* =====================================================================
-   6 quater. القرآن : موضع القراءة بالأحزاب والأثمان، وأحكام رواية ورش
+   6 quater. القرآن : نصّ ورش، والقراءة بالأحزاب والأرباع
    ---------------------------------------------------------------------
-   Le découpage marocain : soixante أحزاب, huit أثمان chacun, soit quatre
-   cent quatre-vingts أثمان — un par page du mushaf. C'est de l'arithmétique
-   pure, aucune donnée n'est recopiée : on ne peut donc pas se tromper de
-   borne, et rien du texte coranique n'est reproduit ici.
+   Le texte vient du مجمع الملك فهد لطباعة المصحف الشريف, numérisé par
+   Quranpedia.net. Il n'est PAS dans cette page : il dort dans un fichier
+   voisin, quran-warsh.js, qui n'est chargé qu'à la première ouverture de
+   l'onglet. L'application démarre donc aussi vite qu'avant, et celui qui
+   n'ouvre jamais le Coran n'en paie jamais le prix.
 
-   La position est enregistrée sous forme d'un seul nombre, de 0 à 480 :
-     0   = rien n'est encore marqué ;
-     181 = on a fini le 181e thumn, c'est-à-dire le thumn 5 du hizb 23.
-   Un seul nombre évite les états impossibles (un thumn 9, un hizb 61) et
-   rend l'avancement, le retour et la ختمة immédiats à calculer.
+   Le découpage est celui du مصحف الأرباع marocain : soixante أحزاب, quatre
+   أرباع chacun, soit deux cent quarante أرباع — un par page. Les bornes
+   viennent du fichier, elles ne sont pas devinées.
+
+   La position tient dans un seul nombre, de 1 à 240 : le ربع où l'on en est.
+   Un seul nombre interdit les états impossibles — un ربع 5, un حزب 61.
    ===================================================================== */
-const K_QUR="quran-mark-v1";
-const QUR_PAR_HIZB=8, QUR_HIZB=60, QUR_TOTAL=QUR_HIZB*QUR_PAR_HIZB;   // 480
+const K_QUR="quran-mark-v2";
+const QUR_PAR_HIZB=4, QUR_HIZB=60, QUR_TOTAL=QUR_HIZB*QUR_PAR_HIZB;   // 240
 
-let QUR={pos:0,at:0,khatma:0};
-let QUR_VUE=1;                 // le hizb dont on affiche les أثمان
+let QUR={pos:1,at:0,khatma:0,v:2};
+let QUR_VUE=1;                 // le hizb dont on affiche les أرباع dans la grille
 const QUR_OUVERT=new Set();    // les أحكام dont le texte est déplié
+let QFLAT=null, QDEB=null;     // versets à plat, et l'indice où commence chaque ربع
+let QUR_PROMESSE=null;         // chargement du fichier voisin, une seule fois
 
 const hizbDe  = p => Math.floor((p-1)/QUR_PAR_HIZB)+1;
-const thumnDe = p => ((p-1)%QUR_PAR_HIZB)+1;
-const posDe   = (h,t) => (h-1)*QUR_PAR_HIZB+t;
+const rubDe   = p => ((p-1)%QUR_PAR_HIZB)+1;
+const posDe   = (h,r) => (h-1)*QUR_PAR_HIZB+r;
 
-/* « اليوم », « أمس », « منذ ثلاثة أيام »… */
+/* L'ancienne marque comptait en أثمان, de 0 à 480 : un ربع en vaut deux. */
+function qurMigre(x){
+  const neuf={pos:1,at:0,khatma:0,v:2};
+  if(!x||typeof x!=="object")return neuf;
+  if(x.v===2)return Object.assign(neuf,x,{pos:Math.max(1,Math.min(QUR_TOTAL,x.pos|0||1))});
+  return{pos:Math.max(1,Math.min(QUR_TOTAL,Math.floor((x.pos|0)/2)+1)),
+         at:x.at||0, khatma:x.khatma||0, v:2};
+}
+
 function depuisQuand(ts){
   if(!ts)return "";
   const j=Math.floor((Date.now()-ts)/864e5);
@@ -1746,22 +1805,57 @@ const WARSH=[
   c:"لورشٍ بين كلّ سورتين ثلاثةُ أوجه: البسملة، والسكت بلا بسملة، والوصل بلا بسملة. وبين الأنفال وبراءة: الوقف، أو السكت، أو الوصل."}
 ];
 
+/* ---------------- le texte, chargé à la demande ---------------- */
+
+/* Un <script> voisin plutôt qu'un fetch : dans l'APK la page est en file://,
+   où fetch est interdit d'un fichier à l'autre, alors qu'une balise script
+   passe sans rien demander. Le même code sert donc aux deux plateformes. */
+function qurCharge(){
+  if(window.QURAN_WARSH)return Promise.resolve();
+  if(QUR_PROMESSE)return QUR_PROMESSE;
+  QUR_PROMESSE=new Promise((ok,ko)=>{
+    const s=document.createElement("script");
+    s.src="quran-warsh.js";
+    s.onload=()=>{ window.QURAN_WARSH?ok():ko(new Error("vide")); };
+    s.onerror=()=>{ QUR_PROMESSE=null; ko(new Error("introuvable")); };
+    document.head.appendChild(s);
+  });
+  return QUR_PROMESSE;
+}
+
+/* On met les 6214 versets à plat une seule fois : un ربع n'est plus alors
+   qu'une tranche du tableau, et le changement de sourate ne demande aucun
+   calcul au moment de l'affichage. */
+function qurPrepare(){
+  if(QFLAT)return;
+  const S=window.QURAN_WARSH.s, R=window.QURAN_WARSH.r;
+  QFLAT=[];
+  const index={};
+  S.forEach((su,i)=>su[1].forEach((t,j)=>{
+    index[(i+1)+":"+(j+1)]=QFLAT.length;
+    QFLAT.push([i+1,j+1,t]);
+  }));
+  QDEB=R.map(b=>index[b[0]+":"+b[1]]);
+}
+const qurTranche=rub=>QFLAT.slice(QDEB[rub-1], rub<QUR_TOTAL?QDEB[rub]:QFLAT.length);
+/* le rond de fin de verset est un glyphe de la police : U+FC00 + numéro - 1 */
+const qurRond=n=>String.fromCharCode(0xFC00+n-1);
+
 /* ---------------- l'enregistrement ---------------- */
 
 function qurPose(pos,touche){
-  QUR.pos=Math.max(0,Math.min(QUR_TOTAL,pos));
+  QUR.pos=Math.max(1,Math.min(QUR_TOTAL,pos));
   if(touche)QUR.at=Date.now();
-  if(QUR.pos>0)QUR_VUE=hizbDe(QUR.pos);
+  QUR_VUE=hizbDe(QUR.pos);
   Store.set(K_QUR,QUR);
   renderQuran();
 }
 
-/* « أنهيت هذا الثمن » : au quatre cent quatre-vingtième, la ختمة est complète
-   et le compteur repart à zéro. */
+/* « أنهيت هذا الربع » : au deux cent quarantième, la ختمة est complète. */
 function qurSuivant(){
   if(QUR.pos>=QUR_TOTAL){
     QUR.khatma=(QUR.khatma||0)+1;
-    qurPose(0,true);
+    qurPose(1,true);
     return;
   }
   qurPose(QUR.pos+1,true);
@@ -1770,21 +1864,18 @@ function qurSuivant(){
 /* ---------------- l'affichage ---------------- */
 
 function renderQuran(){
-  const pos=QUR.pos|0, pose=pos>0;
+  const pos=QUR.pos, faits=pos-1;
 
-  $("#qurHizb").textContent=pose?`الحزب ${hizbDe(pos)}`:"—";
-  $("#qurThumn").textContent=pose?`الثمن ${thumnDe(pos)}`:"";
-  $("#qurWhen").textContent=pose
-    ? `آخر ثمنٍ قرأته${QUR.at?" · "+depuisQuand(QUR.at):""}`
-    : "لم تُسجَّل علامةٌ بعد. اختر الحزب ثم الثمن الذي وقفت عنده.";
+  $("#qurHizb").textContent=`الحزب ${hizbDe(pos)}`;
+  $("#qurRub").textContent=`الربع ${rubDe(pos)}`;
+  $("#qurWhen").textContent="أنت هنا"+(QUR.at?" · "+depuisQuand(QUR.at):"");
+  $("#qurBar").style.width=(faits/QUR_TOTAL*100).toFixed(1)+"%";
+  $("#qurRead").innerHTML=`قرأت <b>${faits}</b> من ${QUR_TOTAL} ربعًا`;
+  $("#qurLeft").textContent=`بقي ${QUR_TOTAL-faits} · ${Math.round(faits/QUR_TOTAL*100)}٪`;
 
-  $("#qurBar").style.width=(pos/QUR_TOTAL*100).toFixed(1)+"%";
-  $("#qurRead").innerHTML=`قرأت <b>${pos}</b> من ${QUR_TOTAL} ثمنًا`;
-  $("#qurLeft").textContent=pose?`بقي ${QUR_TOTAL-pos} · ${Math.round(pos/QUR_TOTAL*100)}٪`:"";
-
-  $("#btnQurNext").textContent=pos>=QUR_TOTAL?"أتممت الختمة":"أنهيت هذا الثمن";
-  $("#btnQurBack").disabled=!pose;
-  $("#btnQurReset").disabled=!pose&&!(QUR.khatma>0);
+  $("#btnQurNext").textContent=pos>=QUR_TOTAL?"أتممت الختمة":"أنهيت هذا الربع";
+  $("#btnQurBack").disabled=pos<=1;
+  $("#btnQurReset").disabled=pos<=1&&!(QUR.khatma>0);
 
   const kh=$("#qurKhat");
   kh.classList.toggle("hidden",!(QUR.khatma>0));
@@ -1794,22 +1885,22 @@ function renderQuran(){
   /* la grille des soixante */
   let g="";
   for(let h=1;h<=QUR_HIZB;h++){
-    const actuel=pose&&hizbDe(pos)===h;
-    const fini=pose&&!actuel&&h*QUR_PAR_HIZB<=pos;
+    const actuel=hizbDe(pos)===h;
+    const fini=!actuel&&h*QUR_PAR_HIZB<=faits;
     const cl="hz"+(actuel?" now":(fini?" done":""))+(h===QUR_VUE?" open":"");
     g+=`<button type="button" class="${cl}" data-h="${h}" aria-label="الحزب ${h}">${h}</button>`;
   }
   $("#hizbGrid").innerHTML=g;
 
-  /* les huit أثمان du hizb ouvert */
-  $("#thumnLab").textContent=`أثمان الحزب ${QUR_VUE}`;
+  /* les quatre أرباع du hizb ouvert */
+  $("#rubLab").textContent=`أرباع الحزب ${QUR_VUE}`;
   let r="";
   for(let t=1;t<=QUR_PAR_HIZB;t++){
     const p=posDe(QUR_VUE,t);
     const cl="th"+(p===pos?" now":(p<pos?" done":""));
-    r+=`<button type="button" class="${cl}" data-t="${t}" aria-label="الثمن ${t} من الحزب ${QUR_VUE}">${t}</button>`;
+    r+=`<button type="button" class="${cl}" data-r="${t}" aria-label="الربع ${t} من الحزب ${QUR_VUE}">${t}</button>`;
   }
-  $("#thumnRow").innerHTML=r;
+  $("#rubRow").innerHTML=r;
 
   /* أحكام ورش */
   $("#tajList").innerHTML=WARSH.map((w,i)=>{
@@ -1821,6 +1912,36 @@ function renderQuran(){
       <p class="tajtxt${ouvert?"":" hidden"}">${w.c}</p>
     </div>`;
   }).join("");
+
+  renderQurTexte();
+}
+
+function qurMot(m){ $("#qurTexte").innerHTML=`<div class="qmot">${m}</div>`; }
+
+function renderQurTexte(){
+  $("#qurOu").textContent=`الحزب ${hizbDe(QUR.pos)} · الربع ${rubDe(QUR.pos)}`;
+  $("#btnRubPrev").disabled=QUR.pos<=1;
+  $("#btnRubNext").disabled=QUR.pos>=QUR_TOTAL;
+
+  if(!window.QURAN_WARSH){
+    qurMot("جارٍ تحميل المصحف…");
+    qurCharge().then(()=>{ qurPrepare(); renderQurTexte(); })
+               .catch(()=>qurMot("تعذّر تحميل المصحف. إن كنت تستعمل النسخة المثبّتة من الموقع، افتحها مرّة وأنت متّصل بالإنترنت."));
+    return;
+  }
+  qurPrepare();
+
+  const versets=qurTranche(QUR.pos);
+  let html="", sourate=0;
+  for(const v of versets){
+    if(v[0]!==sourate){
+      sourate=v[0];
+      html+=`<div class="qsura">${window.QURAN_WARSH.s[sourate-1][0]}</div>`;
+    }
+    html+=`<span class="qaya">${v[2]}<span class="qnum">${qurRond(v[1])}</span></span> `;
+  }
+  $("#qurTexte").innerHTML=html;
+  $("#qurTexte").scrollTop=0;
 }
 
 /* ---------------- les gestes ---------------- */
@@ -1832,11 +1953,9 @@ $("#hizbGrid").addEventListener("click",e=>{
   renderQuran();
 });
 
-$("#thumnRow").addEventListener("click",e=>{
-  const b=e.target.closest("button[data-t]");
-  if(!b)return;
-  const p=posDe(QUR_VUE,+b.dataset.t);
-  qurPose(p===QUR.pos?p-1:p,true);   // retoucher le même thumn le décoche
+$("#rubRow").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-r]");
+  if(b)qurPose(posDe(QUR_VUE,+b.dataset.r),true);
 });
 
 $("#tajList").addEventListener("click",e=>{
@@ -1849,8 +1968,10 @@ $("#tajList").addEventListener("click",e=>{
 
 $("#btnQurNext").addEventListener("click",qurSuivant);
 $("#btnQurBack").addEventListener("click",()=>qurPose(QUR.pos-1,true));
+$("#btnRubNext").addEventListener("click",()=>qurPose(QUR.pos+1,true));
+$("#btnRubPrev").addEventListener("click",()=>qurPose(QUR.pos-1,true));
 $("#btnQurReset").addEventListener("click",()=>{
-  QUR={pos:0,at:0,khatma:0};
+  QUR={pos:1,at:0,khatma:0,v:2};
   QUR_VUE=1;
   Store.set(K_QUR,QUR);
   renderQuran();
@@ -2397,8 +2518,9 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
-  QUR=Object.assign({pos:0,at:0,khatma:0},(await Store.get(K_QUR))||{});
-  if(QUR.pos>0)QUR_VUE=hizbDe(QUR.pos);
+  /* la marque d'avant comptait en أثمان : qurMigre la convertit en أرباع */
+  QUR=qurMigre((await Store.get(K_QUR))||(await Store.get("quran-mark-v1")));
+  QUR_VUE=hizbDe(QUR.pos);
   SET=Object.assign({adhan:true,notify:true,rawatib:true,geo:false},(await Store.get(K_SET))||{});
   renderSettings();
   const c=await Store.get(K_CITY);
