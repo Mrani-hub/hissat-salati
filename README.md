@@ -208,6 +208,28 @@ mais **interdit toute modification** : elle est donc embarquée telle quelle, ni
 ni convertie en woff2. Les ronds de fin de verset sont des glyphes de cette police, à
 `U+FC00 + numéro - 1` : ils se calculent et ne sont pas stockés.
 
+### La page
+
+Le ربع est présenté comme une page de mushaf : cadre à double filet doré, fond
+parchemin, bandeau orné par sourate, texte justifié bord à bord, numéro de page en
+pied. On feuillette au doigt — vers la droite pour avancer, comme on tourne la page
+d'un livre arabe — ou par les boutons. Deux boutons **ص / ك** règlent la taille du
+texte sur cinq crans, gardée dans les réglages.
+
+C'est une page **dessinée**, pas photographiée. Les applications qui montrent de
+vraies images de pages pèsent des dizaines de mégaoctets — le jeu d'images du même
+mushaf Warsh chez Quranpedia en fait 102 à lui seul, là où l'APK entière en fait
+moins de trois. Et un vrai mushaf aligne ses bords en étirant les lettres
+(الكشيدة), ce que le web ne sait pas faire : on justifie par les espaces, au plus
+près.
+
+### Le fihrist
+
+Deux volets. **السور** : les 114, avec leur nombre de versets et le hizb où elles
+commencent ; un appui ouvre la page et fait défiler jusqu'au bandeau de la sourate
+— utile, car un ربع commence souvent au milieu de la sourate précédente.
+**الأحزاب** : la grille des soixante, puis les quatre أرباع du hizb choisi.
+
 ### Les أحكام
 
 Seulement ce où ورش من طريق الأزرق — la riwaya du Maroc — s'écarte de حفص :

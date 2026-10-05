@@ -282,26 +282,68 @@ tbody tr.future .cell{opacity:.45}
   font-display:swap;
 }
 
-/* lecture du ربع */
+/* en-tête de la lecture : où l'on est, la taille du texte, le feuilletage */
 .qlirehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .qou{font-family:var(--arab);font-size:1.25rem;font-weight:700;color:var(--azure);direction:rtl}
-.qnav{display:flex;gap:6px}
-.qnav .act{font-size:.8rem;padding:7px 12px}
-.qtexte{
-  margin-top:12px;max-height:62vh;overflow-y:auto;direction:rtl;text-align:justify;
-  font-family:"Warsh","Amiri",serif;font-size:1.55rem;line-height:2.5;
-  color:var(--ink);background:var(--gold-pale);border:1px solid #EEE2C4;
-  border-radius:12px;padding:16px 15px;
+.qnav{display:flex;gap:6px;align-items:center}
+.qnav .act{font-size:.8rem;padding:7px 11px}
+.qtaille{display:flex;gap:4px;align-items:center;margin-inline-end:4px}
+.qtaille button{font:inherit;font-family:var(--arab);font-size:1rem;line-height:1;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);
+  border-radius:8px;width:30px;height:30px;cursor:pointer;padding:0}
+.qtaille button:disabled{opacity:.35;cursor:not-allowed}
+.qtaille button:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+/* la page du mushaf : un cadre, un texte justifié bord à bord, un pied */
+.mushaf{
+  margin-top:12px;border:1px solid var(--gold);border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#FFFDF7,#F9F1DF);
+  box-shadow:0 1px 2px rgba(17,33,46,.06), 0 10px 24px -20px rgba(17,33,46,.3);
+  touch-action:pan-y;   /* le balayage horizontal nous revient, le vertical au défilement */
 }
-.qsura{
-  font-family:var(--arab);font-size:1.05rem;font-weight:700;color:#8A671C;text-align:center;
-  background:#fff;border:1px solid var(--gold);border-radius:99px;
-  padding:3px 14px;margin:14px auto 10px;width:max-content;line-height:1.6;
+.mcadre{margin:8px;border:2px double #C9A94E;border-radius:10px;padding:15px 13px;min-height:200px}
+.mtexte{
+  direction:rtl;text-align:justify;text-align-last:center;
+  font-family:"Warsh","Amiri",serif;font-size:var(--qsize,1.6rem);line-height:2.5;
+  color:var(--ink);
 }
-.qsura:first-child{margin-top:0}
+/* le bandeau du nom de sourate, en double filet doré */
+.msura{
+  display:block;width:max-content;max-width:100%;margin:18px auto 14px;
+  font-family:var(--arab);font-size:1.02rem;font-weight:700;color:#7A5A16;line-height:1.7;
+  text-align:center;border:2px double var(--gold);border-radius:9px;
+  background:linear-gradient(180deg,#FFFEFA,#FBF2DC);padding:5px 20px;
+  box-shadow:inset 0 0 0 1px rgba(185,139,46,.18);
+}
+.mtexte .msura:first-child{margin-top:2px}
 .qaya{display:inline}
-.qnum{color:var(--gold);padding:0 .12em}
-.qmot{font-family:var(--arab);font-size:1.1rem;line-height:1.8;color:var(--ink-soft);text-align:center;padding:22px 6px}
+.qnum{color:var(--gold);padding:0 .1em}
+.mpied{
+  margin:0 10px;padding:7px 0 10px;text-align:center;
+  border-top:1px solid rgba(185,139,46,.28);
+  font-family:var(--arab);font-size:.98rem;color:#8A671C;direction:rtl;
+}
+.qmot{font-family:var(--arab);font-size:1.1rem;line-height:1.8;color:var(--ink-soft);text-align:center;padding:26px 6px}
+
+/* le fihrist : sourates d'un côté, أحزاب de l'autre */
+.fbasc{display:flex;gap:3px;background:#F1ECE0;border-radius:9px;padding:3px;margin-top:10px}
+.fbasc button{flex:1;border:0;background:transparent;font-family:var(--arab);font-size:1rem;
+  color:var(--ink-soft);padding:7px 2px 8px;border-radius:7px;cursor:pointer}
+.fbasc button[aria-selected="true"]{background:var(--panel);color:var(--ink);font-weight:700;
+  box-shadow:0 1px 2px rgba(17,33,46,.10)}
+.fliste{max-height:46vh;overflow-y:auto;margin-top:10px;border:1px solid var(--rule);border-radius:12px}
+.fl{display:flex;align-items:baseline;gap:10px;width:100%;text-align:start;direction:rtl;
+  font:inherit;background:transparent;border:0;border-bottom:1px solid #F3EEE3;
+  padding:9px 12px;cursor:pointer}
+.fl:last-child{border-bottom:0}
+.fl .no{flex:0 0 2.1em;text-align:center;font-size:.8rem;color:var(--ink-soft);
+  font-variant-numeric:tabular-nums}
+.fl .nom{font-family:var(--arab);font-size:1.12rem;color:var(--ink);white-space:nowrap}
+.fl .ext{flex:1;font-family:var(--arab);font-size:.95rem;color:var(--ink-soft);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:end}
+.fl.now{background:var(--gold-pale)}
+.fl.now .nom{color:#8A671C;font-weight:700}
+.fl:focus-visible{outline:2px solid var(--azure);outline-offset:-2px}
 
 /* les quatre أرباع */
 .rubrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -538,27 +580,45 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div class="qurkhat hidden" id="qurKhat"></div>
     </div>
 
-    <!-- le texte du rub' courant -->
+    <!-- la page du mushaf -->
     <div class="card pad">
       <div class="qlirehead">
         <div class="qou" id="qurOu">—</div>
         <div class="qnav">
-          <button class="act ghost" id="btnRubPrev" aria-label="الربع السابق">السابق</button>
-          <button class="act ghost" id="btnRubNext" aria-label="الربع التالي">التالي</button>
+          <span class="qtaille">
+            <button id="btnQMoins" aria-label="تصغير الخط">ص</button>
+            <button id="btnQPlus" aria-label="تكبير الخط">ك</button>
+          </span>
+          <button class="act ghost" id="btnRubPrev">السابق</button>
+          <button class="act ghost" id="btnRubNext">التالي</button>
         </div>
       </div>
-      <div class="qtexte" id="qurTexte"></div>
-      <p class="note">نصّ المصحف برواية ورش عن نافع، من إصدار مجمع الملك فهد لطباعة المصحف الشريف، برقمنة Quranpedia.net. الخطّ: KFGQPC Warsh Uthmanic Script.</p>
+      <div class="mushaf" id="qurPage">
+        <div class="mcadre"><div class="mtexte" id="qurTexte"></div></div>
+        <div class="mpied" id="qurPied">—</div>
+      </div>
+      <p class="note">اسحب الصفحة بإصبعك للانتقال. النصّ برواية ورش عن نافع، من إصدار مجمع الملك فهد لطباعة المصحف الشريف، برقمنة Quranpedia.net — والخطّ KFGQPC Warsh Uthmanic Script.</p>
     </div>
 
-    <!-- la grille -->
+    <!-- le fihrist : sourates, ou أحزاب et أرباع -->
     <div class="card pad">
-      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">الأحزاب والأرباع</h3>
-      <div class="sub">ستون حزبًا، في كل حزب أربعة أرباع — مئتان وأربعون ربعًا، ربعٌ لكل صفحة، كما في مصحف الأرباع. اختر الحزب ثم الربع.</div>
-      <div class="hizbgrid" id="hizbGrid"></div>
-      <div class="thumnwrap">
-        <div class="thumnlab" id="rubLab">—</div>
-        <div class="rubrow" id="rubRow"></div>
+      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">الفهرس</h3>
+      <div class="sub">ستون حزبًا، في كل حزب أربعة أرباع — مئتان وأربعون ربعًا، ربعٌ لكل صفحة، كما في مصحف الأرباع.</div>
+      <div class="fbasc" role="tablist">
+        <button role="tab" id="fSur" aria-selected="false">السور</button>
+        <button role="tab" id="fHiz" aria-selected="true">الأحزاب</button>
+      </div>
+
+      <div id="fPanSur" class="hidden">
+        <div class="fliste" id="suraListe"></div>
+      </div>
+
+      <div id="fPanHiz">
+        <div class="hizbgrid" id="hizbGrid"></div>
+        <div class="thumnwrap">
+          <div class="thumnlab" id="rubLab">—</div>
+          <div class="rubrow" id="rubRow"></div>
+        </div>
       </div>
     </div>
 
@@ -1735,29 +1795,31 @@ $("#btnQLoc").addEventListener("click",async()=>{
 
 
 /* =====================================================================
-   6 quater. القرآن : نصّ ورش، والقراءة بالأحزاب والأرباع
+   6 quater. القرآن : نصّ ورش في صفحة مؤطّرة، والفهرس، وأحكام الرواية
    ---------------------------------------------------------------------
    Le texte vient du مجمع الملك فهد لطباعة المصحف الشريف, numérisé par
    Quranpedia.net. Il n'est PAS dans cette page : il dort dans un fichier
-   voisin, quran-warsh.js, qui n'est chargé qu'à la première ouverture de
-   l'onglet. L'application démarre donc aussi vite qu'avant, et celui qui
-   n'ouvre jamais le Coran n'en paie jamais le prix.
+   voisin, quran-warsh.js, chargé à la première ouverture de l'onglet.
 
    Le découpage est celui du مصحف الأرباع marocain : soixante أحزاب, quatre
-   أرباع chacun, soit deux cent quarante أرباع — un par page. Les bornes
-   viennent du fichier, elles ne sont pas devinées.
+   أرباع chacun, deux cent quarante أرباع — un par page. Les bornes viennent
+   du fichier, elles ne sont pas devinées.
 
-   La position tient dans un seul nombre, de 1 à 240 : le ربع où l'on en est.
-   Un seul nombre interdit les états impossibles — un ربع 5, un حزب 61.
+   La page est dessinée, pas photographiée : un cadre, un texte justifié
+   bord à bord, un bandeau par sourate, un numéro de page. Une vraie page de
+   mushaf étire les lettres (الكشيدة) pour aligner ses bords, ce que le web
+   ne sait pas faire ; on justifie donc par les espaces, au plus près.
    ===================================================================== */
 const K_QUR="quran-mark-v2";
 const QUR_PAR_HIZB=4, QUR_HIZB=60, QUR_TOTAL=QUR_HIZB*QUR_PAR_HIZB;   // 240
+const QSIZES=["1.30rem","1.50rem","1.70rem","1.95rem","2.25rem"];
 
 let QUR={pos:1,at:0,khatma:0,v:2};
-let QUR_VUE=1;                 // le hizb dont on affiche les أرباع dans la grille
-const QUR_OUVERT=new Set();    // les أحكام dont le texte est déplié
-let QFLAT=null, QDEB=null;     // versets à plat, et l'indice où commence chaque ربع
-let QUR_PROMESSE=null;         // chargement du fichier voisin, une seule fois
+let QUR_VUE=1;                 // le hizb dont on affiche les أرباع
+let QUR_FIH="hiz";             // volet du fihrist : "hiz" ou "sur"
+const QUR_OUVERT=new Set();    // les أحكام dépliés
+let QFLAT=null, QDEB=null, QIDX=null;
+let QUR_PROMESSE=null;
 
 const hizbDe  = p => Math.floor((p-1)/QUR_PAR_HIZB)+1;
 const rubDe   = p => ((p-1)%QUR_PAR_HIZB)+1;
@@ -1829,17 +1891,24 @@ function qurCharge(){
 function qurPrepare(){
   if(QFLAT)return;
   const S=window.QURAN_WARSH.s, R=window.QURAN_WARSH.r;
-  QFLAT=[];
-  const index={};
+  QFLAT=[]; QIDX={};
   S.forEach((su,i)=>su[1].forEach((t,j)=>{
-    index[(i+1)+":"+(j+1)]=QFLAT.length;
+    QIDX[(i+1)+":"+(j+1)]=QFLAT.length;
     QFLAT.push([i+1,j+1,t]);
   }));
-  QDEB=R.map(b=>index[b[0]+":"+b[1]]);
+  QDEB=R.map(b=>QIDX[b[0]+":"+b[1]]);
 }
 const qurTranche=rub=>QFLAT.slice(QDEB[rub-1], rub<QUR_TOTAL?QDEB[rub]:QFLAT.length);
 /* le rond de fin de verset est un glyphe de la police : U+FC00 + numéro - 1 */
 const qurRond=n=>String.fromCharCode(0xFC00+n-1);
+
+/* dans quel ربع tombe ce verset ? */
+function qurRubDe(plat){
+  let r=1;
+  for(let i=0;i<QDEB.length;i++){ if(QDEB[i]<=plat)r=i+1; else break; }
+  return r;
+}
+const qurRubSourate=s=>qurRubDe(QIDX[s+":1"]);
 
 /* ---------------- l'enregistrement ---------------- */
 
@@ -1859,6 +1928,21 @@ function qurSuivant(){
     return;
   }
   qurPose(QUR.pos+1,true);
+}
+
+/* taille du texte : rangée dans les réglages, comme les autres préférences */
+const qurTaille=()=>Math.max(0,Math.min(QSIZES.length-1, SET.qsize==null?2:SET.qsize|0));
+function qurZoom(d){
+  SET.qsize=Math.max(0,Math.min(QSIZES.length-1,qurTaille()+d));
+  Store.set(K_SET,SET);
+  appliqueTaille();
+}
+function appliqueTaille(){
+  const t=qurTaille();
+  const el=$("#qurTexte");
+  if(el)el.style.setProperty("--qsize",QSIZES[t]);
+  $("#btnQMoins").disabled=t<=0;
+  $("#btnQPlus").disabled=t>=QSIZES.length-1;
 }
 
 /* ---------------- l'affichage ---------------- */
@@ -1892,7 +1976,6 @@ function renderQuran(){
   }
   $("#hizbGrid").innerHTML=g;
 
-  /* les quatre أرباع du hizb ouvert */
   $("#rubLab").textContent=`أرباع الحزب ${QUR_VUE}`;
   let r="";
   for(let t=1;t<=QUR_PAR_HIZB;t++){
@@ -1914,34 +1997,59 @@ function renderQuran(){
   }).join("");
 
   renderQurTexte();
+  renderSuraListe();
 }
 
 function qurMot(m){ $("#qurTexte").innerHTML=`<div class="qmot">${m}</div>`; }
 
 function renderQurTexte(){
   $("#qurOu").textContent=`الحزب ${hizbDe(QUR.pos)} · الربع ${rubDe(QUR.pos)}`;
+  $("#qurPied").textContent=`صفحة ${QUR.pos} من ${QUR_TOTAL}`;
   $("#btnRubPrev").disabled=QUR.pos<=1;
   $("#btnRubNext").disabled=QUR.pos>=QUR_TOTAL;
+  appliqueTaille();
 
   if(!window.QURAN_WARSH){
     qurMot("جارٍ تحميل المصحف…");
-    qurCharge().then(()=>{ qurPrepare(); renderQurTexte(); })
+    qurCharge().then(()=>{ qurPrepare(); renderQurTexte(); renderSuraListe(); })
                .catch(()=>qurMot("تعذّر تحميل المصحف. إن كنت تستعمل النسخة المثبّتة من الموقع، افتحها مرّة وأنت متّصل بالإنترنت."));
     return;
   }
   qurPrepare();
 
-  const versets=qurTranche(QUR.pos);
   let html="", sourate=0;
-  for(const v of versets){
+  for(const v of qurTranche(QUR.pos)){
     if(v[0]!==sourate){
       sourate=v[0];
-      html+=`<div class="qsura">${window.QURAN_WARSH.s[sourate-1][0]}</div>`;
+      html+=`<span class="msura" data-s="${sourate}">${window.QURAN_WARSH.s[sourate-1][0]}</span>`;
     }
     html+=`<span class="qaya">${v[2]}<span class="qnum">${qurRond(v[1])}</span></span> `;
   }
   $("#qurTexte").innerHTML=html;
-  $("#qurTexte").scrollTop=0;
+  appliqueTaille();
+}
+
+function renderSuraListe(){
+  const el=$("#suraListe");
+  if(!el)return;
+  if(!window.QURAN_WARSH){ el.innerHTML=""; return; }
+  qurPrepare();
+  el.innerHTML=window.QURAN_WARSH.s.map((su,i)=>{
+    const rub=qurRubSourate(i+1);
+    return `<button type="button" class="fl${rub===QUR.pos?" now":""}" data-sura="${i+1}">`
+      +`<span class="no">${i+1}</span>`
+      +`<span class="nom">${su[0]}</span>`
+      +`<span class="ext">${su[1].length} آية · الحزب ${hizbDe(rub)}</span></button>`;
+  }).join("");
+}
+
+function setFihrist(mode){
+  QUR_FIH=mode;
+  $("#fSur").setAttribute("aria-selected",mode==="sur"?"true":"false");
+  $("#fHiz").setAttribute("aria-selected",mode==="hiz"?"true":"false");
+  $("#fPanSur").classList.toggle("hidden",mode!=="sur");
+  $("#fPanHiz").classList.toggle("hidden",mode!=="hiz");
+  if(mode==="sur")renderSuraListe();
 }
 
 /* ---------------- les gestes ---------------- */
@@ -1958,6 +2066,17 @@ $("#rubRow").addEventListener("click",e=>{
   if(b)qurPose(posDe(QUR_VUE,+b.dataset.r),true);
 });
 
+$("#suraListe").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-sura]");
+  if(!b||!window.QURAN_WARSH)return;
+  const s=+b.dataset.sura;
+  qurPose(qurRubSourate(s),true);
+  /* le ربع commence souvent dans la sourate d’avant : on amène l’œil
+     sur le bandeau demandé au lieu de laisser l’utilisateur le chercher */
+  const band=$(`#qurTexte .msura[data-s="${s}"]`);
+  if(band)band.scrollIntoView({block:"center"});
+});
+
 $("#tajList").addEventListener("click",e=>{
   const b=e.target.closest("button[data-taj]");
   if(!b)return;
@@ -1966,6 +2085,10 @@ $("#tajList").addEventListener("click",e=>{
   renderQuran();
 });
 
+$("#fSur").addEventListener("click",()=>setFihrist("sur"));
+$("#fHiz").addEventListener("click",()=>setFihrist("hiz"));
+$("#btnQMoins").addEventListener("click",()=>qurZoom(-1));
+$("#btnQPlus").addEventListener("click",()=>qurZoom(1));
 $("#btnQurNext").addEventListener("click",qurSuivant);
 $("#btnQurBack").addEventListener("click",()=>qurPose(QUR.pos-1,true));
 $("#btnRubNext").addEventListener("click",()=>qurPose(QUR.pos+1,true));
@@ -1976,6 +2099,27 @@ $("#btnQurReset").addEventListener("click",()=>{
   Store.set(K_QUR,QUR);
   renderQuran();
 });
+
+/* Feuilleter au doigt. Un livre arabe se tourne de la gauche vers la droite :
+   le doigt qui part vers la droite amène donc la page suivante. On ignore les
+   gestes trop courts, et ceux qui sont surtout verticaux — ceux-là, c'est le
+   défilement de la page, il ne faut pas les voler. */
+(function(){
+  const el=$("#qurPage");
+  if(!el)return;
+  let x0=null,y0=null;
+  el.addEventListener("touchstart",e=>{
+    if(e.touches.length!==1){x0=null;return;}
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY;
+  },{passive:true});
+  el.addEventListener("touchend",e=>{
+    if(x0==null)return;
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+    x0=null;
+    if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.4)return;
+    qurPose(QUR.pos+(dx>0?1:-1),true);
+  },{passive:true});
+})();
 
 
 /* =====================================================================
@@ -2521,7 +2665,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   /* la marque d'avant comptait en أثمان : qurMigre la convertit en أرباع */
   QUR=qurMigre((await Store.get(K_QUR))||(await Store.get("quran-mark-v1")));
   QUR_VUE=hizbDe(QUR.pos);
-  SET=Object.assign({adhan:true,notify:true,rawatib:true,geo:false},(await Store.get(K_SET))||{});
+  SET=Object.assign({adhan:true,notify:true,rawatib:true,geo:false,qsize:2},(await Store.get(K_SET))||{});
   renderSettings();
   const c=await Store.get(K_CITY);
   if(c){
