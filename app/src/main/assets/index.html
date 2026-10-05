@@ -60,7 +60,7 @@ nav.tabs{display:flex;direction:rtl;gap:3px;background:#F1ECE0;border-radius:10p
    que de rogner les mots. */
 nav.tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 nav.tabs::-webkit-scrollbar{display:none}
-nav.tabs button{flex:1 0 auto;border:0;background:transparent;font-family:var(--arab);font-size:1.05rem;font-weight:400;color:var(--ink-soft);padding:8px 9px 9px;border-radius:7px;cursor:pointer;white-space:nowrap}
+nav.tabs button{flex:1 0 auto;border:0;background:transparent;font-family:var(--arab);font-size:1rem;font-weight:400;color:var(--ink-soft);padding:8px 6px 9px;border-radius:7px;cursor:pointer;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{background:var(--panel);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(17,33,46,.10)}
 nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 
@@ -223,6 +223,55 @@ tbody tr.future .cell{opacity:.45}
 .qfall h4{margin:0 0 6px;font-family:var(--arab);font-size:1.12rem;font-weight:700}
 .qfall ul{margin:0;padding-inline-start:20px;font-family:var(--arab);font-size:1.08rem;line-height:1.85}
 
+/* القرآن */
+.qurhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.qurhead h3{margin:0;font-family:var(--arab);font-size:1.3rem;font-weight:700;color:var(--azure)}
+.qurwhen{font-size:.76rem;color:var(--ink-soft);margin-top:3px}
+.qurpos{text-align:end;white-space:nowrap;font-family:var(--arab);direction:rtl}
+.qurpos b{display:block;font-size:1.5rem;font-weight:700;line-height:1.15}
+.qurpos span{font-size:1.05rem;color:var(--ink-soft)}
+.qurbar{height:7px;border-radius:99px;background:#F0EADC;margin-top:14px;overflow:hidden}
+.qurbar span{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--azure),var(--gold));transition:width .25s ease}
+.qurnum{display:flex;justify-content:space-between;gap:10px;font-size:.78rem;color:var(--ink-soft);
+  margin-top:7px;font-variant-numeric:tabular-nums}
+.qurnum b{font-family:var(--arab);font-size:1rem;color:var(--ink);font-weight:700}
+.qurbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.qurbtns .act{flex:1 1 auto}
+.qurkhat{margin-top:12px;background:var(--gold-pale);border:1px solid var(--gold);color:#8A671C;
+  border-radius:12px;padding:9px 13px;font-family:var(--arab);font-size:1.08rem;line-height:1.6;text-align:center}
+
+/* la grille des soixante أحزاب */
+.hizbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-top:12px}
+.hz{font:inherit;font-family:var(--arab);font-size:1rem;font-variant-numeric:tabular-nums;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);
+  border-radius:9px;padding:7px 0;cursor:pointer;line-height:1.2;text-align:center}
+.hz.done{background:var(--azure-pale);border-color:#C9DCE4;color:#2B6075}
+.hz.now{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:700}
+.hz.open{box-shadow:0 0 0 2px var(--azure)}
+.hz:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+.thumnwrap{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
+.thumnlab{font-family:var(--arab);font-size:1.08rem;margin-bottom:8px;direction:rtl}
+.thumnrow{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.th{font:inherit;font-family:var(--arab);font-size:1rem;font-variant-numeric:tabular-nums;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink-soft);
+  border-radius:9px;padding:9px 0;cursor:pointer;line-height:1.2;text-align:center}
+.th.done{background:var(--azure-pale);border-color:#C9DCE4;color:#2B6075}
+.th.now{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:700}
+.th:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+/* أحكام ورش, en accordéon */
+.tajrow{border-top:1px solid #F0EADC}
+.tajrow:first-child{border-top:0}
+.tajbtn{width:100%;display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font:inherit;text-align:start;background:transparent;border:0;padding:12px 2px;cursor:pointer;direction:rtl}
+.tajbtn .n{font-family:var(--arab);font-size:1.2rem;font-weight:700;color:var(--ink)}
+.tajbtn .s{font-family:var(--arab);font-size:.95rem;color:var(--ink-soft);flex:1;text-align:end}
+.tajbtn:focus-visible{outline:2px solid var(--azure);outline-offset:-2px;border-radius:8px}
+.tajtxt{font-family:var(--arab);font-size:1.12rem;line-height:1.95;direction:rtl;
+  background:var(--gold-pale);border-radius:10px;padding:11px 14px;margin:0 0 12px}
+
 /* adhkar */
 .dsec{margin-top:18px}
 .dsec:first-of-type{margin-top:0}
@@ -282,6 +331,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
     <button role="tab" id="t-day" aria-selected="true" aria-controls="v-day">اليوم</button>
     <button role="tab" id="t-month" aria-selected="false" aria-controls="v-month">الشهر</button>
     <button role="tab" id="t-qibla" aria-selected="false" aria-controls="v-qibla">القبلة</button>
+    <button role="tab" id="t-quran" aria-selected="false" aria-controls="v-quran">القرآن</button>
     <button role="tab" id="t-track" aria-selected="false" aria-controls="v-track">المتابعة</button>
     <button role="tab" id="t-dhikr" aria-selected="false" aria-controls="v-dhikr">الأذكار</button>
     <button role="tab" id="t-load" aria-selected="false" aria-controls="v-load">التحميل</button>
@@ -427,6 +477,52 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       </div>
     </div>
     <p class="note">الزاوية محسوبة من إحداثيات المدينة المعروضة، أو من موقعك إذا حدّدته، إلى الكعبة المشرّفة. أمّا البوصلة فتستعمل مستشعر الهاتف: أبعِده عن المعادن ومكبّرات الصوت، وحرّكه على شكل الرقم 8 إذا كانت القراءة مضطربة.</p>
+  </section>
+
+  <!-- ===== coran ===== -->
+  <section id="v-quran" role="tabpanel" aria-labelledby="t-quran" class="hidden">
+
+    <!-- où on en est -->
+    <div class="card pad">
+      <div class="qurhead">
+        <div>
+          <h3>علامة القراءة</h3>
+          <div class="qurwhen" id="qurWhen">—</div>
+        </div>
+        <div class="qurpos"><b id="qurHizb">—</b><span id="qurThumn"></span></div>
+      </div>
+      <div class="qurbar"><span id="qurBar"></span></div>
+      <div class="qurnum">
+        <span id="qurRead">—</span>
+        <span id="qurLeft"></span>
+      </div>
+      <div class="qurbtns">
+        <button class="act" id="btnQurNext">أنهيت هذا الثمن</button>
+        <button class="act ghost" id="btnQurBack">رجوع ثمنًا</button>
+        <button class="act ghost" id="btnQurReset">تصفير</button>
+      </div>
+      <div class="qurkhat hidden" id="qurKhat"></div>
+    </div>
+
+    <!-- la grille -->
+    <div class="card pad">
+      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">الأحزاب والأثمان</h3>
+      <div class="sub">ستون حزبًا، في كل حزب ثمانية أثمان — أربعُ مئةٍ وثمانون ثمنًا، ثمنٌ لكل صفحة. اختر الحزب ثم الثمن الذي وقفت عنده.</div>
+      <div class="hizbgrid" id="hizbGrid"></div>
+      <div class="thumnwrap">
+        <div class="thumnlab" id="thumnLab">—</div>
+        <div class="thumnrow" id="thumnRow"></div>
+      </div>
+    </div>
+
+    <!-- ce qui distingue Warsh -->
+    <div class="card pad">
+      <h3 style="margin:0;font-family:var(--arab);font-size:1.2rem;color:var(--azure)">من أحكام رواية ورش</h3>
+      <div class="sub">ما تنفرد به رواية ورش عن نافع، من طريق الأزرق — وهي المعتمدة بالمغرب. اضغط الحكم لقراءة شرحه.</div>
+      <div id="tajList"></div>
+      <p class="note">تذكرةٌ مختصرة بما يفارق فيه ورشٌ حفصًا، لا تُغني عن التلقّي عن مقرئ.</p>
+    </div>
+
   </section>
 
   <!-- ===== suivi ===== -->
@@ -1305,7 +1401,7 @@ $("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur ا
 /* =====================================================================
    6. Onglets
    ===================================================================== */
-[["#t-day","#v-day"],["#t-month","#v-month"],["#t-qibla","#v-qibla"],["#t-track","#v-track"],["#t-dhikr","#v-dhikr"],["#t-load","#v-load"]]
+[["#t-day","#v-day"],["#t-month","#v-month"],["#t-qibla","#v-qibla"],["#t-quran","#v-quran"],["#t-track","#v-track"],["#t-dhikr","#v-dhikr"],["#t-load","#v-load"]]
 .forEach(([tb,vw],_,all)=>{
   $(tb).addEventListener("click",()=>{
     all.forEach(([t,v])=>{
@@ -1315,6 +1411,7 @@ $("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur ا
     });
     if(vw==="#v-day")renderDay(true);
     if(vw==="#v-track")renderTrack();
+    if(vw==="#v-quran")renderQuran();
     qiblaActive(vw==="#v-qibla");   // le capteur ne tourne que sur son propre ecran
   });
 });
@@ -1587,6 +1684,176 @@ $("#btnQLoc").addEventListener("click",async()=>{
     qWarn(geoWhy(e&&e.message));
   }
   b.disabled=false; b.textContent=texte;
+});
+
+
+/* =====================================================================
+   6 quater. القرآن : موضع القراءة بالأحزاب والأثمان، وأحكام رواية ورش
+   ---------------------------------------------------------------------
+   Le découpage marocain : soixante أحزاب, huit أثمان chacun, soit quatre
+   cent quatre-vingts أثمان — un par page du mushaf. C'est de l'arithmétique
+   pure, aucune donnée n'est recopiée : on ne peut donc pas se tromper de
+   borne, et rien du texte coranique n'est reproduit ici.
+
+   La position est enregistrée sous forme d'un seul nombre, de 0 à 480 :
+     0   = rien n'est encore marqué ;
+     181 = on a fini le 181e thumn, c'est-à-dire le thumn 5 du hizb 23.
+   Un seul nombre évite les états impossibles (un thumn 9, un hizb 61) et
+   rend l'avancement, le retour et la ختمة immédiats à calculer.
+   ===================================================================== */
+const K_QUR="quran-mark-v1";
+const QUR_PAR_HIZB=8, QUR_HIZB=60, QUR_TOTAL=QUR_HIZB*QUR_PAR_HIZB;   // 480
+
+let QUR={pos:0,at:0,khatma:0};
+let QUR_VUE=1;                 // le hizb dont on affiche les أثمان
+const QUR_OUVERT=new Set();    // les أحكام dont le texte est déplié
+
+const hizbDe  = p => Math.floor((p-1)/QUR_PAR_HIZB)+1;
+const thumnDe = p => ((p-1)%QUR_PAR_HIZB)+1;
+const posDe   = (h,t) => (h-1)*QUR_PAR_HIZB+t;
+
+/* « اليوم », « أمس », « منذ ثلاثة أيام »… */
+function depuisQuand(ts){
+  if(!ts)return "";
+  const j=Math.floor((Date.now()-ts)/864e5);
+  if(j<=0)return "اليوم";
+  if(j===1)return "أمس";
+  if(j===2)return "منذ يومين";
+  if(j<=10)return `منذ ${j} أيام`;
+  return `منذ ${j} يومًا`;
+}
+
+/* Ce qui distingue ورش عن نافع (طريق الأزرق) de حفص. Volontairement limité à
+   ce qui est bien établi : c'est une aide-mémoire, pas une référence. */
+const WARSH=[
+ {n:"مدّ البدل", s:"كل همزٍ قبل حرف مدّ",
+  c:"نحو «آمَنُوا» و«أُوتُوا» و«إِيمَان». لورشٍ فيه ثلاثة أوجه: القصر حركتين، والتوسّط أربعًا، والطول ستًّا. وحفصٌ يقصره وجهًا واحدًا."},
+ {n:"المدّ المتّصل والمنفصل", s:"الإشباع ستّ حركات",
+  c:"من طريق الأزرق يُشبع ورشٌ المتّصل والمنفصل ستّ حركات: «جَاءَ»، «بِمَا أُنْزِلَ». وحفصٌ يمدّهما أربعًا أو خمسًا."},
+ {n:"النقل", s:"حركة الهمزة تنتقل إلى الساكن قبلها",
+  c:"إذا انتهت الكلمة بساكنٍ وابتدأت التالية بهمزة قطعٍ متحرّكة، نقل ورشٌ حركة الهمزة إلى الساكن وحذف الهمزة: «قَدْ أَفْلَحَ» تُقرأ «قَدَ فْلَحَ»، و«مَنْ آمَنَ» تُقرأ «مَنَ امَنَ»."},
+ {n:"إبدال الهمز الساكن", s:"الهمزة الساكنة تصير حرف مدّ",
+  c:"يُبدل ورشٌ الهمزة الساكنة حرفَ مدٍّ من جنس حركة ما قبلها: «يُؤْمِنُونَ» تُقرأ «يُومِنُونَ»، و«الذِّئْب» «الذِّيب»، و«بَأْس» «بَاس»."},
+ {n:"التقليل والإمالة", s:"بين الفتح والكسر",
+  c:"يُقلّل ورشٌ ذواتِ الياء، ومنها رؤوس الآي في إحدى عشرة سورة: طه، والنجم، والمعارج، والقيامة، والنازعات، وعبس، والأعلى، والشمس، والليل، والضحى، والعلق. ويُقلّل «التَّوْرَاة»، ويُميل «هَارٍ» إمالةً كبرى."},
+ {n:"تغليظ اللام", s:"بعد الصاد والطاء والظاء",
+  c:"يُغلّظ ورشٌ اللام المفتوحة إذا سبقها صادٌ أو طاءٌ أو ظاءٌ، مفتوحةً كانت أو ساكنة: «الصَّلَاة»، «ظَلَمُوا»، «مَطْلَع». وحفصٌ يرقّقها دائمًا إلا في لفظ الجلالة."},
+ {n:"ترقيق الراء", s:"بعد كسرٍ أو ياءٍ ساكنة",
+  c:"يُرقّق ورشٌ الراء المفتوحة أو المضمومة إذا سبقها كسرٌ أو ياءٌ ساكنة: «خَيْرٌ»، «الآخِرَة»، «فِرْعَوْن» — ما لم يأتِ بعدها حرفُ استعلاء."},
+ {n:"صلة ميم الجمع", s:"واوٌ مدّيّة قبل الهمز",
+  c:"يصل ورشٌ ميم الجمع بواوٍ مدّيّة إذا جاء بعدها همزُ قطع: «عَلَيْهِمُو أَأَنذَرْتَهُمْ». وحفصٌ يُسكِنها."},
+ {n:"البسملة بين السورتين", s:"ثلاثة أوجه",
+  c:"لورشٍ بين كلّ سورتين ثلاثةُ أوجه: البسملة، والسكت بلا بسملة، والوصل بلا بسملة. وبين الأنفال وبراءة: الوقف، أو السكت، أو الوصل."}
+];
+
+/* ---------------- l'enregistrement ---------------- */
+
+function qurPose(pos,touche){
+  QUR.pos=Math.max(0,Math.min(QUR_TOTAL,pos));
+  if(touche)QUR.at=Date.now();
+  if(QUR.pos>0)QUR_VUE=hizbDe(QUR.pos);
+  Store.set(K_QUR,QUR);
+  renderQuran();
+}
+
+/* « أنهيت هذا الثمن » : au quatre cent quatre-vingtième, la ختمة est complète
+   et le compteur repart à zéro. */
+function qurSuivant(){
+  if(QUR.pos>=QUR_TOTAL){
+    QUR.khatma=(QUR.khatma||0)+1;
+    qurPose(0,true);
+    return;
+  }
+  qurPose(QUR.pos+1,true);
+}
+
+/* ---------------- l'affichage ---------------- */
+
+function renderQuran(){
+  const pos=QUR.pos|0, pose=pos>0;
+
+  $("#qurHizb").textContent=pose?`الحزب ${hizbDe(pos)}`:"—";
+  $("#qurThumn").textContent=pose?`الثمن ${thumnDe(pos)}`:"";
+  $("#qurWhen").textContent=pose
+    ? `آخر ثمنٍ قرأته${QUR.at?" · "+depuisQuand(QUR.at):""}`
+    : "لم تُسجَّل علامةٌ بعد. اختر الحزب ثم الثمن الذي وقفت عنده.";
+
+  $("#qurBar").style.width=(pos/QUR_TOTAL*100).toFixed(1)+"%";
+  $("#qurRead").innerHTML=`قرأت <b>${pos}</b> من ${QUR_TOTAL} ثمنًا`;
+  $("#qurLeft").textContent=pose?`بقي ${QUR_TOTAL-pos} · ${Math.round(pos/QUR_TOTAL*100)}٪`:"";
+
+  $("#btnQurNext").textContent=pos>=QUR_TOTAL?"أتممت الختمة":"أنهيت هذا الثمن";
+  $("#btnQurBack").disabled=!pose;
+  $("#btnQurReset").disabled=!pose&&!(QUR.khatma>0);
+
+  const kh=$("#qurKhat");
+  kh.classList.toggle("hidden",!(QUR.khatma>0));
+  if(QUR.khatma>0)
+    kh.textContent=QUR.khatma===1?"أتممت ختمةً كاملة — تقبّل الله":`أتممت ${QUR.khatma} ختمات — تقبّل الله`;
+
+  /* la grille des soixante */
+  let g="";
+  for(let h=1;h<=QUR_HIZB;h++){
+    const actuel=pose&&hizbDe(pos)===h;
+    const fini=pose&&!actuel&&h*QUR_PAR_HIZB<=pos;
+    const cl="hz"+(actuel?" now":(fini?" done":""))+(h===QUR_VUE?" open":"");
+    g+=`<button type="button" class="${cl}" data-h="${h}" aria-label="الحزب ${h}">${h}</button>`;
+  }
+  $("#hizbGrid").innerHTML=g;
+
+  /* les huit أثمان du hizb ouvert */
+  $("#thumnLab").textContent=`أثمان الحزب ${QUR_VUE}`;
+  let r="";
+  for(let t=1;t<=QUR_PAR_HIZB;t++){
+    const p=posDe(QUR_VUE,t);
+    const cl="th"+(p===pos?" now":(p<pos?" done":""));
+    r+=`<button type="button" class="${cl}" data-t="${t}" aria-label="الثمن ${t} من الحزب ${QUR_VUE}">${t}</button>`;
+  }
+  $("#thumnRow").innerHTML=r;
+
+  /* أحكام ورش */
+  $("#tajList").innerHTML=WARSH.map((w,i)=>{
+    const ouvert=QUR_OUVERT.has(i);
+    return `<div class="tajrow">
+      <button type="button" class="tajbtn" data-taj="${i}" aria-expanded="${ouvert}">
+        <span class="n">${w.n}</span><span class="s">${w.s}</span>
+      </button>
+      <p class="tajtxt${ouvert?"":" hidden"}">${w.c}</p>
+    </div>`;
+  }).join("");
+}
+
+/* ---------------- les gestes ---------------- */
+
+$("#hizbGrid").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-h]");
+  if(!b)return;
+  QUR_VUE=+b.dataset.h;
+  renderQuran();
+});
+
+$("#thumnRow").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-t]");
+  if(!b)return;
+  const p=posDe(QUR_VUE,+b.dataset.t);
+  qurPose(p===QUR.pos?p-1:p,true);   // retoucher le même thumn le décoche
+});
+
+$("#tajList").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-taj]");
+  if(!b)return;
+  const i=+b.dataset.taj;
+  if(QUR_OUVERT.has(i))QUR_OUVERT.delete(i); else QUR_OUVERT.add(i);
+  renderQuran();
+});
+
+$("#btnQurNext").addEventListener("click",qurSuivant);
+$("#btnQurBack").addEventListener("click",()=>qurPose(QUR.pos-1,true));
+$("#btnQurReset").addEventListener("click",()=>{
+  QUR={pos:0,at:0,khatma:0};
+  QUR_VUE=1;
+  Store.set(K_QUR,QUR);
+  renderQuran();
 });
 
 
@@ -2130,6 +2397,8 @@ $("#btnShareFile").addEventListener("click",async()=>{
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
+  QUR=Object.assign({pos:0,at:0,khatma:0},(await Store.get(K_QUR))||{});
+  if(QUR.pos>0)QUR_VUE=hizbDe(QUR.pos);
   SET=Object.assign({adhan:true,notify:true,rawatib:true,geo:false},(await Store.get(K_SET))||{});
   renderSettings();
   const c=await Store.get(K_CITY);

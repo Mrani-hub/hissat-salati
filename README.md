@@ -148,6 +148,40 @@ Si le téléphone n'a pas de boussole, ou si elle ne répond pas, un message le 
 et renvoie aux repères du bas de l'écran : l'angle depuis le nord, le sens du
 soleil levant, et l'ombre de midi — qui, elle, ne tombe jamais en panne.
 
+## Le Coran (القرآن)
+
+Cinquième onglet. Il garde la page où l'on s'est arrêté, et rappelle ce qui
+distingue la riwaya de Warsh.
+
+**Le découpage** est celui du Maroc : soixante أحزاب, huit أثمان chacun, soit
+quatre cent quatre-vingts أثمان — un par page du mushaf. C'est de l'arithmétique
+pure : aucune borne n'est recopiée d'une source, il n'y a donc rien à se tromper.
+
+**La position tient dans un seul nombre**, de 0 à 480 (`QUR.pos`) : 0 quand rien
+n'est marqué, 181 pour le 181e thumn, c'est-à-dire le thumn 5 du hizb 23. Un seul
+nombre interdit les états impossibles — un thumn 9, un hizb 61 — et rend
+l'avancement, le retour et la ختمة immédiats à calculer. Au 480e, le compteur de
+ختمات monte d'un cran et la marque repart à zéro.
+
+**Les أحكام** listés sont seulement ceux où Warsh (طريق الأزرق, celui du Maroc)
+s'écarte de Hafs : مد البدل, l'équivalent des deux grands mad, النقل,
+إبدال الهمز الساكن, التقليل والإمالة, تغليظ اللام, ترقيق الراء,
+صلة ميم الجمع, et la basmala entre deux sourates. C'est une aide-mémoire, pas une
+référence : l'écran le dit lui-même.
+
+### Ce qui manque encore : le texte
+
+L'onglet ne contient **pas** le texte coranique, et ce n'est pas un oubli. Un
+texte en riwaya de Warsh ne s'écrit pas de mémoire ni ne se devine : il doit venir
+d'une source en laquelle on a confiance, intégrée telle quelle, sans retouche.
+
+Pour l'ajouter il faut **deux choses**, et la première ne suffit pas :
+
+1. le texte lui-même, en Warsh, dans un fichier lisible (`.txt`, `.json`, `.xml`) ;
+2. les **bornes des 480 أثمان** — à quelle sourate et quelle آية commence chacun.
+   Sans elles, impossible de paginé à un thumn par page ; beaucoup de fichiers du
+   Coran ne portent que les sourates et les versets.
+
 ## Suivre le lieu en voyage (اتّباع الموقع)
 
 Réglage à activer dans la carte des réglages, écran اليوم. Éteint par défaut :
