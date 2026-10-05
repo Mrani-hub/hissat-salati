@@ -41,6 +41,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
             try { nm.notify(Notif.ID_REMINDER, b.build()); } catch (SecurityException ignored) {}
         }
+        Widget.refresh(c);          // le widget annonce desormais la priere suivante
         Schedule.scheduleNext(c);
     }
 }

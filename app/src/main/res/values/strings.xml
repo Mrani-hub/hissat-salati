@@ -22,4 +22,16 @@
     <string name="update_allow_install">اسمح للتطبيق بتثبيت التحديث، ثم عد إليه</string>
     <string name="update_failed">تعذّر تثبيت التحديث</string>
     <string name="update_bad_file">الملف المنزَّل غير صالح، أعد المحاولة</string>
+    <!-- widget de l'ecran d'accueil -->
+    <string name="widget_desc">الصلاة القادمة ومواقيت اليوم على الشاشة الرئيسية</string>
+    <string name="widget_lead_next">الصلاة القادمة</string>
+    <string name="widget_lead_tomorrow">الصلاة القادمة ـ غدًا</string>
+    <string name="widget_lead_now">الصلاة الحالية</string>
+    <string name="widget_in_m">بعد %1$d د</string>
+    <string name="widget_in_h">بعد %1$d س</string>
+    <string name="widget_in_hm">بعد %1$d س و %2$d د</string>
+    <string name="widget_due">حان وقت الصلاة</string>
+    <string name="widget_just_now">الأذان الآن</string>
+    <string name="widget_since">مضى %1$d د على الأذان</string>
+    <string name="widget_no_month">افتح التطبيق لتحديث المواقيت</string>
 </resources>

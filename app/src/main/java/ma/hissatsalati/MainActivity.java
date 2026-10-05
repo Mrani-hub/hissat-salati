@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
     private boolean resumed = false;      // l'écran est-il au premier plan ?
     private boolean wantDownload = false; // téléchargement demandé, en attente de l'autorisation d'installer
     private boolean wantLocation = false; // position demandée, en attente de l'autorisation de localiser
+    private Compass compass;              // boussole de la Qibla, allumée seulement à l'écran
 
     /**
      * Changement d'heure (heure d'été, fuseau, réglage manuel).
@@ -56,6 +57,7 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context c, Intent i) {
             Schedule.scheduleNext(MainActivity.this);
+            Widget.refresh(MainActivity.this);
             js("onClockChanged", "");
         }
     };
@@ -132,6 +134,9 @@ public class MainActivity extends Activity {
     protected void onPause() {
         // Android refuse d'ouvrir l'installateur depuis l'arrière-plan : on saura qu'il faut attendre.
         resumed = false;
+        // un capteur laissé allumé en arrière-plan vide la batterie pour rien ;
+        // la page le rallume elle-même en revenant sur l'écran de la Qibla
+        if (compass != null) compass.stop();
         super.onPause();
     }
 
@@ -279,6 +284,7 @@ public class MainActivity extends Activity {
         public void setSchedule(String json) {
             Schedule.save(MainActivity.this, json);
             Schedule.scheduleNext(MainActivity.this);
+            Widget.refresh(MainActivity.this);   // le widget lit le même calendrier
             boolean wants = json != null
                     && (json.contains("\"adhan\":true") || json.contains("\"notify\":true"));
             if (wants) runOnUiThread(MainActivity.this::ensurePermissions);
@@ -400,6 +406,45 @@ public class MainActivity extends Activity {
                 }
                 fetchLocation();
             });
+        }
+
+        /**
+         * Allume la boussole pour l'écran de la Qibla.
+         *
+         * Les coordonnées reçues servent à corriger l'écart entre nord magnétique et
+         * nord géographique, qui dépend du lieu. La réponse arrive dans la page par
+         * onCompass({"az":123.4,"acc":2}), dix fois par seconde au plus.
+         *
+         * Renvoie false quand le téléphone n'a pas de magnétomètre : la page affiche
+         * alors l'angle et les repères du soleil au lieu de l'aiguille.
+         */
+        @JavascriptInterface
+        public boolean startCompass(final double lat, final double lon) {
+            if (!Compass.available(MainActivity.this)) return false;
+            runOnUiThread(() -> {
+                if (compass == null) {
+                    compass = new Compass(MainActivity.this, (deg, acc) -> {
+                        String payload;
+                        try {
+                            payload = new JSONObject()
+                                    .put("az", Math.round(deg * 10) / 10.0)
+                                    .put("acc", acc).toString();
+                        } catch (Exception e) {
+                            return;
+                        }
+                        js("onCompass", payload);
+                    });
+                }
+                compass.setPlace(lat, lon);
+                compass.start();
+            });
+            return true;
+        }
+
+        /** Éteint la boussole : on quitte l'écran de la Qibla. */
+        @JavascriptInterface
+        public void stopCompass() {
+            runOnUiThread(() -> { if (compass != null) compass.stop(); });
         }
 
         /** Joue l'adhan tout de suite, pour vérifier le son et l'arrêt par les boutons de volume. */

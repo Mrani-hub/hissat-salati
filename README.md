@@ -42,6 +42,72 @@ Copiez l'APK sur l'appareil, ouvrez-le, et autorisez l'installation depuis
 Remplacez `app/src/main/assets/index.html` par la nouvelle version,
 augmentez `versionCode` dans `app/build.gradle`, reconstruisez.
 
+## Widget de l'écran d'accueil (الصلاة القادمة)
+
+Une vignette à poser sur l'écran d'accueil : la prochaine prière, son heure, le
+temps qui reste, et les cinq heures du jour. On n'ouvre plus l'application pour
+jeter un coup d'œil.
+
+Pour l'ajouter : appui long sur un espace vide de l'écran d'accueil →
+**Widgets** → **حصة صلاتي**. Un appui sur la vignette ouvre l'application.
+
+Le widget ne calcule rien lui-même. Il relit le tableau du mois que la page a
+déjà envoyé à Android pour programmer l'adhan (`Schedule`), et y cherche sa
+place dans la journée exactement comme la carte « اليوم » : pendant la
+demi-heure qui suit l'adhan il annonce *la prière en cours*, ensuite *la
+prochaine*. Les deux affichages ne peuvent donc pas se contredire.
+
+**La question de la mise à jour.** Android ne rafraîchit un widget de lui-même
+qu'une fois toutes les trente minutes au mieux — inutilisable pour un compte à
+rebours. `Widget.java` pose donc son propre réveil à chaque minute pleine, en
+`RTC` et non `RTC_WAKEUP` : **il ne réveille jamais le téléphone**, il attend
+que celui-ci soit debout. Écran éteint, le widget ne coûte rien ; écran allumé,
+il est juste à la minute. Le réveil est reposé après chaque dessin, et arrêté
+dès que le dernier widget est retiré de l'écran d'accueil.
+
+Fichiers concernés : `Widget.java` (le réveil et le dessin), `Times.java` (où
+en est-on dans la journée), `res/layout/widget.xml` (les cases à remplir),
+`res/xml/widget_info.xml` (la fiche lue par l'écran d'accueil).
+
+## La Qibla (اتجاه القبلة)
+
+Quatrième onglet. Deux choses bien distinctes y sont affichées, et c'est tout
+l'intérêt de l'écran :
+
+- **L'angle** de la Qibla est un pur calcul de géométrie sur la sphère, depuis
+  les coordonnées du lieu vers la Kaaba. Il ne dépend d'aucun capteur, ne peut
+  pas se dérégler, et reste affiché même sur un téléphone sans boussole.
+  Ce n'est pas « la direction sur la carte » : sur un globe, le chemin le plus
+  court depuis le Maroc part presque plein est (95° depuis Rabat), et non vers
+  le sud-est comme une carte plate le laisse croire.
+- **Le cap du téléphone** vient du magnétomètre. Lui peut manquer, ou mentir
+  près d'un aimant de coque, dans une voiture ou contre du béton armé.
+
+L'aiguille montre la différence des deux : quand la Kaaba vient se poser sur le
+repère bleu du haut, on est face à la Qibla. Tant que la boussole est éteinte,
+la rose garde le nord en haut et le repère reste estompé.
+
+Le lieu est celui de la ville affichée. Le bouton **تحديد موقعي** affine avec la
+position réelle, utile loin d'une ville de la liste ; cette position reste en
+mémoire vive et n'est jamais enregistrée ni envoyée.
+
+Le même code sert aux deux plateformes :
+
+- **Android** : `Compass.java` lit le capteur de rotation (`TYPE_ROTATION_VECTOR`,
+  et à défaut accéléromètre + magnétomètre). Il corrige l'écart entre nord
+  magnétique et nord géographique (`GeomagneticField`, environ −1° au Maroc),
+  lisse les mesures sur le cercle, et n'envoie à la page que dix valeurs par
+  seconde au plus. Le capteur s'éteint dès qu'on quitte l'onglet ou que l'écran
+  passe en veille.
+- **iPhone / navigateur** : `DeviceOrientationEvent`. iOS exige que
+  l'autorisation soit demandée à la suite d'un geste, c'est pourquoi tout part
+  du bouton **تشغيل البوصلة** et jamais du chargement de la page.
+  `webkitCompassHeading` donne déjà le nord géographique.
+
+Si le téléphone n'a pas de boussole, ou si elle ne répond pas, un message le dit
+et renvoie aux repères du bas de l'écran : l'angle depuis le nord, le sens du
+soleil levant, et l'ombre de midi — qui, elle, ne tombe jamais en panne.
+
 ## Suivre le lieu en voyage (اتّباع الموقع)
 
 Réglage à activer dans la carte des réglages, écran اليوم. Éteint par défaut :

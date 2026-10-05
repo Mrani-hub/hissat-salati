@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fiche du widget, lue par l'écran d'accueil.
+
+  updatePeriodMillis="0" : on refuse le rafraîchissement automatique d'Android
+  (une demi-heure au mieux, inutilisable pour un compte à rebours). Widget.java
+  pose son propre réveil à chaque minute pleine.
+
+  targetCellWidth/Height et description ne servent qu'à partir d'Android 12 ;
+  les versions plus anciennes les ignorent sans se plaindre et retombent sur
+  minWidth / minHeight.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="90dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget"
+    android:previewLayout="@layout/widget"
+    android:previewImage="@mipmap/ic_launcher"
+    android:description="@string/widget_desc"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />

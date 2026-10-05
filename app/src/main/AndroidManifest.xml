@@ -67,6 +67,18 @@
             </intent-filter>
         </receiver>
 
+        <!-- Widget de l'ecran d'accueil : la prochaine priere, sans ouvrir l'application.
+             exported="true" est obligatoire : c'est le systeme qui envoie la mise a jour
+             du widget, depuis l'exterieur de l'application. -->
+        <receiver android:name=".Widget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

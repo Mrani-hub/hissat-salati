@@ -55,7 +55,12 @@ select.city:focus-visible{outline:2px solid var(--azure);outline-offset:3px;bord
 .hijri{font-family:var(--arab);font-size:1.15rem;direction:rtl;color:var(--azure);white-space:nowrap}
 
 nav.tabs{display:flex;direction:rtl;gap:3px;background:#F1ECE0;border-radius:10px;padding:4px;margin-bottom:16px}
-nav.tabs button{flex:1;border:0;background:transparent;font-family:var(--arab);font-size:1.05rem;font-weight:400;color:var(--ink-soft);padding:8px 2px 9px;border-radius:7px;cursor:pointer;white-space:nowrap}
+/* six onglets : « flex:1 0 auto » les laisse remplir la barre quand la place suffit,
+   et garder leur largeur naturelle sinon — la barre glisse alors du doigt plutot
+   que de rogner les mots. */
+nav.tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{flex:1 0 auto;border:0;background:transparent;font-family:var(--arab);font-size:1.05rem;font-weight:400;color:var(--ink-soft);padding:8px 9px 9px;border-radius:7px;cursor:pointer;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{background:var(--panel);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(17,33,46,.10)}
 nav.tabs button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 
@@ -196,6 +201,28 @@ tbody tr.future .cell{opacity:.45}
 .bar{height:6px;border-radius:99px;background:#EDE6D7;overflow:hidden;margin-top:7px}
 .bar span{display:block;height:100%}
 
+/* القبلة */
+.qcard{text-align:center}
+.qtop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;text-align:start}
+.qtop h3{margin:0;font-family:var(--arab);font-size:1.3rem;font-weight:700;color:var(--azure)}
+.qfrom{font-size:.74rem;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+.qang{text-align:end;white-space:nowrap}
+.qang b{display:block;font-size:1.9rem;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.qang span{font-family:var(--arab);font-size:1.02rem;color:var(--ink-soft)}
+.qdial{margin:14px auto 2px;max-width:290px}
+.qdial svg{display:block;width:100%;height:auto}
+/* l'aiguille glisse au lieu de sauter d'une mesure à l'autre */
+#qRose{transition:transform .14s linear}
+.qmsg{font-family:var(--arab);font-size:1.3rem;line-height:1.6;margin-top:8px;min-height:2.1em}
+.qmsg.good{color:#2C6B4F;font-weight:700}
+.qdist{font-size:.78rem;color:var(--ink-soft);margin-top:2px;font-variant-numeric:tabular-nums}
+.qbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.qwarn{margin-top:12px;background:var(--gold-pale);border:1px solid var(--gold);color:#8A671C;
+  border-radius:12px;padding:10px 14px;font-family:var(--arab);font-size:1.08rem;line-height:1.65;text-align:start}
+.qfall{margin-top:16px;border-top:1px solid var(--rule);padding-top:12px;text-align:start}
+.qfall h4{margin:0 0 6px;font-family:var(--arab);font-size:1.12rem;font-weight:700}
+.qfall ul{margin:0;padding-inline-start:20px;font-family:var(--arab);font-size:1.08rem;line-height:1.85}
+
 /* adhkar */
 .dsec{margin-top:18px}
 .dsec:first-of-type{margin-top:0}
@@ -254,6 +281,7 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
   <nav class="tabs" role="tablist">
     <button role="tab" id="t-day" aria-selected="true" aria-controls="v-day">اليوم</button>
     <button role="tab" id="t-month" aria-selected="false" aria-controls="v-month">الشهر</button>
+    <button role="tab" id="t-qibla" aria-selected="false" aria-controls="v-qibla">القبلة</button>
     <button role="tab" id="t-track" aria-selected="false" aria-controls="v-track">المتابعة</button>
     <button role="tab" id="t-dhikr" aria-selected="false" aria-controls="v-dhikr">الأذكار</button>
     <button role="tab" id="t-load" aria-selected="false" aria-controls="v-load">التحميل</button>
@@ -353,6 +381,52 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <button class="act ghost" id="btnShareFile">مشاركة الملف</button>
     </div>
     <p class="note" id="shareNote">أيام الجمعة بالأزرق، واليوم الحالي بالذهبي. تشمل الصورة والملف الشهر والمدينة المعروضين أعلاه.</p>
+  </section>
+
+  <!-- ===== qibla ===== -->
+  <section id="v-qibla" role="tabpanel" aria-labelledby="t-qibla" class="hidden">
+    <div class="card pad qcard">
+      <div class="qtop">
+        <div>
+          <h3>اتجاه القبلة</h3>
+          <div class="qfrom" id="qFrom">—</div>
+        </div>
+        <div class="qang"><b id="qDeg">—</b><span id="qCard"></span></div>
+      </div>
+
+      <!-- La rose tourne avec le téléphone ; le repère bleu du haut reste fixe et
+           montre la direction dans laquelle le téléphone est tourné. Quand la Kaaba
+           vient se poser dessus, on est face à la Qibla. Boussole éteinte, le repère
+           est estompé et la rose garde le nord en haut. -->
+      <div class="qdial">
+        <svg viewBox="0 0 200 200" role="img" aria-labelledby="qSvgTitle">
+          <title id="qSvgTitle">بوصلة القبلة</title>
+          <circle cx="100" cy="100" r="92" fill="#F8F4EA" stroke="#E6DECD" stroke-width="1.5"/>
+          <g id="qRose"></g>
+          <g id="qHead" opacity="0.35">
+            <path d="M100 3 l7 13 h-14 z" fill="#1F6F8B"/>
+            <line x1="100" y1="18" x2="100" y2="29" stroke="#1F6F8B" stroke-width="1.4" stroke-dasharray="3 4"/>
+          </g>
+          <circle cx="100" cy="100" r="4.5" fill="#11212E"/>
+        </svg>
+      </div>
+
+      <div class="qmsg" id="qMsg">—</div>
+      <div class="qdist" id="qDist"></div>
+
+      <div class="qbtns">
+        <button class="act" id="btnQibla">تشغيل البوصلة</button>
+        <button class="act ghost" id="btnQLoc">تحديد موقعي</button>
+      </div>
+
+      <div class="qwarn hidden" id="qWarn"></div>
+
+      <div class="qfall">
+        <h4>كيف تجد القبلة بدون بوصلة</h4>
+        <ul id="qFallList"></ul>
+      </div>
+    </div>
+    <p class="note">الزاوية محسوبة من إحداثيات المدينة المعروضة، أو من موقعك إذا حدّدته، إلى الكعبة المشرّفة. أمّا البوصلة فتستعمل مستشعر الهاتف: أبعِده عن المعادن ومكبّرات الصوت، وحرّكه على شكل الرقم 8 إذا كانت القراءة مضطربة.</p>
   </section>
 
   <!-- ===== suivi ===== -->
@@ -946,8 +1020,13 @@ const NATIVE=!!(window.AndroidBridge&&window.AndroidBridge.setSchedule);
 function pushSchedule(){
   if(!NATIVE)return;
   try{
+    /* city, hmonth, h et shuruq ne servent pas aux alarmes : ils sont la pour le
+       widget de l’ecran d’accueil, qui n’a pas de page web pour les deviner et doit
+       afficher exactement la meme chose que la carte « اليوم ». */
     AndroidBridge.setSchedule(JSON.stringify({adhan:!!SET.adhan,notify:!!SET.notify,
-      days:MONTH.days.map(d=>({d:d.greg,fajr:d.fajr,dhuhr:d.dhuhr,asr:d.asr,maghrib:d.maghrib,isha:d.isha}))}));
+      city:MONTH.city||"",hmonth:MONTH.hijriMonth||"",
+      days:MONTH.days.map(d=>({d:d.greg,h:d.hijri,fajr:d.fajr,shuruq:d.shuruq,
+        dhuhr:d.dhuhr,asr:d.asr,maghrib:d.maghrib,isha:d.isha}))}));
   }catch(e){}
 }
 function renderSettings(){
@@ -1220,7 +1299,7 @@ $("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur ا
 /* =====================================================================
    6. Onglets
    ===================================================================== */
-[["#t-day","#v-day"],["#t-month","#v-month"],["#t-track","#v-track"],["#t-dhikr","#v-dhikr"],["#t-load","#v-load"]]
+[["#t-day","#v-day"],["#t-month","#v-month"],["#t-qibla","#v-qibla"],["#t-track","#v-track"],["#t-dhikr","#v-dhikr"],["#t-load","#v-load"]]
 .forEach(([tb,vw],_,all)=>{
   $(tb).addEventListener("click",()=>{
     all.forEach(([t,v])=>{
@@ -1230,8 +1309,280 @@ $("#btnUpdBanner").addEventListener("click",startDownload);   // on reste sur ا
     });
     if(vw==="#v-day")renderDay(true);
     if(vw==="#v-track")renderTrack();
+    qiblaActive(vw==="#v-qibla");   // le capteur ne tourne que sur son propre ecran
   });
 });
+
+/* =====================================================================
+   6 ter. القبلة : اتجاه الكعبة، وبوصلة تتبع دوران الهاتف
+   ---------------------------------------------------------------------
+   Deux choses bien distinctes, et c'est tout l'intérêt de l'écran :
+
+     . L'ANGLE de la Qibla est un pur calcul de géométrie sur la sphère, à
+       partir des coordonnées du lieu. Il ne dépend d'aucun capteur, ne peut
+       pas se tromper, et reste affiché même sans boussole.
+
+     . Le CAP du téléphone vient du magnétomètre. Lui peut manquer (téléphone
+       sans capteur), ou mentir (aimant de coque, voiture, béton armé).
+
+   L'aiguille montre la différence des deux. Tant que le cap est inconnu, la
+   rose garde le nord en haut : l'angle depuis le nord reste exploitable, et
+   les repères du bas expliquent comment s'en servir sans boussole.
+
+   Le même code sert aux deux plateformes :
+     . Android  -> AndroidBridge.startCompass(lat,lon), qui répond dans onCompass.
+                   Le côté Java corrige l'écart entre nord magnétique et nord
+                   géographique, qui dépend du lieu.
+     . iPhone   -> DeviceOrientationEvent, après autorisation demandée au clic.
+                   webkitCompassHeading donne déjà le nord géographique.
+   ===================================================================== */
+const KAABA={lat:21.4225,lon:39.8262};
+const QNAMES=["شمالًا","شمالًا شرقًا","شرقًا","جنوبًا شرقًا","جنوبًا","جنوبًا غربًا","غربًا","شمالًا غربًا"];
+const Q_NATIVE=!!(window.AndroidBridge&&window.AndroidBridge.startCompass);
+
+let QIBLA=null;        // angle de la Qibla pour le lieu courant, en degrés depuis le nord
+let QPOS=null;         // position relevée depuis cet écran ; en mémoire seulement, jamais enregistrée
+let Q_HEAD=null;       // cap du téléphone, ou null tant que la boussole est éteinte
+let Q_TURN=0;          // le même cap « déroulé », pour que l'aiguille ne fasse pas un tour à l'envers
+let Q_ACC=null;        // fiabilité annoncée par le capteur
+let Q_MODE="";         // "native", "web", ou "" quand la boussole est éteinte
+let Q_SHOWN=false;     // l'onglet القبلة est-il affiché ?
+let Q_WANT=false;      // la boussole tournait avant une mise en veille : à rallumer au retour
+let Q_OFF=null;        // fonction qui coupe les écouteurs du navigateur
+
+/* Angle de la Qibla : le cap du grand cercle qui va du lieu vers la Kaaba.
+   Ce n'est pas « la direction sur la carte » : sur un globe, le chemin le plus
+   court depuis le Maroc part presque plein est, et non vers le sud-est comme
+   une carte plate le laisse croire. */
+function qiblaBearing(lat,lon){
+  const f1=lat*RAD, f2=KAABA.lat*RAD, dl=(KAABA.lon-lon)*RAD;
+  const b=Math.atan2(Math.sin(dl), Math.cos(f1)*Math.tan(f2)-Math.sin(f1)*Math.cos(dl));
+  return ((b/RAD)%360+360)%360;
+}
+const qName=a=>QNAMES[Math.round((((a%360)+360)%360)/45)%8];
+/* écart signé entre deux caps, de -180 à +180 : positif = il faut tourner vers la droite */
+function qGap(a,b){ let d=((a-b)%360+360)%360; return d>180?d-360:d; }
+
+/* D'où regarde-t-on ? La position relevée si on en a une, sinon la ville affichée. */
+function qiblaOrigin(){
+  if(QPOS)return{lat:QPOS.lat,lon:QPOS.lon,label:"موقعك",live:true};
+  if(GEO&&GEO.at&&Date.now()-GEO.at<12*3600e3){
+    const p=sanePos(GEO);
+    if(p)return{lat:p.lat,lon:p.lon,label:"موقعك",live:true};
+  }
+  const c=CITIES.find(v=>v.n===MONTH.city);
+  if(c)return{lat:c.lat,lon:c.lon,label:c.n,live:false};
+  return null;
+}
+
+/* La rose : graduations, lettres des quatre directions, et la Kaaba au bout de
+   l'aiguille. Tout est dessiné une fois, puis le groupe entier tourne. */
+function buildRose(q){
+  let s="";
+  for(let a=0;a<360;a+=15){
+    const grand=a%90===0;
+    s+=`<line x1="100" y1="12" x2="100" y2="${grand?22:18}" stroke="${grand?"#B98B2E":"#CFC4AC"}"`
+      +` stroke-width="${grand?2:1.1}" transform="rotate(${a} 100 100)"/>`;
+  }
+  /* les lettres sont posées à leur place sans être tournées : elles restent
+     lisibles, au lieu de se retrouver à l'envers du côté du sud */
+  for(const[a,t]of [[0,"ش"],[90,"ق"],[180,"ج"],[270,"غ"]]){
+    const x=100+38*Math.sin(a*RAD), y=100-38*Math.cos(a*RAD), nord=a===0;
+    s+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" dy=".35em" text-anchor="middle"`
+      +` font-family="Amiri,serif" font-size="${nord?19:17}"`
+      +` font-weight="${nord?700:400}" fill="${nord?"#B98B2E":"#6B7A86"}">${t}</text>`;
+  }
+  s+=`<g transform="rotate(${q.toFixed(2)} 100 100)">`
+    +`<line x1="100" y1="100" x2="100" y2="120" stroke="#D8CFBC" stroke-width="2" stroke-linecap="round"/>`
+    +`<line x1="100" y1="100" x2="100" y2="48" stroke="#B98B2E" stroke-width="3.5" stroke-linecap="round"/>`
+    +`<g transform="translate(100 38)">`
+    +`<rect x="-9" y="-9" width="18" height="18" rx="2" fill="#152431" stroke="#FBF9F4" stroke-width="1.2"/>`
+    +`<rect x="-9" y="-2.5" width="18" height="4.5" fill="#D8A93F"/>`
+    +`<rect x="-2.5" y="2.5" width="5" height="6.5" fill="#3A4C5A"/>`
+    +`</g></g>`;
+  return s;
+}
+
+/* Fait tourner la rose. Le cap est « déroulé » (Q_TURN) : sans cela, passer de
+   359° à 1° ferait repartir l'aiguille d'un tour complet en arrière. */
+function paintQibla(){
+  const rose=$("#qRose"), head=$("#qHead");
+  if(!rose)return;
+  head.setAttribute("opacity",Q_HEAD==null?"0.35":"1");
+  rose.setAttribute("transform",`rotate(${(Q_HEAD==null?0:-Q_TURN).toFixed(2)} 100 100)`);
+}
+
+function qWarn(m){
+  const el=$("#qWarn");
+  el.textContent=m||"";
+  el.classList.toggle("hidden",!m);
+}
+
+/* La boussole est-elle digne de confiance ? Le capteur le dit lui-même. */
+function qAccWarn(){
+  if(Q_ACC==null)return "";
+  if(Q_MODE==="native"&&Q_ACC>=0&&Q_ACC<2)
+    return "دقّة البوصلة ضعيفة. حرّك الهاتف على شكل الرقم 8 مرّتين أو ثلاثًا، وأبعِده عن المعادن.";
+  if(Q_MODE==="web"&&(Q_ACC<0||Q_ACC>20))
+    return "دقّة البوصلة ضعيفة. حرّك الهاتف على شكل الرقم 8، وأبعِده عن المعادن.";
+  return "";
+}
+
+function qiblaMsg(){
+  const m=$("#qMsg");
+  if(QIBLA==null){ m.className="qmsg"; m.textContent="لا تتوفر إحداثيات لهذه المدينة."; return; }
+  if(Q_HEAD==null){
+    m.className="qmsg";
+    m.textContent="الشمال في الأعلى. شغّل البوصلة ليتبع القرص دوران الهاتف.";
+    return;
+  }
+  const d=qGap(QIBLA,Q_HEAD), a=Math.round(Math.abs(d));
+  if(a<=4){ m.className="qmsg good"; m.textContent="أنت في اتجاه القبلة"; }
+  else{ m.className="qmsg"; m.textContent=`استدر ${a}° إلى ${d>0?"اليمين":"اليسار"}`; }
+  qWarn(qAccWarn());
+}
+
+/* Les repères qui marchent sans capteur, calculés pour l'angle du lieu. */
+function qiblaTips(q){
+  const a=Math.round(q);
+  const dSoleil=qGap(q,90);            // écart entre la Qibla et le soleil levant (plein est)
+  const s=Math.round(Math.abs(dSoleil));
+  const shoroq = s<=5
+    ? "القبلة في اتجاه شروق الشمس تقريبًا."
+    : `عند الشروق، القبلة على ${s}° إلى ${dSoleil>0?"يمين":"يسار"} الشمس.`;
+  return [
+    `القبلة على ${a}° من الشمال الحقيقي، أي في اتجاه ${qName(q)}.`,
+    `عند الظهر يتجه ظلّ الأشياء نحو الشمال تقريبًا: قف والظلّ أمامك، ثم استدر ${a}° إلى اليمين.`,
+    `الشمس تشرق من الشرق وتغرب في الغرب: ${shoroq}`
+  ].map(t=>`<li>${t}</li>`).join("");
+}
+
+function renderQibla(){
+  const o=qiblaOrigin();
+  if(!o){
+    QIBLA=null;
+    $("#qFrom").textContent="—"; $("#qDeg").textContent="—"; $("#qCard").textContent="";
+    $("#qDist").textContent=""; $("#qRose").innerHTML=""; $("#qFallList").innerHTML="";
+    qiblaMsg(); return;
+  }
+  QIBLA=qiblaBearing(o.lat,o.lon);
+  $("#qFrom").textContent=`${o.live?"من موقعك المحدَّد":"من "+o.label} · `
+    +`${o.lat.toFixed(2)}° / ${o.lon.toFixed(2)}°`;
+  $("#qDeg").textContent=Math.round(QIBLA)+"°";
+  $("#qCard").textContent=qName(QIBLA);
+  /* separateur de milliers : une espace fine, jamais un point — « 4.757 » se lirait
+     comme quatre kilometres et des poussieres */
+  const km=String(Math.round(kmBetween(o.lat,o.lon,KAABA.lat,KAABA.lon)))
+    .replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  $("#qDist").textContent=`المسافة إلى الكعبة: ${km} كلم`;
+  $("#qRose").innerHTML=buildRose(QIBLA);
+  $("#qFallList").innerHTML=qiblaTips(QIBLA);
+  paintQibla(); qiblaMsg();
+}
+
+/* Une mesure arrive : on la déroule, puis on repeint. */
+function qSetHead(deg,acc){
+  const d=Number(deg);
+  if(!isFinite(d))return;
+  const v=((d%360)+360)%360;
+  if(Q_HEAD==null)Q_TURN=v;
+  else Q_TURN+=qGap(v,((Q_TURN%360)+360)%360);
+  Q_HEAD=v;
+  if(acc!=null&&isFinite(Number(acc)))Q_ACC=Number(acc);
+  paintQibla(); qiblaMsg();
+}
+/* appelé par MainActivity, dix fois par seconde au plus */
+window.onCompass=j=>{
+  try{ const o=typeof j==="string"?JSON.parse(j):j; qSetHead(o.az,o.acc); }catch(e){}
+};
+
+async function startQiblaCompass(){
+  const o=qiblaOrigin();
+  if(!o)return false;
+  if(Q_NATIVE){
+    let ok=false;
+    try{ ok=AndroidBridge.startCompass(o.lat,o.lon)!==false; }catch(e){ ok=false; }
+    if(ok)Q_MODE="native";
+    return ok;
+  }
+  const DOE=window.DeviceOrientationEvent;
+  if(!DOE)return false;
+  /* iOS : l'autorisation ne peut être demandée qu'à la suite d'un geste de l'utilisateur,
+     c'est pourquoi tout part du bouton et jamais du chargement de la page. */
+  if(typeof DOE.requestPermission==="function"){
+    try{ if(await DOE.requestPermission()!=="granted")return false; }catch(e){ return false; }
+  }
+  const onTurn=e=>{
+    if(typeof e.webkitCompassHeading==="number"&&isFinite(e.webkitCompassHeading)){
+      qSetHead(e.webkitCompassHeading,e.webkitCompassAccuracy); return;
+    }
+    /* ailleurs : alpha tourne dans l'autre sens, et ne vaut que s'il est « absolu » */
+    if(e.absolute===true&&typeof e.alpha==="number"&&isFinite(e.alpha))qSetHead(360-e.alpha,null);
+  };
+  window.addEventListener("deviceorientationabsolute",onTurn,true);
+  window.addEventListener("deviceorientation",onTurn,true);
+  Q_OFF=()=>{
+    window.removeEventListener("deviceorientationabsolute",onTurn,true);
+    window.removeEventListener("deviceorientation",onTurn,true);
+    Q_OFF=null;
+  };
+  Q_MODE="web";
+  return true;
+}
+
+function stopQiblaCompass(){
+  if(Q_NATIVE)try{AndroidBridge.stopCompass();}catch(e){}
+  if(Q_OFF)Q_OFF();
+  Q_MODE=""; Q_HEAD=null; Q_ACC=null;
+  if($("#qRose")){ paintQibla(); qiblaMsg(); }
+  renderQiblaBtn();
+}
+
+function renderQiblaBtn(){
+  const b=$("#btnQibla");
+  if(b)b.textContent=Q_MODE?"إيقاف البوصلة":"تشغيل البوصلة";
+}
+
+/* Appelé au changement d'onglet : le capteur ne tourne que quand l'écran est visible. */
+function qiblaActive(on){
+  Q_SHOWN=on;
+  if(on){ renderQibla(); renderQiblaBtn(); }
+  else{ Q_WANT=false; stopQiblaCompass(); qWarn(""); }
+}
+
+$("#btnQibla").addEventListener("click",async()=>{
+  if(Q_MODE){ stopQiblaCompass(); return; }
+  const b=$("#btnQibla");
+  b.disabled=true;
+  const ok=await startQiblaCompass();
+  b.disabled=false;
+  renderQiblaBtn();
+  if(!ok){
+    qWarn("هذا الجهاز لا يوفّر بوصلة. استعمل الزاوية والعلامات أسفل الصفحة.");
+    return;
+  }
+  qWarn("");
+  /* certains appareils acceptent la demande puis n'envoient jamais la moindre mesure */
+  setTimeout(()=>{ if(Q_MODE&&Q_HEAD==null)qWarn("البوصلة لا تستجيب على هذا الجهاز. استعمل الزاوية والعلامات أسفل الصفحة."); },3500);
+});
+
+/* La ville donne déjà un angle juste à un degré près ; ce bouton sert à l'affiner
+   quand on est loin d'une ville de la liste. La position reste en mémoire vive. */
+$("#btnQLoc").addEventListener("click",async()=>{
+  const b=$("#btnQLoc"), texte=b.textContent;
+  b.disabled=true; b.textContent="جارٍ التحديد…";
+  try{
+    const p=await locate();
+    QPOS={lat:p.lat,lon:p.lon};
+    renderQibla();
+    if(Q_MODE==="native")try{AndroidBridge.startCompass(p.lat,p.lon);}catch(e){}
+    qWarn("");
+  }catch(e){
+    qWarn(geoWhy(e&&e.message));
+  }
+  b.disabled=false; b.textContent=texte;
+});
+
 
 /* =====================================================================
    6 bis. أذكار الصلاة
@@ -1797,9 +2148,14 @@ $("#btnShareFile").addEventListener("click",async()=>{
   },1000);
   /* retour sur l'écran après une longue mise en veille */
   document.addEventListener("visibilitychange",()=>{
-    if(document.hidden)return;
+    if(document.hidden){
+      /* un capteur laisse allume en veille vide la batterie pour rien */
+      if(Q_MODE){Q_WANT=true;stopQiblaCompass();}
+      return;
+    }
     onClockChanged();               // l'heure a pu changer pendant la veille
     if(SET.geo)geoCheck(false);     // le lieu aussi : c'est ici qu'un voyage est detecte
+    if(Q_SHOWN&&Q_WANT){Q_WANT=false;startQiblaCompass().then(renderQiblaBtn);}
   });
   if(UPDATABLE){
     UPD=(await Store.get(K_UPD))||{};
