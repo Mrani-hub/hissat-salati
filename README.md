@@ -320,10 +320,21 @@ ouvrir l'image reçue par WhatsApp. Carte « قراءة الجدول من صور
 التحميل, visible seulement dans l'APK.
 
 `Ocr.java` fait la reconnaissance avec ML Kit en version *bundled* : le modèle
-est dans l'APK (≈ 4 Mo), donc **tout se passe dans le téléphone, sans connexion
-et sans les services Google**. Ni l'image ni le texte lu n'en sortent. Le
-sélecteur du système ne donne accès qu'à l'image choisie : aucune autorisation
-sur les photos n'est demandée.
+est dans l'APK, donc **tout se passe dans le téléphone, sans connexion et sans
+les services Google**. Ni l'image ni le texte lu n'en sortent. Le sélecteur du
+système ne donne accès qu'à l'image choisie : aucune autorisation sur les photos
+n'est demandée.
+
+**Ce que ça coûte, et les deux pièges du build.** Le moteur pèse 11 Mo *par type
+de processeur*, et un APK en embarque quatre par défaut : 45 Mo, quinze fois le
+poids d'avant, à renvoyer par WhatsApp et à retélécharger à chaque mise à jour.
+`abiFilters 'arm64-v8a'` ne garde que le processeur 64 bits, celui de tous les
+téléphones depuis 2016, et l'APK retombe à **16 Mo**. Conséquence assumée : les
+rares téléphones 32 bits ne peuvent plus l'installer ni la mettre à jour.
+Second piège : ML Kit traîne une vieille bibliothèque Kotlin découpée en trois
+morceaux (1.6.21), fondus en un seul depuis Kotlin 1.8 ; mélanger les deux
+époques donne des classes en double et la compilation échoue. Le bloc
+`constraints` d'`app/build.gradle` impose la même version partout.
 
 Seuls les chiffres latins sont lus, et cela suffit. Le texte reconnu est remis
 en rangées par position (hauteur pour la ligne, abscisse pour la colonne), ce

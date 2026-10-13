@@ -10,6 +10,14 @@ android {
         targetSdk 34
         versionCode 19
         versionName "2.8"
+
+        // Le moteur de lecture d'image pèse 11 Mo par type de processeur, et un APK
+        // en embarque quatre par défaut : 45 Mo au total, impossible à envoyer par
+        // WhatsApp ou à retélécharger à chaque mise à jour. On ne garde que le
+        // processeur 64 bits (arm64-v8a), celui de tous les téléphones depuis 2016 :
+        // l'APK tombe à 16 Mo. Conséquence assumée : les rares téléphones 32 bits
+        // ne peuvent plus l'installer, ni la mettre à jour.
+        ndk { abiFilters 'arm64-v8a' }
     }
 
     // Signature : la clé vient des variables d'environnement (secrets GitHub),
@@ -47,4 +55,15 @@ dependencies {
     // le modèle est dans l'APK, donc la reconnaissance marche sans connexion et
     // sans les services Google. Elle coûte environ 4 Mo à l'application.
     implementation 'com.google.mlkit:text-recognition:16.0.1'
+
+    // ML Kit traîne avec lui une vieille bibliothèque Kotlin (1.6.21) découpée en
+    // trois morceaux : stdlib, stdlib-jdk7 et stdlib-jdk8. Depuis Kotlin 1.8 les
+    // deux derniers ont été fondus dans le premier, et mélanger les deux époques
+    // donne des classes en double, ce qui fait échouer la compilation. On impose
+    // donc la même version partout ; en 1.8.22 les deux morceaux jdk7/jdk8 sont
+    // des coquilles vides qui renvoient vers stdlib, et le doublon disparaît.
+    constraints {
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+    }
 }
