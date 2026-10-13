@@ -419,6 +419,10 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <div><div class="t">يتوفر إصدار جديد من التطبيق</div><div class="s" id="updBannerSub"></div></div>
       <button class="act" id="btnUpdBanner">تنزيل</button>
     </div>
+    <div class="upd hidden" id="estBanner">
+      <div><div class="t">مواقيت تقديرية</div><div class="s" id="estBannerS">—</div></div>
+      <button class="act ghost" id="btnEstHide">فهمت</button>
+    </div>
     <div class="upd hidden" id="geoBanner">
       <div><div class="t" id="geoBannerT">—</div><div class="s" id="geoBannerS">—</div></div>
       <button class="act ghost" id="btnGeoUndo">العودة</button>
@@ -676,6 +680,8 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
         <button class="act" id="btnGen">مواقيت هذه المدينة</button>
         <button class="act ghost" id="btnFav">إضافة إلى المفضلة</button>
       </div>
+      <div class="row"><button class="act ghost" id="btnEstimate">حساب الشهر الحالي تقديريًا</button></div>
+      <p class="note" style="margin-top:10px">إن تعذّر تحميل الجدول الرسمي في أول الشهر، يحسب التطبيق وحده مواقيت الشهر الهجري الجاري بطريقة وزارة الأوقاف (19° / 17°)؛ الفارق عن الجدول الرسمي دقيقة واحدة على الأكثر. يتم ذلك تلقائيًا عندما ينتهي الجدول المحفوظ، وهذا الزر يعيده يدويًا.</p>
       <div class="favs" id="favList"></div>
       <p class="note" style="margin-top:10px">تظهر المدن المفضلة في القائمة أعلى الشاشة الرئيسية: لمسة واحدة تكفي للتنقل بينها. تحتفظ كل مدينة بمواقيتها الخاصة، محسوبة أو رسمية.</p>
     </div>
@@ -702,6 +708,15 @@ input[type=time]{font:inherit;font-size:.76rem;border:1px solid var(--rule);bord
       <label class="f" for="startd">أول يوم في الجدول (إن لم تكن التواريخ مذكورة فيه)</label>
       <input type="date" id="startd">
       <div class="row"><button class="act" id="btnPaste">قراءة النص الملصق</button></div>
+    </div>
+
+    <div class="card pad hidden" id="imgcard">
+      <h3>قراءة الجدول من صورة</h3>
+      <p class="note" style="margin:0 0 10px">الجدول الشهري المعلّق في المسجد، أو صورته المرسلة في واتساب: اختر الصورة ويقرأ التطبيق أرقامها بنفسه، دون أنترنت.</p>
+      <div class="row" style="margin-top:0"><button class="act" id="btnImg">اختيار صورة الجدول</button></div>
+      <label class="f" for="imgstart">أول يوم في الصورة</label>
+      <input type="date" id="imgstart">
+      <p class="note">يُعرَف أول يوم من الصورة نفسها؛ إن أخطأ التطبيق صحّحه هنا وأعد الاختيار. تُقرأ الأرقام وحدها لا الكلمات العربية، فتحقّق من الجدول قبل الحفظ. إن فشلت القراءة فالصورة مائلة أو مظلمة: صوّرها من الأمام، في ضوء جيّد، والجدول يملأ الصورة.</p>
     </div>
 
     <div class="row">
@@ -824,6 +839,8 @@ const WINDOW=30;   // minutes pendant lesquelles la prière est annoncée « en 
 const WINDOW_PAR={maghrib:15};
 const windowOf=k=>(WINDOW_PAR[k]||WINDOW)*60000;
 const AR_DAYS=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const AR_HMONTHS=["محرم","صفر","ربيع الأول","ربيع الثاني","جمادى الأولى","جمادى الآخرة",
+                  "رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
 const SKY={
   fajr:"linear-gradient(150deg,#1E2A50,#5B4A72 60%,#8A6A73)",
   shuruq:"linear-gradient(150deg,#3C6EA0,#7FA8C4 70%,#D9B87C)",
@@ -884,6 +901,7 @@ const Store=(()=>{
     }
   };
 })();
+const K_OFF="prayer-official-v1";
 const K_MONTH="prayer-month-v2", K_MONTHS="prayer-months-v1", K_LOG="prayer-log-v1", K_CITY="prayer-city-v1", K_RAW="prayer-rawatib-v1", K_SET="prayer-settings-v1", K_UPD="prayer-update-v1", K_GEO="prayer-geo-v1";
 
 /* =====================================================================
@@ -899,6 +917,9 @@ function parseISO(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1
 function at(iso,hhmm){const d=parseISO(iso);const[h,mi]=hhmm.split(":").map(Number);d.setHours(h,mi,0,0);return d;}
 function addMin(hhmm,m){const[h,mi]=hhmm.split(":").map(Number);let t=((h*60+mi+m)%1440+1440)%1440;return pad(Math.floor(t/60))+":"+pad(t%60);}
 function arDay(iso){return AR_DAYS[parseISO(iso).getDay()];}
+/* n jours plus loin (ou plus tôt). On passe par midi et par setDate : ajouter
+   24 h en millisecondes retombe sur la veille les jours de changement d'heure. */
+function addDays(iso,n){const d=parseISO(iso);d.setHours(12,0,0,0);d.setDate(d.getDate()+n);return isoOf(d);}
 function human(ms){
   const t=Math.max(0,Math.round(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;
   if(h>0)return `بعد ${h} س ${pad(m)} د`;
@@ -950,6 +971,10 @@ function normalizeMonth(m){
 
 let MONTH=normalizeMonth(JSON.parse(JSON.stringify(DEFAULT_MONTH)));
 let MONTHS={};   // un mois mémorisé par ville
+/* Dernier tableau officiel reçu, gardé à part. Quand l'application remplace un
+   mois périmé par son estimation, c'est lui qui garde la trace du passage du
+   Maroc à l'heure GMT : sans lui on perdrait ce repère au premier calcul. */
+let OFFICIAL=null;
 let FAVS=[];     // villes favorites
 let LOG={};            // "2026-09-13": {fajr:{m:true,t:true}, ...}
 let RAW={};            // "2026-09-13": {fajr_b:true, dhuhr_b:true, ...}
@@ -2302,13 +2327,59 @@ function prayerTimes(iso,lat,lon,tz){
   const f=h=>{let t=Math.round(h*60);t=(t%1440+1440)%1440;return pad(Math.floor(t/60))+":"+pad(t%60);};
   return{fajr:f(out[0]),shuruq:f(out[1]),dhuhr:f(out[2]),asr:f(out[3]),maghrib:f(out[4]),isha:f(out[5])};
 }
+/* Décalage horaire du jour, lu sur l'horloge du téléphone.
+   On ne l'écrit jamais en dur : le Maroc passe à GMT puis en revient, et c'est
+   Android qui sait quel jour. L'heure calculée est donc toujours celle que la
+   personne lit sur son écran, la même que celle des alarmes. */
+function tzNative(iso){const d=parseISO(iso);d.setHours(12,0,0,0);return -d.getTimezoneOffset()/60;}
+
+/* Jour officiel connu le plus proche d'une date, avec la longitude de sa ville.
+   On cherche dans le mois affiché, dans ceux gardés en cache ville par ville,
+   et en dernier lieu dans le mois d'usine. */
+function officialNear(iso){
+  const pool=[], add=m=>{ if(m&&m.source!=="calcul"&&m.days&&m.days.length)pool.push(m); };
+  add(OFFICIAL);
+  add(MONTH);
+  Object.keys(MONTHS||{}).forEach(k=>add(MONTHS[k]));
+  add(DEFAULT_MONTH);
+  let best=null;
+  for(const m of pool){
+    const c=CITIES.find(v=>v.n===m.city);
+    if(!c)continue;
+    for(const d of m.days){
+      if(!d||!d.greg||!d.dhuhr)continue;
+      const gap=Math.abs(parseISO(d.greg)-parseISO(iso));
+      if(!best||gap<best.gap)best={day:d,lon:c.lon,gap};
+    }
+  }
+  return best&&best.gap<=45*864e5?best:null;
+}
+
+/* Décalage horaire à appliquer pour un jour donné.
+
+   On le lit d'abord sur le dernier tableau officiel connu, en comparant son Dohr
+   au midi solaire : c'est la source la plus sûre. Le Maroc passe à l'heure GMT et
+   en revient par décret, et la table des fuseaux horaires d'un téléphone un peu
+   ancien peut l'ignorer — le tableau des Habous, lui, ne se trompe jamais.
+   Passé six semaines, la saison a pu changer : on reprend alors l'horloge du
+   téléphone, qui reste la référence des alarmes. */
+function tzAnchor(iso){
+  const o=officialNear(iso);
+  if(!o)return tzNative(iso);
+  const[h,mi]=o.day.dhuhr.split(":").map(Number);
+  const tz=Math.round((h+mi/60)-solarNoonUTC(o.day.greg,o.lon)-OFF[2]/60);
+  return (tz>=-12&&tz<=14)?tz:tzNative(iso);
+}
 /* décalage horaire du jour, déduit du Dohr déjà connu pour la ville de référence */
 function tzOfDay(day,ref){
-  if(!ref||!day.dhuhr)return 1;
+  if(!ref||!day.dhuhr)return tzAnchor(day.greg);
   const[h,mi]=day.dhuhr.split(":").map(Number);
   return Math.round((h+mi/60)-solarNoonUTC(day.greg,ref.lon)-OFF[2]/60);
 }
 function genForCity(city){
+  /* le tableau en mémoire ne couvre plus aujourd'hui : il n'y a plus de grille
+     sur laquelle se caler, on recalcule le mois hégirien en cours de zéro */
+  if(monthStale())return genCurrentMonth(city);
   const ref=CITIES.find(c=>c.n===MONTH.city)||null;
   const days=MONTH.days.map(d=>{
     const t=prayerTimes(d.greg,city.lat,city.lon,tzOfDay(d,ref||city));
@@ -2318,6 +2389,128 @@ function genForCity(city){
   return{city:city.n,hijriMonth:MONTH.hijriMonth,hijriYear:MONTH.hijriYear,source:"calcul",
     note:`مواقيت محسوبة لمدينة ${city.n} — بطريقة وزارة الأوقاف (19° / 17°)، بفارق دقيقة تقريبًا عن الجدول الرسمي.`,
     days};
+}
+
+/* =====================================================================
+   7 ter. La roue de secours : un mois entier calculé sans rien d'autre
+
+   genForCity() ne sait recalculer que les jours déjà présents dans le tableau
+   courant : il lui faut une grille de départ. Or le jour où le tableau officiel
+   du mois n'a pas pu être chargé, c'est justement cette grille qui manque, et
+   l'application devient aveugle (« —:—:— » sur l'écran d'accueil).
+
+   Ce qui suit fabrique donc le mois tout seul : les dates, les étiquettes
+   hégiriennes et les six horaires de chaque jour. Comparé au calendrier
+   officiel de Rabat, l'écart ne dépasse pas une minute.
+   ===================================================================== */
+
+/* --- étiquettes hégiriennes -----------------------------------------
+   Le navigateur sait convertir, mais selon le calendrier d'Oumm al-Qoura,
+   calculé à l'avance, alors que le Maroc attend la vision du croissant :
+   il est en avance d'un jour. On relit cet écart sur le dernier tableau
+   officiel connu, où le 1er du mois est écrit en face de sa date.
+   Ces étiquettes ne servent qu'à l'affichage : les horaires n'en dépendent pas.
+   -------------------------------------------------------------------- */
+const HFMT=(()=>{
+  try{
+    const f=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",
+      {day:"numeric",month:"numeric",year:"numeric",timeZone:"UTC"});
+    /* vérification : une WebView ancienne ignore ce calendrier et renvoie la date grégorienne */
+    return /144\d|145\d/.test(f.format(new Date("2026-10-13T12:00:00Z")))?f:null;
+  }catch(e){ return null; }
+})();
+function hijriRaw(iso){
+  if(!HFMT)return null;
+  try{
+    const p=HFMT.formatToParts(new Date(iso+"T12:00:00Z"));
+    const g=k=>Number(String((p.find(x=>x.type===k)||{}).value||"").replace(/\D/g,""));
+    const d=g("day"),m=g("month"),y=g("year");
+    return (d>=1&&d<=30&&m>=1&&m<=12&&y>1400)?{d,m,y}:null;
+  }catch(e){ return null; }
+}
+/* combien de jours retrancher à la date du navigateur pour tomber sur le Maroc */
+function hijriShift(){
+  const d0=MONTH.days&&MONTH.days[0];
+  if(HFMT&&d0&&MONTH.source!=="calcul"&&Number(d0.hijri)===1){
+    for(let k=-2;k<=2;k++){
+      const r=hijriRaw(addDays(d0.greg,k));
+      if(r&&r.d===1)return k;
+    }
+  }
+  return -1;
+}
+function hijriOf(iso,shift){
+  const r=hijriRaw(addDays(iso,shift||0));
+  return r?{d:r.d,m:r.m,y:r.y,name:AR_HMONTHS[r.m-1]||""}:null;
+}
+/* premier et dernier jour grégoriens du mois hégirien qui contient `iso` */
+function hijriSpan(iso,shift){
+  const h=hijriOf(iso,shift);
+  if(!h)return null;
+  const walk=dir=>{
+    let cur=iso;
+    for(let i=0;i<40;i++){
+      const nxt=addDays(cur,dir), hn=hijriOf(nxt,shift);
+      if(!hn||hn.m!==h.m||hn.y!==h.y)break;
+      cur=nxt;
+    }
+    return cur;
+  };
+  return{first:walk(-1),last:walk(1),name:h.name,year:h.y};
+}
+
+/* --- fabrication du mois --------------------------------------------- */
+function genMonthAuto(city,firstISO,lastISO,label){
+  const shift=hijriShift(), days=[];
+  for(let iso=firstISO;iso<=lastISO;iso=addDays(iso,1)){
+    const t=prayerTimes(iso,city.lat,city.lon,tzAnchor(iso));
+    if(!t)return null;                       // latitude extrême : pas de lever ce jour-là
+    const h=hijriOf(iso,shift);
+    days.push({greg:iso,hijri:h?h.d:days.length+1,dayName:arDay(iso),...t});
+    if(days.length>45)break;                 // garde-fou : jamais de boucle sans fin
+  }
+  if(days.length<20)return null;
+  return{city:city.n,
+    hijriMonth:(label&&label.name)||MONTH.hijriMonth||"",
+    hijriYear:(label&&label.year)||MONTH.hijriYear||"",
+    source:"calcul",
+    note:`مواقيت تقديرية حُسبت داخل التطبيق لمدينة ${city.n} بطريقة وزارة الأوقاف (19° / 17°). حمّل الجدول الرسمي متى توفّر الاتصال.`,
+    days};
+}
+/* le mois hégirien en cours, plus deux jours de marge : il faut toujours
+   un lendemain dans le tableau pour annoncer « الصبح غدًا » et programmer son alarme */
+function genCurrentMonth(city){
+  if(!city)return null;
+  const today=isoOf(nowLocal()), span=hijriSpan(today,hijriShift());
+  return span
+    ? genMonthAuto(city,span.first,addDays(span.last,2),span)
+    : genMonthAuto(city,addDays(today,-10),addDays(today,25),null);   // WebView sans calendrier hégirien
+}
+
+/* --- déclenchement automatique ---------------------------------------- */
+/* la ville dont on calcule les horaires, par ordre de préférence */
+function estimateCity(){
+  return CITIES.find(c=>c.n===MONTH.city)
+      || (GEO&&GEO.city&&CITIES.find(c=>c.n===GEO.city))
+      || CITIES[0];
+}
+/* le tableau en mémoire est-il à bout de course ? */
+function monthStale(){
+  if(!MONTH.days||!MONTH.days.length)return true;
+  const t=isoOf(nowLocal());
+  if(!dayFor(t))return true;                                    // il ne couvre plus aujourd'hui
+  /* une estimation qui s'arrête aujourd'hui n'a pas de lendemain : on la prolonge
+     tout de suite. Un tableau officiel, lui, on n'y touche pas tant qu'il sert. */
+  return MONTH.source==="calcul"&&MONTH.days[MONTH.days.length-1].greg<=t;
+}
+let ESTIMATED=false;        // le dernier remplacement a-t-il été fait par l'application elle-même ?
+async function autoEstimate(){
+  if(!monthStale())return false;
+  const m=genCurrentMonth(estimateCity());
+  if(!m)return false;
+  await useMonth(m);
+  ESTIMATED=true;
+  return true;
 }
 
 /* =====================================================================
@@ -2335,6 +2528,9 @@ function saveCityPrefs(){ Store.set(K_CITY,{ville:sel.value,links:LINKS,vid:$("#
 /* met en cache le mois de la ville courante, puis le rend courant */
 async function useMonth(m){
   MONTH=normalizeMonth(m);
+  /* on garde une copie du dernier tableau officiel : il sert de repère horaire
+     longtemps après avoir été remplacé par une estimation */
+  if(MONTH.source!=="calcul"){ OFFICIAL=MONTH; await Store.set(K_OFF,MONTH); }
   MONTHS[MONTH.city]=MONTH;
   await Store.set(K_MONTHS,MONTHS);
   await Store.set(K_MONTH,MONTH);
@@ -2381,6 +2577,24 @@ sel.addEventListener("change",async()=>{
   await switchCity(sel.value,false);
 });
 $("#btnGen").addEventListener("click",()=>switchCity(sel.value,true));
+$("#btnEstimate").addEventListener("click",async()=>{
+  const city=CITIES.find(c=>c.n===sel.value)||estimateCity();
+  const m=genCurrentMonth(city);
+  if(!m){setStatus("تعذّر حساب المواقيت لهذه المدينة.","err");return;}
+  await useMonth(m);
+  ESTIMATED=true;
+  showEstBanner();
+  setStatus(`حُسبت مواقيت تقديرية لمدينة ${city.n}: ${m.days.length} يومًا، من ${FR_MONTH.format(parseISO(m.days[0].greg))} إلى ${FR_MONTH.format(parseISO(m.days[m.days.length-1].greg))}.`,"ok");
+});
+
+/* bandeau de l'écran d'accueil : dire franchement que ces horaires sont calculés */
+function showEstBanner(){
+  if(!ESTIMATED||MONTH.source!=="calcul"){$("#estBanner").classList.add("hidden");return;}
+  $("#estBannerS").textContent=`الجدول الرسمي لم يُحمَّل، فحُسبت مواقيت ${MONTH.city} داخل التطبيق. الفارق دقيقة على الأكثر.`;
+  $("#estBanner").classList.remove("hidden");
+}
+$("#btnEstHide").addEventListener("click",()=>{ESTIMATED=false;$("#estBanner").classList.add("hidden");});
+
 $("#citySel").addEventListener("change",async e=>{
   const n=e.target.value;
   if(CITIES.some(c=>c.n===n))sel.value=n;
@@ -2440,6 +2654,116 @@ $("#btnPaste").addEventListener("click",()=>{
   setStatus(`قُرئ ${pending.days.length} يومًا. تحقق قبل الحفظ.`,"ok");
 });
 
+/* ---------------------------------------------------------------------
+   Lecture du tableau à partir d'une photo.
+
+   Android fait la reconnaissance des caractères hors ligne et renvoie ici
+   le texte, une ligne du tableau par ligne, les cases rangées de gauche à
+   droite. Sur un calendrier marocain cela donne « 14:7 00:6 28:3 19:12
+   28:6 02:5 13 1 » : les heures sont écrites à l'envers (7h14 devient
+   « 14:7 ») et les colonnes vont de l'Icha au Subh.
+
+   Rien de tout cela n'a besoin d'un traitement spécial : readRow() essaie
+   déjà les deux sens et retrouve l'ordre juste en vérifiant que les écarts
+   entre prières sont plausibles. On réutilise donc la lecture du texte
+   collé, telle quelle.
+   --------------------------------------------------------------------- */
+const IMG_OCR=!!(window.AndroidBridge&&window.AndroidBridge.pickTimetableImage);
+$("#imgcard").classList.toggle("hidden",!IMG_OCR);
+
+/* le numéro du jour grégorien d'une ligne : ce qui reste quand on retire les heures */
+function dayNumIn(line){
+  const rest=String(line).replace(/\d{1,2}\s*[:hH.]\s*\d{1,2}/g," ");
+  const ns=(rest.match(/\b\d{1,2}\b/g)||[]).map(Number).filter(n=>n>=1&&n<=31);
+  return ns.length?ns[0]:0;
+}
+/* « le tableau commence un 13 » : le 13 le plus proche d'aujourd'hui, avant ou après */
+function guessStart(n){
+  if(!n)return null;
+  const now=nowLocal();
+  let best=null,gap=Infinity;
+  for(let k=-1;k<=1;k++){
+    const d=new Date(now.getFullYear(),now.getMonth()+k,1);
+    const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+    if(n>last)continue;
+    d.setDate(n);d.setHours(12,0,0,0);
+    const g=Math.abs(d-now);
+    if(g<gap){gap=g;best=d;}
+  }
+  return best?isoOf(best):null;
+}
+
+$("#btnImg").addEventListener("click",()=>{
+  if(!IMG_OCR){setStatus("قراءة الصور متاحة في تطبيق أندرويد فقط.","err");return;}
+  setStatus("اختر صورة الجدول الشهري…");
+  try{ AndroidBridge.pickTimetableImage(); }
+  catch(e){ setStatus("تعذّر فتح معرض الصور.","err"); }
+});
+window.onImageBusy=()=>setStatus("جارٍ قراءة أرقام الصورة…");
+window.onImageCancel=()=>setStatus("");
+window.onImageError=m=>setStatus("تعذّرت قراءة الصورة"+(m?` (${m})`:"")+". صوّر الجدول من الأمام، في ضوء جيّد، وليملأ الصورة كلها.","err");
+
+const NOTE_IMG="الجدول الرسمي، مقروء من صورة. تحقّق من الأرقام قبل الحفظ.";
+window.onImageText=function(txt){
+  const lines=String(txt||"").split(/\r?\n/).filter(l=>readRow(l));
+  if(lines.length<20){
+    setStatus(`لم تُقرأ من الصورة إلا ${lines.length} سطرًا صالحًا، والشهر يحتاج 29 على الأقل. أعد التصوير من الأمام وفي ضوء جيّد، أو استعمل «حساب الشهر الحالي تقديريًا».`,"err");
+    return;
+  }
+  const rows=lines.map(l=>({t:readRow(l),n:dayNumIn(l)}));
+  const start=$("#imgstart").value||guessStart(rows[0].n);
+  if(!start){
+    setStatus("قُرئت المواقيت لكن تاريخ أول يوم غير واضح: اكتبه في خانة «أول يوم في الصورة» ثم أعد الاختيار.","err");
+    return;
+  }
+  $("#imgstart").value=start;
+  /* Chaque rangée porte son propre numéro de jour grégorien. On s'en sert pour
+     recaler la date : si la reconnaissance saute une rangée, les jours suivants
+     gardent quand même la bonne date au lieu de glisser tous d'un cran. */
+  let cur=start;
+  let days=rows.map((r,i)=>{
+    if(i)cur=addDays(cur,1);
+    if(r.n>=1&&r.n<=31){
+      for(const k of[0,1,-1,2,-2]){
+        const c=addDays(cur,k);
+        if(Number(c.slice(8))===r.n){cur=c;break;}
+      }
+    }
+    return{greg:cur,hijri:i+1,fajr:r.t[0],shuruq:r.t[1],dhuhr:r.t[2],
+           asr:r.t[3],maghrib:r.t[4],isha:r.t[5]};
+  });
+  /* Une rangée illisible laisserait un trou dans le mois, et ce jour-là
+     l'application n'aurait plus rien à afficher. On comble donc les manques par
+     le calcul : une minute d'écart tout au plus, et la journée reste couverte. */
+  const vil=CITIES.find(v=>v.n===(sel.value||MONTH.city));
+  let filled=0;
+  if(vil){
+    const full=[];
+    days.forEach((d,k)=>{
+      if(k){
+        for(let g=addDays(days[k-1].greg,1);g<d.greg&&filled<40;g=addDays(g,1)){
+          const t=prayerTimes(g,vil.lat,vil.lon,tzAnchor(g));
+          if(!t)break;
+          full.push({greg:g,hijri:0,...t});
+          filled++;
+        }
+      }
+      full.push(d);
+    });
+    days=full;
+  }
+  days.forEach((d,i)=>{d.hijri=i+1;});
+  const m={city:sel.value||MONTH.city,hijriMonth:MONTH.hijriMonth||"",hijriYear:MONTH.hijriYear||"",
+           source:"officiel",days,
+           note:NOTE_IMG};
+  /* l'étiquette hégirienne du mois, déduite du premier jour lu */
+  const h=hijriOf(start,hijriShift());
+  if(h&&h.d<=3){m.hijriMonth=h.name;m.hijriYear=h.y;}
+  pending=normalizeMonth(m);
+  showEditor(pending);
+  setStatus(`قُرئ ${pending.days.length} يومًا من الصورة، ابتداءً من ${FR_DATE.format(parseISO(start))}`+(filled?`، منها ${filled} يومًا تعذّرت قراءتها فحُسبت`:"")+`. راجع الأرقام سطرًا سطرًا ثم احفظ.`,"ok");
+};
+
 /* --- éditeur de vérification --- */
 function showEditor(m){
   $("#ebody").innerHTML=m.days.map((d,i)=>`<tr>
@@ -2457,6 +2781,7 @@ $("#btnSave").addEventListener("click",async()=>{
   if(!pending)return;
   const m=pending; pending=null;
   await useMonth(m);
+  ESTIMATED=false; showEstBanner();        // on repart sur un vrai tableau
   $("#editor").classList.add("hidden");
   setStatus(`حُفظ الشهر لمدينة ${MONTH.city}. تبقى المتابعة المسجّلة كما هي.`,"ok");
 });
@@ -2465,6 +2790,7 @@ $("#btnCancel").addEventListener("click",()=>{pending=null;$("#editor").classLis
 $("#btnReset").addEventListener("click",async()=>{
   pending=null;$("#editor").classList.add("hidden");
   await useMonth(JSON.parse(JSON.stringify(DEFAULT_MONTH)));
+  ESTIMATED=false; showEstBanner();
   sel.value=MONTH.city;syncLink();renderFavs();
   setStatus("أُعيد الشهر الافتراضي: ربيع الثاني 1448.","ok");
 });
@@ -2659,6 +2985,7 @@ $("#btnShareFile").addEventListener("click",async()=>{
   const saved=await Store.get(K_MONTH);
   if(saved&&saved.days&&saved.days.length)MONTH=normalizeMonth(saved);
   MONTHS=(await Store.get(K_MONTHS))||{};
+  OFFICIAL=(await Store.get(K_OFF))||(MONTH.source!=="calcul"?MONTH:null);
   if(!MONTHS[MONTH.city])MONTHS[MONTH.city]=MONTH;          // reprise des versions précédentes
   LOG=(await Store.get(K_LOG))||{};
   RAW=(await Store.get(K_RAW))||{};
@@ -2678,13 +3005,25 @@ $("#btnShareFile").addEventListener("click",async()=>{
   $("#startd").value=MONTH.days[0].greg;
   GEO=(await Store.get(K_GEO))||{};
   syncClock();                      // caler l'horloge de la page avant le premier affichage
+  /* Roue de secours : si le tableau enregistré ne couvre plus la journée — mois
+     terminé, chargement raté en début de mois — l'application calcule elle-même
+     les horaires du mois hégirien en cours. Elle n'affiche jamais « —:—:— ». */
+  await autoEstimate();
+  showEstBanner();
   renderAll();
   geoBoot();                        // اتّباع الموقع : رسالة الحالة ثم التحقق
-  let ticks=0;
+  let ticks=0, dayISO=isoOf(nowLocal());
   setInterval(()=>{
     /* filet de sécurité : on revérifie l'heure du téléphone chaque minute, au cas où
        le changement d'heure n'aurait pas été annoncé à l'application. */
     if(++ticks%60===0&&syncClock()){ renderAll(); return; }
+    /* minuit : nouveau jour. C'est ici que le mois terminé est remplacé tout seul. */
+    const d=isoOf(nowLocal());
+    if(d!==dayISO){
+      dayISO=d;
+      autoEstimate().then(done=>{ showEstBanner(); if(!done)renderAll(); });
+      return;
+    }
     if(!$("#v-day").classList.contains("hidden"))renderDay(false);
   },1000);
   /* retour sur l'écran après une longue mise en veille */
@@ -2695,6 +3034,8 @@ $("#btnShareFile").addEventListener("click",async()=>{
       return;
     }
     onClockChanged();               // l'heure a pu changer pendant la veille
+    /* le telephone a pu dormir plusieurs jours : le mois affiche est peut-etre perime */
+    autoEstimate().then(done=>{ if(done)showEstBanner(); });
     if(SET.geo)geoCheck(false);     // le lieu aussi : c'est ici qu'un voyage est detecte
     if(Q_SHOWN&&Q_WANT){Q_WANT=false;startQiblaCompass().then(renderQiblaBtn);}
   });

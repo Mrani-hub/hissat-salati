@@ -35,6 +35,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private static final int REQ_LOCATION = 9;   // code de la demande d'autorisation « localisation »
+    private static final int REQ_IMAGE = 11;     // code du choix d'une image de tableau mensuel
 
     private WebView web;
     private boolean askedPerms = false;
@@ -163,6 +164,23 @@ public class MainActivity extends Activity {
                 } catch (Exception ignored) {}
             }
         }
+    }
+
+    /**
+     * Retour du choix d'une image : on la donne à lire à ML Kit, hors ligne,
+     * puis on renvoie à la page le texte reconnu, une rangée du tableau par ligne.
+     */
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req != REQ_IMAGE) return;
+        Uri u = (res == RESULT_OK && data != null) ? data.getData() : null;
+        if (u == null) { js("onImageCancel", ""); return; }   // choix annulé
+        js("onImageBusy", "");
+        Ocr.read(this, u, new Ocr.OnText() {
+            @Override public void onText(String lines) { js("onImageText", lines); }
+            @Override public void onError(String why) { js("onImageError", ""); }
+        });
     }
 
     @Override
@@ -445,6 +463,33 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void stopCompass() {
             runOnUiThread(() -> { if (compass != null) compass.stop(); });
+        }
+
+        /**
+         * Ouvre le choix d'une image (galerie, fichiers, appareil photo selon le
+         * téléphone) pour y lire le tableau mensuel.
+         *
+         * On passe par le sélecteur du système : il donne accès à la seule image
+         * choisie, donc l'application n'a besoin d'aucune autorisation sur les
+         * photos. La lecture se fait ensuite dans le téléphone, sans connexion :
+         * ni l'image ni le texte lu ne quittent l'appareil.
+         */
+        @JavascriptInterface
+        public void pickTimetableImage() {
+            runOnUiThread(() -> {
+                Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE).setType("image/*");
+                try {
+                    startActivityForResult(pick, REQ_IMAGE);
+                } catch (Exception e) {
+                    try {
+                        startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT)
+                                .setType("image/*"), REQ_IMAGE);
+                    } catch (Exception e2) {
+                        js("onImageError", "");
+                    }
+                }
+            });
         }
 
         /** Joue l'adhan tout de suite, pour vérifier le son et l'arrêt par les boutons de volume. */

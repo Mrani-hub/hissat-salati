@@ -8,8 +8,8 @@ android {
         applicationId "ma.hissatsalati"
         minSdk 24
         targetSdk 34
-        versionCode 18
-        versionName "2.7"
+        versionCode 19
+        versionName "2.8"
     }
 
     // Signature : la clé vient des variables d'environnement (secrets GitHub),
@@ -43,4 +43,8 @@ android {
 dependencies {
     implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.media:media:1.7.0'   // session média : touches de volume pendant l'adhan
+    // Lecture du tableau mensuel à partir d'une photo. Variante « bundled » :
+    // le modèle est dans l'APK, donc la reconnaissance marche sans connexion et
+    // sans les services Google. Elle coûte environ 4 Mo à l'application.
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
 }

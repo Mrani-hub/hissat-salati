@@ -276,13 +276,83 @@ fois sur place remet tout d'aplomb. Un suivi en arrière-plan exigerait
 `ACCESS_BACKGROUND_LOCATION`, coûterait de la batterie, et reste impossible sur
 iPhone hors App Store.
 
+## Quand le tableau du mois ne se charge pas
+
+Le premier jour d'un mois hégirien, le tableau officiel doit être chargé depuis
+le site des Habous. Si ce jour-là il n'y a pas de réseau, si le site est en
+panne, ou simplement si on oublie, l'application se retrouvait sans horaires :
+l'écran اليوم affichait « —:—:— » et plus aucun adhan n'était programmé.
+
+Deux filets de sécurité règlent cela, et les deux marchent sans connexion.
+
+### 1. L'estimation automatique
+
+Au démarrage, à chaque passage de minuit et au retour d'une longue veille,
+l'application vérifie que le tableau en mémoire couvre bien la journée — et
+qu'il lui reste au moins un lendemain. Sinon, elle calcule elle-même le mois
+hégirien en cours (section « 7 ter » d'`index.html`) :
+
+- **les horaires** viennent de `prayerTimes()`, déjà utilisé pour les villes
+  sans tableau officiel : convention des Habous, Fajr à 19°, Icha à 17°, Asr à
+  l'ombre simple, plus les décalages relevés sur le calendrier officiel ;
+- **les dates hégiriennes** viennent du calendrier d'Oumm al-Qoura du navigateur,
+  décalé pour coller au Maroc. L'écart est relu sur le dernier tableau officiel
+  connu, où le 1er du mois est écrit en face de sa date grégorienne ;
+- **le fuseau horaire** est lu lui aussi sur ce dernier tableau officiel, en
+  comparant son Dohr au midi solaire (`tzAnchor()`). C'est plus sûr que la table
+  des fuseaux du téléphone : le Maroc passe à l'heure GMT et en revient par
+  décret, et un vieil Android peut l'ignorer. Passé six semaines on ne s'y fie
+  plus et on reprend l'horloge du téléphone.
+
+Vérifié sur جمادى الأولى 1448 à Rabat, mois entier : **écart maximal d'une
+minute** avec le calendrier officiel, passage à GMT compris. L'étiquette
+« محسوب » reste affichée en tête, un bandeau le dit sur l'écran اليوم, et le
+bouton « حساب الشهر الحالي تقديريًا » permet de refaire le calcul à la main.
+
+Le dernier tableau officiel est gardé à part (clé `prayer-official-v1`) : sans
+cela, la première estimation écraserait le seul repère qui connaît le passage à
+l'heure GMT.
+
+### 2. La lecture d'une photo du tableau
+
+L'autre chemin : photographier le tableau affiché au mur de la mosquée, ou
+ouvrir l'image reçue par WhatsApp. Carte « قراءة الجدول من صورة », onglet
+التحميل, visible seulement dans l'APK.
+
+`Ocr.java` fait la reconnaissance avec ML Kit en version *bundled* : le modèle
+est dans l'APK (≈ 4 Mo), donc **tout se passe dans le téléphone, sans connexion
+et sans les services Google**. Ni l'image ni le texte lu n'en sortent. Le
+sélecteur du système ne donne accès qu'à l'image choisie : aucune autorisation
+sur les photos n'est demandée.
+
+Seuls les chiffres latins sont lus, et cela suffit. Le texte reconnu est remis
+en rangées par position (hauteur pour la ligne, abscisse pour la colonne), ce
+qui donne par exemple `14:7 00:6 28:3 19:12 28:6 02:5 13 1` : les heures des
+calendriers marocains sont écrites à l'envers (7 h 14 devient « 14:7 ») et les
+colonnes vont de l'Icha au Subh. Rien de spécial à faire : `readRow()` essaie
+déjà les deux sens et retient la seule lecture où les écarts entre prières sont
+plausibles.
+
+Trois détails qui font tenir le résultat :
+
+- **la date de départ** est devinée à partir du numéro de jour grégorien de la
+  première rangée (« le 13 le plus proche d'aujourd'hui ») ; le champ « أول يوم
+  في الصورة » permet de la corriger ;
+- **chaque rangée porte son propre numéro de jour**, qui sert à recaler la date :
+  une rangée illisible ne décale plus toutes les suivantes d'un cran ;
+- **les trous sont comblés par le calcul**, et le nombre de jours concernés est
+  annoncé : la journée reste couverte et son alarme programmée.
+
+Le tableau lu passe ensuite par l'éditeur de vérification, comme un tableau
+collé : rien n'est enregistré avant d'avoir été relu.
+
 ## Ce qui change par rapport au navigateur
 - Le partage passe par un pont natif : l'image du mois et le fichier partageable
   ouvrent directement le sélecteur Android (WhatsApp, Gmail…).
-- « Lire l'image » appelle l'API d'Anthropic, qui exige une clé hors de
-  claude.ai : dans l'APK, cette fonction échoue et renvoie vers la saisie
-  manuelle ou le texte collé. Le calcul par ville et le collage du tableau des
-  Habous fonctionnent normalement.
+- La lecture d'une photo du tableau n'existe que dans l'APK : elle demande le
+  modèle de reconnaissance embarqué. Dans le navigateur, la carte est masquée ;
+  le calcul par ville, l'estimation automatique et le collage du tableau des
+  Habous fonctionnent partout.
 - La police Amiri (arabe, graisses 400 et 700) est embarquée dans le HTML en
   woff2 : aucun appel réseau pour les polices, rendu identique hors connexion.
   Le texte latin utilise la police système du téléphone.
