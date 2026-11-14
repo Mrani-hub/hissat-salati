@@ -2218,22 +2218,25 @@ $("#btnDzero").addEventListener("click",()=>{
 /* =====================================================================
    7. Analyse d'un tableau texte (site des Habous ou autre source)
    ===================================================================== */
-function candidates(tok){
-  const p=tok.split(/[:hH.\s]+/).filter(Boolean).map(Number);
-  if(p.length<2)return[];
-  const[a,b]=p,out=[];
+/* Une case comme « 3:04 » peut vouloir dire 3h04 ou 15h04 : on garde les deux,
+   et c'est l'écart avec la prière précédente qui tranchera. Ici l'ordre des
+   deux nombres est déjà fixé : h est l'heure, m la minute. */
+function candidates(h,m){
+  const out=[];
   const add=(h,m)=>{if(h>=0&&h<24&&m>=0&&m<60&&!out.includes(h*60+m))out.push(h*60+m);};
-  add(a,b);add(b,a);
-  if(a<12)add(a+12,b);
-  if(b<12)add(b+12,a);
+  add(h,m);
+  if(h<12)add(h+12,m);
   return out;
+}
+/* les deux nombres d'une case, dans l'ordre où ils sont écrits */
+function pairOf(tok){
+  const p=tok.split(/[:hH.\s]+/).filter(Boolean).map(Number);
+  return p.length<2?null:[p[0],p[1]];
 }
 /* écarts plausibles entre deux prières consécutives, en minutes */
 const GAP=[[55,115],[240,420],[120,260],[60,220],[50,130]];
-function rowToTimes(toks){
-  if(toks.length<6)return null;
-  const c=toks.slice(0,6).map(candidates);
-  if(c.some(x=>!x.length))return null;
+/* cherche, case par case, une suite d'heures dont les écarts sont plausibles */
+function solveRow(c){
   const seq=[];
   function back(i){
     if(i===6)return true;
@@ -2250,7 +2253,25 @@ function rowToTimes(toks){
     }
     return false;
   }
-  return back(0)?seq.map(v=>pad(Math.floor(v/60))+":"+pad(v%60)):null;
+  return back(0)?seq:null;
+}
+/* Six cases dans l'ordre Subh → Icha. Sur le site des Habous elles s'écrivent
+   « heure:minute » ; sur la photo du calendrier, qui se lit de droite à gauche,
+   elles s'écrivent toutes « minute:heure » (« 04:3 » pour 3h04). Le sens est
+   donc le même pour toute la rangée : on l'essaie en entier dans un sens, puis
+   dans l'autre, jamais case par case. Deviner chaque case séparément faisait
+   lire « 04:3 » comme 16h03 dès que l'écart avec le Dohr paraissait plausible. */
+function rowToTimes(toks){
+  if(toks.length<6)return null;
+  const p=toks.slice(0,6).map(pairOf);
+  if(p.some(x=>!x))return null;
+  for(const swap of[false,true]){
+    const c=p.map(([a,b])=>swap?candidates(b,a):candidates(a,b));
+    if(c.some(x=>!x.length))continue;
+    const seq=solveRow(c);
+    if(seq)return seq.map(v=>pad(Math.floor(v/60))+":"+pad(v%60));
+  }
+  return null;
 }
 function readRow(line){
   const toks=line.match(/\d{1,2}\s*[:hH.]\s*\d{1,2}/g)||[];

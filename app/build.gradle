@@ -8,8 +8,8 @@ android {
         applicationId "ma.hissatsalati"
         minSdk 24
         targetSdk 34
-        versionCode 19
-        versionName "2.8"
+        versionCode 20
+        versionName "2.9"
 
         // Le moteur de lecture d'image pèse 11 Mo par type de processeur, et un APK
         // en embarque quatre par défaut : 45 Mo au total, impossible à envoyer par
